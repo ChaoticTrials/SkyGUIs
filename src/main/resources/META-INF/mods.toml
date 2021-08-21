@@ -1,0 +1,35 @@
+modLoader="javafml"
+loaderVersion="[37,)"
+license="The Apache License, Version 2.0"
+issueTrackerURL=""
+
+[[mods]]
+modId="easyskyblockmanagement"
+version="${file.jarVersion}"
+displayName="EasySkyblockManagement"
+displayURL=""
+authors=""
+description="""
+"""
+
+[[dependencies.easyskyblockmanagement]]
+    modId="forge"
+    mandatory=true
+    versionRange="[37.0,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.easyskyblockmanagement]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.17.1,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.easyskyblockmanagement]]
+    modId="skyblockbuilder"
+    mandatory=true
+    versionRange="[1.17.1-2.0.5,)"
+    ordering="NONE"
+    side="BOTH"
+

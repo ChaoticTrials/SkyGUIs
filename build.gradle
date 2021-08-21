@@ -1,0 +1,24 @@
+buildscript {
+    apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v2/buildscript.gradle', to: buildscript
+}
+
+apply from: 'https://raw.githubusercontent.com/noeppi-noeppi/ModUtils/v2/mod.gradle'
+
+repositories {
+    maven {
+        name = "JEI"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        name = "MelanX Maven"
+        url = "https://maven.melanx.de/"
+    }
+}
+
+dependencies {
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.8"
+
+//    runtimeOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.0.58")
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.8")
+    implementation fg.deobf("de.melanx:SkyblockBuilder:1.17.1-2.0.5")
+}
