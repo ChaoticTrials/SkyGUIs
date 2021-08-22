@@ -1,10 +1,14 @@
 package de.melanx.easyskyblockmanagement.client.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+
+import javax.annotation.Nonnull;
 
 public abstract class BaseScreen extends Screen {
 
@@ -13,7 +17,7 @@ public abstract class BaseScreen extends Screen {
     protected int relX;
     protected int relY;
 
-    protected BaseScreen(Component component, int xSize, int ySize) {
+    public BaseScreen(Component component, int xSize, int ySize) {
         super(component);
         this.xSize = xSize;
         this.ySize = ySize;
@@ -27,6 +31,12 @@ public abstract class BaseScreen extends Screen {
     }
 
     abstract protected void init(GuiScreenEvent.InitGuiEvent event);
+
+    @Override
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+        RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize);
+        super.render(poseStack, mouseX, mouseY, partialTicks);
+    }
 
     @Override
     abstract public void tick();

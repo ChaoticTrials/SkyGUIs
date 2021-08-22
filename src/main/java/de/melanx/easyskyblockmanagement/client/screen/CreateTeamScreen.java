@@ -1,17 +1,14 @@
 package de.melanx.easyskyblockmanagement.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 
 import javax.annotation.Nonnull;
@@ -20,7 +17,6 @@ import java.util.List;
 
 public class CreateTeamScreen extends BaseScreen {
 
-    private static final ResourceLocation SCREEN_LOCATION = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/screen/create_team.png");
     private static final Component NAME_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".name");
     private static final Component TEMPLATE_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".template");
     private static final Component CREATE = new TranslatableComponent("screen.easyskyblockmanagement.button.create");
@@ -82,12 +78,6 @@ public class CreateTeamScreen extends BaseScreen {
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(poseStack);
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, SCREEN_LOCATION);
-        this.blit(poseStack, this.relX, this.relY, 0, 0, this.xSize, this.ySize);
-
         super.render(poseStack, mouseX, mouseY, partialTicks);
         this.font.draw(poseStack, this.title, (float) (this.width / 2 - this.font.width(this.title.getVisualOrderText()) / 2), this.relY + 13, Color.DARK_GRAY.getRGB());
         this.font.draw(poseStack, NAME_COMPONENT, this.relX + 10, this.relY + 37, Color.DARK_GRAY.getRGB());
