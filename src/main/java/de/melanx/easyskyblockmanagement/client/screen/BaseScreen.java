@@ -3,6 +3,7 @@ package de.melanx.easyskyblockmanagement.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.noeppi_noeppi.libx.render.RenderHelper;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -53,8 +54,8 @@ public abstract class BaseScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         InputConstants.Key mapping = InputConstants.getKey(keyCode, scanCode);
         //noinspection ConstantConditions
-        if (keyCode != 256 && (this.minecraft.options.keyInventory.isActiveAndMatches(mapping)
-                || this.minecraft.options.keyDrop.isActiveAndMatches(mapping))) {
+        if (this.minecraft.options.keyInventory.isActiveAndMatches(mapping) && !(this.getFocused() instanceof EditBox)) {
+            this.onClose();
             return true;
         }
 

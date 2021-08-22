@@ -38,6 +38,7 @@ public class CreateTeamScreen extends BaseScreen {
         this.name = new EditBox(this.font, this.relX + 66, this.relY + 30, 120, 20, new TextComponent(""));
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
+        this.addRenderableWidget(this.name);
 
         this.addRenderableWidget(new Button(this.relX + 65, this.relY + 60, 122, 20, new TextComponent(this.templates.get(this.currIndex).getName()), button -> {
             this.currIndex++;
@@ -62,7 +63,6 @@ public class CreateTeamScreen extends BaseScreen {
             }
         }));
 
-        this.addRenderableWidget(this.name);
         this.addRenderableWidget(new Button(this.relX + 27, this.relY + 92, 60, 20, CREATE, button -> {
             EasySkyblockManagement.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
             this.onClose();
