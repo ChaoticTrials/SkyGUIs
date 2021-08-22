@@ -1,7 +1,10 @@
 {
   "itemGroup.easyskyblockmanagement": "Easy Skyblock Management",
-  "screen.easyskyblockmanagement.name": "Name",
   "screen.easyskyblockmanagement.template": "Template",
-  "screen.easyskyblockmanagement.create_team": "Create New Team",
+  "screen.easyskyblockmanagement.title.create_team": "Create New Team",
+  "screen.easyskyblockmanagement.title.all_teams": "All Teams",
+  "screen.easyskyblockmanagement.text.name": "Name",
+  "screen.easyskyblockmanagement.text.members": "Members",
+  "screen.easyskyblockmanagement.text.teams": "Teams",
   "screen.easyskyblockmanagement.button.create": "Create"
 }

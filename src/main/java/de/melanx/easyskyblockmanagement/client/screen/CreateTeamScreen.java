@@ -17,7 +17,7 @@ import java.util.List;
 
 public class CreateTeamScreen extends BaseScreen {
 
-    private static final Component NAME_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".name");
+    private static final Component NAME_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.name");
     private static final Component TEMPLATE_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".template");
     private static final Component CREATE = new TranslatableComponent("screen.easyskyblockmanagement.button.create");
     private static final Component ABORT = new TranslatableComponent("skyblockbuilder.screen.button.abort");
@@ -29,7 +29,7 @@ public class CreateTeamScreen extends BaseScreen {
     private boolean enableTooltip;
 
     public CreateTeamScreen() {
-        super(new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".create_team"), 200, 125);
+        super(new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".title.create_team"), 200, 125);
         this.templates = TemplateLoader.getConfiguredTemplates();
     }
 

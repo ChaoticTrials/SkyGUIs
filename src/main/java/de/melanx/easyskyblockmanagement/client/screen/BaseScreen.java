@@ -41,6 +41,14 @@ public abstract class BaseScreen extends Screen {
     @Override
     abstract public void tick();
 
+    public int getRelX() {
+        return this.relX;
+    }
+
+    public int getRelY() {
+        return this.relY;
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         InputConstants.Key mapping = InputConstants.getKey(keyCode, scanCode);
