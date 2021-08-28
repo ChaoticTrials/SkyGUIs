@@ -1,10 +1,10 @@
-package de.melanx.easyskyblockmanagement.client.screen.widget;
+package de.melanx.easyskyblockmanagement.client.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
-import io.github.noeppi_noeppi.libx.util.ScreenHelper;
+import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,7 @@ import java.util.List;
 public class ScrollbarWidget implements GuiEventListener {
 
     private static final int SCROLLER_HEIGHT = 15;
-    private static final ResourceLocation ICONS = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/icons.png");
+    private static final ResourceLocation ICONS = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/icons.png");
 
     private final int x;
     private final int y;
@@ -63,7 +63,7 @@ public class ScrollbarWidget implements GuiEventListener {
     public void render(@Nonnull PoseStack poseStack) {
         RenderSystem.setShaderTexture(0, ICONS);
         GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y - 1, this.width + 2, 1, 0, 15, 14, 1, 256, 256);
-        GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, this.width + 2, this.height, 0, 16, 14, 13, 256, 256);
+        GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, this.width + 2, this.height, 0, 17, 14, 12, 256, 256);
         GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y + this.height, this.width + 2, 1, 0, 31, 14, 1, 256, 256);
         this.screen.blit(poseStack, this.screen.getRelX() + this.x, this.screen.getRelY() + this.y + (int) Math.min(this.height - SCROLLER_HEIGHT, (float) this.offset / (float) this.maxOffset * (float) (this.height - SCROLLER_HEIGHT)), this.enabled ? 0 : 12, 0, 12, 15);
     }
@@ -73,7 +73,7 @@ public class ScrollbarWidget implements GuiEventListener {
         mouseX -= this.screen.getRelX();
         mouseY -= this.screen.getRelY();
 
-        if (this.clicked && ScreenHelper.inBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        if (this.clicked && Math2.isInBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             this.updateOffset(mouseY);
         }
     }
@@ -83,7 +83,7 @@ public class ScrollbarWidget implements GuiEventListener {
         mouseX -= this.screen.getRelX();
         mouseY -= this.screen.getRelY();
 
-        if (button == 0 && ScreenHelper.inBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        if (button == 0 && Math2.isInBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             this.updateOffset(mouseY);
 
             this.clicked = true;

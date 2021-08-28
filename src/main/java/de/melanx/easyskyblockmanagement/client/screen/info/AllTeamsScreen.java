@@ -2,14 +2,13 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import de.melanx.easyskyblockmanagement.ColorHelper;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
-import de.melanx.easyskyblockmanagement.client.screen.widget.ScrollbarWidget;
+import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
-import io.github.noeppi_noeppi.libx.render.RenderHelper;
-import io.github.noeppi_noeppi.libx.util.ScreenHelper;
-import net.minecraft.ChatFormatting;
+import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -57,7 +56,6 @@ public class AllTeamsScreen extends BaseScreen {
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTicks);
-        RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize);
         this.scrollbar.render(poseStack);
         RenderSystem.setShaderColor(1, 0, 1, 0.5F);
         this.font.draw(poseStack, TEAMS_COMPONENT, this.relX + 10, this.relY + 13, Color.DARK_GRAY.getRGB());
@@ -80,7 +78,7 @@ public class AllTeamsScreen extends BaseScreen {
             TextComponent teamNameComponent = new TextComponent(s);
             float x = this.relX + 179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2;
             int y = this.relY + 37 + j * 12;
-            this.font.draw(poseStack, teamNameComponent.setStyle(Style.EMPTY.applyFormat(team.isEmpty() ? ChatFormatting.RED : ChatFormatting.DARK_GREEN)), this.relX + 10, y, Color.DARK_GRAY.getRGB());
+            this.font.draw(poseStack, teamNameComponent, this.relX + 10, y, team.isEmpty() ? ColorHelper.LIGHT_RED.getRGB() : ColorHelper.DARK_GREEN.getRGB());
             this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
             j++;
         }
@@ -96,10 +94,10 @@ public class AllTeamsScreen extends BaseScreen {
         mouseY -= this.relY;
 
         int entries = Math.min(ENTRIES, this.teams.size());
-        if (ScreenHelper.inBounds(10, 37, 175, entries * 12, mouseX, mouseY)) {
+        if (Math2.isInBounds(10, 37, 175, entries * 12, mouseX, mouseY)) {
             int index = (int) ((mouseY - 37) / 12);
             Team team = this.teams.get(index);
-            // TODO open detailed team screen
+            Minecraft.getInstance().setScreen(this /*new TeamInfoScreen(team, this)*/);
 
             return true;
         }

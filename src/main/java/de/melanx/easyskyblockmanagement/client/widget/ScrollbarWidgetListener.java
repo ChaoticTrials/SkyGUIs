@@ -1,4 +1,4 @@
-package de.melanx.easyskyblockmanagement.client.screen.widget;
+package de.melanx.easyskyblockmanagement.client.widget;
 
 public interface ScrollbarWidgetListener {
     void onOffsetChanged(int oldOffset, int newOffset);

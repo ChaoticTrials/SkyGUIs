@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.NameGenerator;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -14,6 +15,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.List;
+import java.util.Random;
 
 public class CreateTeamScreen extends BaseScreen {
 
@@ -40,7 +42,7 @@ public class CreateTeamScreen extends BaseScreen {
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);
 
-        this.addRenderableWidget(new Button(this.relX + 65, this.relY + 60, 122, 20, new TextComponent(this.templates.get(this.currIndex).getName()), button -> {
+        Button templateButton = new Button(this.relX + 65, this.relY + 60, 122, 20, new TextComponent(this.templates.get(this.currIndex).getName()), button -> {
             this.currIndex++;
             if (this.currIndex >= this.templates.size()) {
                 this.currIndex = 0;
@@ -61,11 +63,18 @@ public class CreateTeamScreen extends BaseScreen {
             if (this.enableTooltip) {
                 this.renderTooltip(poseStack, new TextComponent(this.currTemplate), mouseX, mouseY);
             }
-        }));
+        });
+        this.currTemplate = this.templates.get(this.currIndex).getName();
+        this.addRenderableWidget(templateButton);
 
         this.addRenderableWidget(new Button(this.relX + 27, this.relY + 92, 60, 20, CREATE, button -> {
-            EasySkyblockManagement.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
-            this.onClose();
+            if (this.name.getValue().isBlank()) {
+                this.name.setFocus(true);
+                this.name.setValue(NameGenerator.randomName(new Random()));
+            } else {
+                EasySkyblockManagement.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
+                this.onClose();
+            }
         }));
         this.addRenderableWidget(new Button(this.relX + 106, this.relY + 92, 60, 20, ABORT, button -> this.onClose()));
     }
