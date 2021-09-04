@@ -7,15 +7,19 @@ import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
 
 public abstract class BaseScreen extends Screen {
 
     private static final ResourceLocation GENERIC = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/generic.png");
+    protected static final MutableComponent BACK_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.back_to_all_teams");
 
     protected final int xSize;
     protected final int ySize;
@@ -43,8 +47,9 @@ public abstract class BaseScreen extends Screen {
         super.render(poseStack, mouseX, mouseY, partialTicks);
     }
 
-    @Override
-    abstract public void tick();
+    public void renderTitle(@Nonnull PoseStack poseStack) {
+        this.font.draw(poseStack, this.title, this.relX + ((float) this.xSize / 2) - (float) this.font.width(this.title.getVisualOrderText()) / 2, this.relY + 10, Color.DARK_GRAY.getRGB());
+    }
 
     public int getRelX() {
         return this.relX;

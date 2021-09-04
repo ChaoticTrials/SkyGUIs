@@ -29,13 +29,13 @@ description="""
 [[dependencies.easyskyblockmanagement]]
     modId="skyblockbuilder"
     mandatory=true
-    versionRange="[1.17.1-2.0.6,)"
+    versionRange="[1.17.1-2.0.9,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.easyskyblockmanagement]]
     modId="libx"
     mandatory=true
-    versionRange="[1.17.1-2.0.11,)"
+    versionRange="[1.17.1-2.0.13,)"
     ordering="NONE"
     side="BOTH"

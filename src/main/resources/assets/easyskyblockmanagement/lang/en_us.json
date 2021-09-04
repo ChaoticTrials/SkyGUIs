@@ -1,10 +1,15 @@
 {
   "itemGroup.easyskyblockmanagement": "Easy Skyblock Management",
+
   "screen.easyskyblockmanagement.template": "Template",
   "screen.easyskyblockmanagement.title.create_team": "Create New Team",
   "screen.easyskyblockmanagement.title.all_teams": "All Teams",
   "screen.easyskyblockmanagement.text.name": "Name",
   "screen.easyskyblockmanagement.text.members": "Members",
   "screen.easyskyblockmanagement.text.teams": "Teams",
+  "screen.easyskyblockmanagement.text.created_at": "Created at",
+  "screen.easyskyblockmanagement.text.last_changed": "Last changed",
+  "screen.easyskyblockmanagement.text.back_to_all_teams": "Back to All Teams",
+  "screen.easyskyblockmanagement.text.visit_team": "Visit Team",
   "screen.easyskyblockmanagement.button.create": "Create"
 }

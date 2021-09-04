@@ -88,7 +88,7 @@ public class CreateTeamScreen extends BaseScreen {
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTicks);
-        this.font.draw(poseStack, this.title, (float) (this.width / 2 - this.font.width(this.title.getVisualOrderText()) / 2), this.relY + 13, Color.DARK_GRAY.getRGB());
+        this.renderTitle(poseStack);
         this.font.draw(poseStack, NAME_COMPONENT, this.relX + 10, this.relY + 37, Color.DARK_GRAY.getRGB());
         this.font.draw(poseStack, TEMPLATE_COMPONENT, this.relX + 10, this.relY + 67, Color.DARK_GRAY.getRGB());
     }
