@@ -5,15 +5,15 @@ import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
@@ -35,8 +35,12 @@ public class CreateTeamScreen extends BaseScreen {
         this.templates = TemplateLoader.getConfiguredTemplates();
     }
 
+    public static void open() {
+        Minecraft.getInstance().setScreen(new CreateTeamScreen());
+    }
+
     @Override
-    protected void init(GuiScreenEvent.InitGuiEvent event) {
+    protected void init() {
         this.name = new EditBox(this.font, this.relX + 66, this.relY + 30, 120, 20, new TextComponent(""));
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());

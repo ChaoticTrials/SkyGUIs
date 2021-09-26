@@ -16,9 +16,10 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.13"
+    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.15"
 
-//    runtimeOnly fg.deobf("mezz.jei:jei-1.16.4:7.6.0.58")
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.13")
-    implementation fg.deobf("de.melanx:SkyblockBuilder:1.17.1-2.0.9")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.17.1:8.1.0.18")
+
+    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.17.1-2.0.15")
+    implementation fg.deobf("de.melanx:SkyblockBuilder:1.17.1-2.0.19")
 }

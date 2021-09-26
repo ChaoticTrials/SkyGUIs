@@ -13,7 +13,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import javax.annotation.Nonnull;
 
 @Mod("easyskyblockmanagement")
-public class EasySkyblockManagement extends ModXRegistration {
+public final class EasySkyblockManagement extends ModXRegistration {
 
     private static EasySkyblockManagement instance;
     private static EasyNetwork network;

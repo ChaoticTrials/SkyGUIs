@@ -2,8 +2,8 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.easyskyblockmanagement.ColorHelper;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
@@ -16,12 +16,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
-import java.util.List;
+import java.awt.Color;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,8 +41,12 @@ public class AllTeamsScreen extends BaseScreen {
                 .collect(Collectors.toList());
     }
 
+    public static void open() {
+        Minecraft.getInstance().setScreen(new AllTeamsScreen());
+    }
+
     @Override
-    protected void init(GuiScreenEvent.InitGuiEvent event) {
+    protected void init() {
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateScrollbar();
     }
@@ -62,19 +64,13 @@ public class AllTeamsScreen extends BaseScreen {
             if (j >= ENTRIES) break;
             Team team = this.teams.get(i);
             String name = team.getName();
-            String s = name;
-            int k = 0;
-            int width = 175 - memberLength;
-            while (this.font.width(s) > width) {
-                s = name.substring(0, name.length() - k).trim() + "...";
-                k++;
-            }
+            String s = TextHelper.shorten(this.font, name, 175 - memberLength);
 
             TextComponent playerSizeComponent = new TextComponent(String.valueOf(team.getPlayers().size()));
             TextComponent teamNameComponent = new TextComponent(s);
             float x = this.relX + 179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2;
             int y = this.relY + 37 + j * 12;
-            this.font.draw(poseStack, teamNameComponent, this.relX + 10, y, team.isEmpty() ? ColorHelper.LIGHT_RED.getRGB() : ColorHelper.DARK_GREEN.getRGB());
+            this.font.draw(poseStack, teamNameComponent, this.relX + 10, y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB());
             this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
             boolean inBounds = Math2.isInBounds(this.relX + 10, y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
@@ -83,7 +79,7 @@ public class AllTeamsScreen extends BaseScreen {
                 smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.members") + ": " + team.getPlayers().size());
                 smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.created_at") + ": " + ClientConfig.date.format(new Date(team.getCreatedAt())));
                 smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.last_changed") + ": " + ClientConfig.date.format(new Date(team.getLastChanged())));
-                ColorHelper.drawHoveringText(poseStack, textLines, smallTextLines, mouseX, mouseY, this.width, this.height,
+                TextHelper.drawHoveringText(poseStack, textLines, smallTextLines, mouseX, mouseY, this.width, this.height,
                         GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, GuiUtils.DEFAULT_BORDER_COLOR_END);
             }
             j++;

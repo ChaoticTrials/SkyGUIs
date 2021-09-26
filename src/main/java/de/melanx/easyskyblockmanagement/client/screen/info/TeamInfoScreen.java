@@ -13,7 +13,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraftforge.client.event.GuiScreenEvent;
 
 import javax.annotation.Nonnull;
 
@@ -39,7 +38,7 @@ public class TeamInfoScreen extends BaseScreen {
     }
 
     @Override
-    protected void init(GuiScreenEvent.InitGuiEvent event) {
+    protected void init() {
         Button joinButton = new Button(this.relX + 10, this.relY + 30, 110, 20, this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
         }, (button, poseStack, mouseX, mouseY) -> {
             //noinspection ConstantConditions

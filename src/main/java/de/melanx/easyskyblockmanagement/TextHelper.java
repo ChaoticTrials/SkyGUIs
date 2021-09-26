@@ -16,16 +16,28 @@ import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
 
-import java.awt.*;
+import javax.annotation.Nonnull;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColorHelper {
+public class TextHelper {
 
     public static final Color LIGHT_GRAY = new Color(212, 212, 212);
     public static final Color LIGHT_GREEN = new Color(0, 222, 0);
     public static final Color DARK_GREEN = new Color(39, 167, 73);
     public static final Color LIGHT_RED = new Color(252, 84, 84);
+
+    public static String shorten(@Nonnull Font font, String name, int length) {
+        String s = name;
+        int k = 0;
+        while (font.width(s) > length) {
+            s = name.substring(0, name.length() - k).trim() + "...";
+            k++;
+        }
+
+        return s;
+    }
 
     public static void drawHoveringText(PoseStack pStack, List<? extends FormattedText> textLines,
                                         List<String> smallTextLines, int mouseX,

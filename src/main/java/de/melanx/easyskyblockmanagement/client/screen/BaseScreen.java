@@ -14,7 +14,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
+import java.awt.Color;
 
 public abstract class BaseScreen extends Screen {
 
@@ -36,10 +36,9 @@ public abstract class BaseScreen extends Screen {
     private void onGuiInit(GuiScreenEvent.InitGuiEvent event) {
         this.relX = (event.getGui().width - this.xSize) / 2;
         this.relY = (event.getGui().height - this.ySize) / 2;
-        this.init(event);
     }
 
-    abstract protected void init(GuiScreenEvent.InitGuiEvent event);
+    public static native void open();
 
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
