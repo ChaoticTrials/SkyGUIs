@@ -38,8 +38,6 @@ public abstract class BaseScreen extends Screen {
         this.relY = (event.getGui().height - this.ySize) / 2;
     }
 
-    public static native void open();
-
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);

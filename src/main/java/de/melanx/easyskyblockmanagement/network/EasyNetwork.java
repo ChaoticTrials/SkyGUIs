@@ -11,8 +11,8 @@ public class EasyNetwork extends NetworkX {
     }
 
     @Override
-    protected String getProtocolVersion() {
-        return "0";
+    protected Protocol getProtocol() {
+        return Protocol.of("0");
     }
 
     @Override
@@ -21,6 +21,6 @@ public class EasyNetwork extends NetworkX {
     }
 
     public void handleCreateTeam(String name, String shape) {
-        this.instance.sendToServer(new CreateTeamScreenClickHandler.Message(name, shape));
+        this.channel.sendToServer(new CreateTeamScreenClickHandler.Message(name, shape));
     }
 }

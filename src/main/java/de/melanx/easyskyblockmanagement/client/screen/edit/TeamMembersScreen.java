@@ -97,7 +97,7 @@ public class TeamMembersScreen extends BaseScreen {
         if (Math2.isInBounds(10, TOP_ENTRY, 175, entries * 12, x, y)) {
             int index = (int) ((y - TOP_ENTRY) / 12) + this.scrollbar.getOffset();
             GameProfile profile = this.members.get(index);
-            if (Math2.isInBounds(10, TOP_ENTRY, this.font.width(this.team.getName()), entries * 12, x, y)) {
+            if (Math2.isInBounds(10, TOP_ENTRY, this.font.width(profile.getName()), entries * 12, x, y)) {
                 Minecraft.getInstance().setScreen(new ChatScreen(ModList.get().isLoaded("minemention")
                         ? "@" + profile.getName() + " "
                         : "/tell " + profile.getName() + " "));
