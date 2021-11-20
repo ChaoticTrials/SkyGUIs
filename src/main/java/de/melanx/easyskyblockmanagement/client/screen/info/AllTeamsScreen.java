@@ -100,16 +100,11 @@ public class AllTeamsScreen extends BaseScreen {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
             if (Math2.isInBounds(10, 37, this.font.width(team.getName()), entries * 12, mouseX, mouseY)) {
-                Minecraft.getInstance().setScreen(new PlayerListScreen(team.getPlayers(), 200, 230, new PlayerListScreen.ScrollbarInfo(180, 10, 210), new PlayerListScreen.RenderAreaInfo(5, 10, 180, 210)) {
-                    @Override
-                    int entriesPerPage() {
-                        return 15;
-                    }
-                });
+                Minecraft.getInstance().setScreen(new TeamPlayersScreen(team, this));
                 if (team.hasPlayer(Minecraft.getInstance().player)) {
-//                    Minecraft.getInstance().setScreen(new TeamEditScreen(team.getPlayers(), 200, 230));
+                    Minecraft.getInstance().setScreen(new TeamEditScreen(team, this));
                 } else {
-//                    Minecraft.getInstance().setScreen(new TeamInfoScreen(team, this));
+                    Minecraft.getInstance().setScreen(new TeamInfoScreen(team, this));
                 }
             }
 

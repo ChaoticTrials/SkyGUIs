@@ -19,7 +19,7 @@ public final class EasySkyblockManagement extends ModXRegistration {
     private static EasyNetwork network;
 
     public EasySkyblockManagement() {
-        super("easyskyblockmanagement", new CreativeModeTab("easyskyblockmanagement") {
+        super(new CreativeModeTab("easyskyblockmanagement") {
             @Nonnull
             @Override
             public ItemStack makeIcon() {

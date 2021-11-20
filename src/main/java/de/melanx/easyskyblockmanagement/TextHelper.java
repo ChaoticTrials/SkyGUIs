@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -37,6 +38,21 @@ public class TextHelper {
         }
 
         return s;
+    }
+
+    public static int stringLength(String s) {
+        Font font = Minecraft.getInstance().font;
+        return font.width(s);
+    }
+
+    public static int stringLength(FormattedText s) {
+        Font font = Minecraft.getInstance().font;
+        return font.width(s);
+    }
+
+    public static int stringLength(FormattedCharSequence s) {
+        Font font = Minecraft.getInstance().font;
+        return font.width(s);
     }
 
     public static void drawHoveringText(PoseStack pStack, List<? extends FormattedText> textLines,

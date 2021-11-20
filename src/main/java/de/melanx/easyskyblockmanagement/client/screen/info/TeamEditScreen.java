@@ -2,7 +2,6 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
-import de.melanx.easyskyblockmanagement.client.screen.edit.TeamMembersScreen;
 import de.melanx.easyskyblockmanagement.client.widget.BlinkingEditBox;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.ChatFormatting;
@@ -90,14 +89,14 @@ public class TeamEditScreen extends BaseScreen {
         }));
 
         this.addRenderableWidget(new Button(this.relX + 10, this.relY + 115, 70, 20, new TextComponent("Show"), button -> {
-            Minecraft.getInstance().setScreen(new TeamMembersScreen(this.team, this));
+            Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this));
         }));
 
         this.addRenderableWidget(new Button(this.relX + 85, this.relY + 115, 70, 20, new TextComponent("Invite"), button -> {
             // TODO open list with invitable users
         }));
 
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 155, 226, 20, BACK_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 155, 226, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
     }

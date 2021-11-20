@@ -64,7 +64,7 @@ public class TeamInfoScreen extends BaseScreen {
         visitButton.active = ConfigHandler.Utility.Teleports.allowVisits && this.team.allowsVisits();
         this.addRenderableWidget(visitButton);
 
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 226, 20, BACK_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 226, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
     }

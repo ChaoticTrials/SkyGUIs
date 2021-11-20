@@ -19,7 +19,7 @@ import java.awt.Color;
 public abstract class BaseScreen extends Screen {
 
     private static final ResourceLocation GENERIC = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/generic.png");
-    protected static final MutableComponent BACK_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.back_to_all_teams");
+    protected static final MutableComponent PREV_SCREEN_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.previous_screen");
 
     protected final int xSize;
     protected final int ySize;
@@ -33,7 +33,7 @@ public abstract class BaseScreen extends Screen {
         MinecraftForge.EVENT_BUS.addListener(this::onGuiInit);
     }
 
-    private void onGuiInit(GuiScreenEvent.InitGuiEvent event) {
+    private void onGuiInit(GuiScreenEvent.InitGuiEvent.Pre event) {
         this.relX = (event.getGui().width - this.xSize) / 2;
         this.relY = (event.getGui().height - this.ySize) / 2;
     }
@@ -54,6 +54,14 @@ public abstract class BaseScreen extends Screen {
 
     public int getRelY() {
         return this.relY;
+    }
+
+    public int x(int x) {
+        return this.relX + x;
+    }
+
+    public int y(int y) {
+        return this.relY + y;
     }
 
     @Override

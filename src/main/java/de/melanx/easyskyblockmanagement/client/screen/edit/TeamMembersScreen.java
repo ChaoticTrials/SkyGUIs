@@ -51,7 +51,7 @@ public class TeamMembersScreen extends BaseScreen {
     protected void init() {
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, TOP_ENTRY - 3, 12, ENTRIES * 12);
 
-        this.addRenderableWidget(new Button(this.relX + (this.xSize - this.font.width(BACK_COMPONENT) - 10) / 2, this.relY + this.ySize - 30, this.font.width(BACK_COMPONENT) + 10, 20, BACK_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.relX + (this.xSize - this.font.width(PREV_SCREEN_COMPONENT) - 10) / 2, this.relY + this.ySize - 30, this.font.width(PREV_SCREEN_COMPONENT) + 10, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
         this.updateScrollbar();

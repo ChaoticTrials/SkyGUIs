@@ -1,4 +1,4 @@
-package de.melanx.easyskyblockmanagement.client.screen.info;
+package de.melanx.easyskyblockmanagement.client.screen.base;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -32,8 +32,8 @@ public abstract class PlayerListScreen extends BaseScreen {
     protected final List<GameProfile> players;
     protected ScrollbarWidget scrollbar;
 
-    public PlayerListScreen(Set<UUID> players, int xSize, int ySize, ScrollbarInfo scrollbarInfo, RenderAreaInfo renderAreaInfo) {
-        super(TextComponent.EMPTY, xSize, ySize);
+    public PlayerListScreen(Component title, Set<UUID> players, int xSize, int ySize, ScrollbarInfo scrollbarInfo, RenderAreaInfo renderAreaInfo) {
+        super(title, xSize, ySize);
 
         List<GameProfile> tempProfiles = Lists.newArrayList();
         for (UUID id : players) {
@@ -54,7 +54,7 @@ public abstract class PlayerListScreen extends BaseScreen {
     protected void init() {
         this.playerWidgets.clear();
         this.scrollbar = new ScrollbarWidget(this, this.scrollbarInfo.x, this.scrollbarInfo.y, 12, this.scrollbarInfo.height);
-        this.renderArea = this.addRenderableWidget(new RenderArea(this, this.relX + this.renderAreaInfo.x, this.relY + this.renderAreaInfo.y, this.renderAreaInfo.width, this.renderAreaInfo.height, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT));
+        this.renderArea = this.addRenderableWidget(new RenderArea(this, this.relX + this.renderAreaInfo.x, this.relY + this.renderAreaInfo.y, this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT));
         for (int i = 0; i < this.players.size(); i++) {
             this.playerWidgets.add(this.renderArea.addRenderableWidget2(new PlayerWidget(this.players.get(i), this, 0, ENTRY_HEIGHT * i, 100, 12)));
         }
@@ -62,7 +62,7 @@ public abstract class PlayerListScreen extends BaseScreen {
         this.updateScrollbar();
     }
 
-    abstract int entriesPerPage();
+    protected abstract int entriesPerPage();
 
     public boolean allSelected() {
         for (PlayerWidget widget : this.playerWidgets) {
@@ -101,6 +101,7 @@ public abstract class PlayerListScreen extends BaseScreen {
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTicks);
+        this.renderTitle(poseStack);
         this.scrollbar.render(poseStack);
     }
 
@@ -138,6 +139,10 @@ public abstract class PlayerListScreen extends BaseScreen {
     }
 
     public static record RenderAreaInfo(int x, int y, int width, int height) {
+
+        public RenderAreaInfo(int x, int y, int width) {
+            this(x, y, width, 0);
+        }
     }
 
     protected static class PlayerWidget extends Panel {
@@ -148,7 +153,7 @@ public abstract class PlayerListScreen extends BaseScreen {
         public PlayerWidget(GameProfile profile, Screen screen, int x, int y, int width, int height) {
             super(screen, x, y, width, height);
             this.profile = profile;
-            this.checkbox = new SizeableCheckbox(0, 0, height, TextComponent.EMPTY, false);
+            this.checkbox = new SizeableCheckbox(0, 0, height, false);
             this.addRenderableWidget(this.checkbox);
             ArrayList<Component> tooltip = Lists.newArrayList(
                     new TextComponent(profile.getName())
