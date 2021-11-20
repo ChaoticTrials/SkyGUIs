@@ -98,9 +98,9 @@ public abstract class PlayerListScreen extends BaseScreen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
         this.scrollbar.render(poseStack);
     }

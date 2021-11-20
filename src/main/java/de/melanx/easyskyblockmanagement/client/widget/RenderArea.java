@@ -41,11 +41,11 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         double guiScale = this.screen.getMinecraft().getWindow().getGuiScale();
         GL11.glScissor((int) (this.initX * guiScale), this.screen.getMinecraft().getWindow().getHeight() - (int) ((this.initY + this.renderHeight) * guiScale), (int) (this.renderWidth * guiScale), (int) (this.renderHeight * guiScale));
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTick);
 //        this.screen.renderBackground(poseStack);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }

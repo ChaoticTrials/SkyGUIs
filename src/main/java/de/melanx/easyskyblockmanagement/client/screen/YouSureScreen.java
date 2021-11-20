@@ -42,9 +42,9 @@ public class YouSureScreen extends BaseScreen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.fillGradient(poseStack, this.parent.relX, this.parent.relY, this.parent.relX + this.parent.xSize - 1, this.parent.relY + this.parent.ySize - 1, -1072689136, -804253680);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
     }
 

@@ -67,8 +67,8 @@ public class TeamPlayersScreen extends PlayerListScreen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render(poseStack, mouseX, mouseY, partialTick);
         this.font.draw(poseStack, new TextComponent(this.selectedAmount + " player(s) selected"), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
     }
 

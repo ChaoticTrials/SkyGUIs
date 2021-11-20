@@ -27,7 +27,7 @@ public class SizeableCheckbox extends Checkbox {
     }
 
     @Override
-    public void renderButton(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void renderButton(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.enableDepthTest();

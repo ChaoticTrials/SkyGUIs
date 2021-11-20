@@ -20,8 +20,8 @@ public class BlinkingEditBox extends EditBox {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render(poseStack, mouseX, mouseY, partialTick);
         if (this.highlight) {
             this.renderOutline(poseStack, Color.GREEN.getRGB());
         } else if (!this.valid) {

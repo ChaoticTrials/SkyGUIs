@@ -39,9 +39,9 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
-        super.render(poseStack, mouseX, mouseY, partialTicks);
+        super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
     public void renderTitle(@Nonnull PoseStack poseStack) {
