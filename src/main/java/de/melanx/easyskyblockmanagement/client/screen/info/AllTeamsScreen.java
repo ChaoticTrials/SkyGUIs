@@ -53,9 +53,9 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTick);
+        super.render_(poseStack, mouseX, mouseY, partialTick);
         this.scrollbar.render(poseStack);
         this.font.draw(poseStack, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB());
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());

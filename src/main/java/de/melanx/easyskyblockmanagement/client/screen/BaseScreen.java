@@ -3,6 +3,7 @@ package de.melanx.easyskyblockmanagement.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,7 @@ public abstract class BaseScreen extends Screen {
     protected int relX;
     protected int relY;
     protected boolean preventUserInput;
+    protected LoadingCircle loadingCircle;
 
     public BaseScreen(Component component, int xSize, int ySize) {
         super(component);
@@ -45,9 +47,25 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public final void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        boolean loadingCircleActive = this.loadingCircle != null && this.loadingCircle.isActive();
+
+        if (!loadingCircleActive) {
+            this.renderBackground(poseStack);
+        }
+        this.render_(poseStack, mouseX, mouseY, partialTick);
+        if (loadingCircleActive) {
+            this.renderBackground(poseStack);
+            this.loadingCircle.render(poseStack, mouseX, mouseY, partialTick);
+        }
+    }
+
+    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
         super.render(poseStack, mouseX, mouseY, partialTick);
+    }
+
+    public void onLoadingResult(LoadingResult result) {
     }
 
     public void renderTitle(@Nonnull PoseStack poseStack) {
@@ -67,7 +85,7 @@ public abstract class BaseScreen extends Screen {
     }
 
     public int centeredY(int height) {
-        return (int) this.x(((float) this.xSize / 2) - ((float) height / 2));
+        return (int) this.y(((float) this.ySize / 2) - ((float) height / 2));
     }
 
     public int getSizeX() {
@@ -100,6 +118,19 @@ public abstract class BaseScreen extends Screen {
 
     public float y(float y) {
         return this.relY + y;
+    }
+
+    @Override
+    public void tick() {
+        if (this.loadingCircle != null && this.loadingCircle.isActive()) {
+            this.preventUserInput = true;
+            LoadingResult result = this.getResult();
+            if (result != null) {
+                this.onLoadingResult(result);
+                this.loadingCircle.setActive(false);
+                this.preventUserInput = false;
+            }
+        }
     }
 
     @Override

@@ -1,8 +1,10 @@
 package de.melanx.easyskyblockmanagement.client.screen.edit;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
+import de.melanx.easyskyblockmanagement.client.screen.info.AllTeamsScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
 import de.melanx.skyblockbuilder.data.Team;
@@ -40,10 +42,15 @@ public class TeamPlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, new TextComponent("Kick"), (button -> {
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to kick these " + this.getSelectedIds().size() + " player(s)?"), () -> {
-                // TODO remove the players on server side
-                this.team.removePlayers(this.getSelectedIds());
-                Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
+            Set<UUID> removalIds = this.getSelectedIds();
+            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to kick these " + removalIds.size() + " player(s)?"), () -> {
+                EasySkyblockManagement.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
+                //noinspection ConstantConditions
+                if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
+                    Minecraft.getInstance().setScreen(new AllTeamsScreen());
+                } else {
+                    Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
+                }
             }, () -> Minecraft.getInstance().setScreen(this)));
         })));
 
@@ -70,8 +77,8 @@ public class TeamPlayersScreen extends PlayerListScreen {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render(poseStack, mouseX, mouseY, partialTick);
+    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render_(poseStack, mouseX, mouseY, partialTick);
         this.font.draw(poseStack, new TextComponent(this.selectedAmount + " player(s) selected"), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
     }
 

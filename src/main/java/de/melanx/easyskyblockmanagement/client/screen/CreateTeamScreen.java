@@ -32,7 +32,6 @@ public class CreateTeamScreen extends BaseScreen {
     private final List<ConfiguredTemplate> templates;
     private String currTemplate;
     private EditBox name;
-    private LoadingCircle loadingCircle;
     private int currIndex = 0;
     private boolean enableTooltip;
 
@@ -71,7 +70,7 @@ public class CreateTeamScreen extends BaseScreen {
         this.currTemplate = this.templates.get(this.currIndex).getName();
         this.addRenderableWidget(templateButton);
 
-        this.loadingCircle = this.addRenderableOnly(new LoadingCircle(this.centeredX(16), this.centeredY(16), 16));
+        this.loadingCircle = new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
         this.loadingCircle.setActive(false);
 
         this.addRenderableWidget(new Button(this.x(27), this.y(92), 60, 20, CREATE, button -> {
@@ -89,35 +88,27 @@ public class CreateTeamScreen extends BaseScreen {
     @Override
     public void tick() {
         this.name.tick();
-
-        if (this.loadingCircle.isActive()) {
-            this.preventUserInput = true;
-            LoadingResult result = this.getResult();
-            if (result != null) {
-                switch (result.status()) {
-                    case SUCCESS -> this.onClose();
-                    case FAIL -> {
-                        Minecraft minecraft = Minecraft.getInstance();
-                        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-                            ForgeHooksClient.popGuiLayer(minecraft);
-                        }));
-                    }
-                }
-                this.loadingCircle.setActive(false);
-                this.preventUserInput = false;
-            }
-        }
+        super.tick();
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        boolean loadingCircleActive = this.loadingCircle.isActive();
-
-        if (!loadingCircleActive) this.renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTick);
+    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.render_(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
         this.font.draw(poseStack, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB());
         this.font.draw(poseStack, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB());
-        if (loadingCircleActive) this.renderBackground(poseStack);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        switch (result.status()) {
+            case SUCCESS -> this.onClose();
+            case FAIL -> {
+                Minecraft minecraft = Minecraft.getInstance();
+                ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
+                    ForgeHooksClient.popGuiLayer(minecraft);
+                }));
+            }
+        }
     }
 }
