@@ -3,7 +3,7 @@ package de.melanx.easyskyblockmanagement.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
-import de.melanx.easyskyblockmanagement.network.LoadingResult;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;

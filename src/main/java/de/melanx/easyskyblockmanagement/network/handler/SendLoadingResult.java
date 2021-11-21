@@ -1,6 +1,7 @@
-package de.melanx.easyskyblockmanagement.network;
+package de.melanx.easyskyblockmanagement.network.handler;
 
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;

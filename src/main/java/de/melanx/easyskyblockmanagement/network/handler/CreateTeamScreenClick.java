@@ -1,6 +1,7 @@
-package de.melanx.easyskyblockmanagement.network;
+package de.melanx.easyskyblockmanagement.network.handler;
 
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -17,9 +18,9 @@ import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class CreateTeamScreenClickHandler {
+public class CreateTeamScreenClick {
 
-    public static void handle(CreateTeamScreenClickHandler.Message msg, Supplier<NetworkEvent.Context> context) {
+    public static void handle(CreateTeamScreenClick.Message msg, Supplier<NetworkEvent.Context> context) {
         NetworkEvent.Context ctx = context.get();
         ctx.enqueueWork(() -> {
             ServerPlayer player = ctx.getSender();
@@ -60,22 +61,22 @@ public class CreateTeamScreenClickHandler {
         ctx.setPacketHandled(true);
     }
 
-    public static class Serializer implements PacketSerializer<CreateTeamScreenClickHandler.Message> {
+    public static class Serializer implements PacketSerializer<CreateTeamScreenClick.Message> {
 
         @Override
-        public Class<CreateTeamScreenClickHandler.Message> messageClass() {
-            return CreateTeamScreenClickHandler.Message.class;
+        public Class<CreateTeamScreenClick.Message> messageClass() {
+            return CreateTeamScreenClick.Message.class;
         }
 
         @Override
-        public void encode(CreateTeamScreenClickHandler.Message msg, FriendlyByteBuf buffer) {
+        public void encode(CreateTeamScreenClick.Message msg, FriendlyByteBuf buffer) {
             buffer.writeUtf(msg.name);
             buffer.writeUtf(msg.shape);
         }
 
         @Override
-        public CreateTeamScreenClickHandler.Message decode(FriendlyByteBuf buffer) {
-            return new CreateTeamScreenClickHandler.Message(buffer.readUtf(), buffer.readUtf());
+        public CreateTeamScreenClick.Message decode(FriendlyByteBuf buffer) {
+            return new CreateTeamScreenClick.Message(buffer.readUtf(), buffer.readUtf());
         }
     }
 

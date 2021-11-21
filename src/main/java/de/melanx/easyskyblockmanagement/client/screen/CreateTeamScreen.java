@@ -5,7 +5,7 @@ import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
-import de.melanx.easyskyblockmanagement.network.LoadingResult;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
@@ -94,11 +94,11 @@ public class CreateTeamScreen extends BaseScreen {
             this.preventUserInput = true;
             LoadingResult result = this.getResult();
             if (result != null) {
-                switch (result.getStatus()) {
+                switch (result.status()) {
                     case SUCCESS -> this.onClose();
                     case FAIL -> {
                         Minecraft minecraft = Minecraft.getInstance();
-                        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.getReason(), TextHelper.stringLength(result.getReason()) + 30, 100, () -> {
+                        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
                             ForgeHooksClient.popGuiLayer(minecraft);
                         }));
                     }
