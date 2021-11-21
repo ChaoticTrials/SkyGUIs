@@ -2,6 +2,10 @@ package de.melanx.easyskyblockmanagement.client.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.TextHelper;
+import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
+import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
+import de.melanx.easyskyblockmanagement.network.LoadingResult;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
@@ -11,6 +15,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -27,6 +32,7 @@ public class CreateTeamScreen extends BaseScreen {
     private final List<ConfiguredTemplate> templates;
     private String currTemplate;
     private EditBox name;
+    private LoadingCircle loadingCircle;
     private int currIndex = 0;
     private boolean enableTooltip;
 
@@ -53,14 +59,8 @@ public class CreateTeamScreen extends BaseScreen {
             }
 
             String orig = this.templates.get(this.currIndex).getName();
-            String s = orig;
-            int i = 0;
+            String s = TextHelper.shorten(this.font, orig, 110);
             this.enableTooltip = false;
-            while (this.font.width(s) > 110) {
-                s = orig.substring(0, orig.length() - i) + "...";
-                this.enableTooltip = true;
-                i++;
-            }
             this.currTemplate = orig;
             button.setMessage(new TextComponent(s));
         }, (button, poseStack, mouseX, mouseY) -> {
@@ -71,13 +71,16 @@ public class CreateTeamScreen extends BaseScreen {
         this.currTemplate = this.templates.get(this.currIndex).getName();
         this.addRenderableWidget(templateButton);
 
+        this.loadingCircle = this.addRenderableOnly(new LoadingCircle(this.centeredX(16), this.centeredY(16), 16));
+        this.loadingCircle.setActive(false);
+
         this.addRenderableWidget(new Button(this.x(27), this.y(92), 60, 20, CREATE, button -> {
             if (this.name.getValue().isBlank()) {
                 this.name.setFocus(true);
                 this.name.setValue(NameGenerator.randomName(new Random()));
             } else {
                 EasySkyblockManagement.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
-                this.onClose();
+                this.loadingCircle.setActive(true);
             }
         }));
         this.addRenderableWidget(new Button(this.x(106), this.y(92), 60, 20, ABORT, button -> this.onClose()));
@@ -86,14 +89,35 @@ public class CreateTeamScreen extends BaseScreen {
     @Override
     public void tick() {
         this.name.tick();
+
+        if (this.loadingCircle.isActive()) {
+            this.preventUserInput = true;
+            LoadingResult result = this.getResult();
+            if (result != null) {
+                switch (result.getStatus()) {
+                    case SUCCESS -> this.onClose();
+                    case FAIL -> {
+                        Minecraft minecraft = Minecraft.getInstance();
+                        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.getReason(), TextHelper.stringLength(result.getReason()) + 30, 100, () -> {
+                            ForgeHooksClient.popGuiLayer(minecraft);
+                        }));
+                    }
+                }
+                this.loadingCircle.setActive(false);
+                this.preventUserInput = false;
+            }
+        }
     }
 
     @Override
     public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(poseStack);
+        boolean loadingCircleActive = this.loadingCircle.isActive();
+
+        if (!loadingCircleActive) this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
         this.font.draw(poseStack, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB());
         this.font.draw(poseStack, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB());
+        if (loadingCircleActive) this.renderBackground(poseStack);
     }
 }

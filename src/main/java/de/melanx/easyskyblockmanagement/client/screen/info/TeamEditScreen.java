@@ -2,6 +2,7 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.client.screen.edit.TeamPlayersScreen;
 import de.melanx.easyskyblockmanagement.client.widget.BlinkingEditBox;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.ChatFormatting;

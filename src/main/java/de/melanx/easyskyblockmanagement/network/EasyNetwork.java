@@ -2,7 +2,9 @@ package de.melanx.easyskyblockmanagement.network;
 
 import io.github.noeppi_noeppi.libx.mod.ModX;
 import io.github.noeppi_noeppi.libx.network.NetworkX;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 public class EasyNetwork extends NetworkX {
 
@@ -18,9 +20,15 @@ public class EasyNetwork extends NetworkX {
     @Override
     protected void registerPackets() {
         this.register(new CreateTeamScreenClickHandler.Serializer(), () -> CreateTeamScreenClickHandler::handle, NetworkDirection.PLAY_TO_SERVER);
+
+        this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public void handleCreateTeam(String name, String shape) {
         this.channel.sendToServer(new CreateTeamScreenClickHandler.Message(name, shape));
+    }
+
+    public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {
+        this.channel.reply(new SendLoadingResult.Message(result, reason), ctx);
     }
 }

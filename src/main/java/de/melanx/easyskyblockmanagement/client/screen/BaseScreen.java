@@ -3,13 +3,16 @@ package de.melanx.easyskyblockmanagement.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.network.LoadingResult;
 import io.github.noeppi_noeppi.libx.render.RenderHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -20,11 +23,14 @@ public abstract class BaseScreen extends Screen {
 
     private static final ResourceLocation GENERIC = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.previous_screen");
+    public static final OnAbort DEFAULT_ABORT = () -> ForgeHooksClient.popGuiLayer(Minecraft.getInstance());
+    private static LoadingResult RESULT;
 
     protected final int xSize;
     protected final int ySize;
     protected int relX;
     protected int relY;
+    protected boolean preventUserInput;
 
     public BaseScreen(Component component, int xSize, int ySize) {
         super(component);
@@ -45,7 +51,31 @@ public abstract class BaseScreen extends Screen {
     }
 
     public void renderTitle(@Nonnull PoseStack poseStack) {
-        this.font.draw(poseStack, this.title, this.x(((float) this.xSize / 2) - (float) this.font.width(this.title.getVisualOrderText()) / 2), this.y(10), Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, this.title, this.centeredX(this.font.width(this.title.getVisualOrderText())), this.y(10), Color.DARK_GRAY.getRGB());
+    }
+
+    public float centeredX(float width) {
+        return this.x(((float) this.xSize / 2) - width);
+    }
+
+    public float centeredY(float height) {
+        return this.x(((float) this.xSize / 2) - height);
+    }
+
+    public int centeredX(int width) {
+        return (int) this.x(((float) this.xSize / 2) - ((float) width / 2));
+    }
+
+    public int centeredY(int height) {
+        return (int) this.x(((float) this.xSize / 2) - ((float) height / 2));
+    }
+
+    public int getSizeX() {
+        return this.xSize;
+    }
+
+    public int getSizeY() {
+        return this.ySize;
     }
 
     public int getRelX() {
@@ -74,6 +104,10 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
         InputConstants.Key mapping = InputConstants.getKey(keyCode, scanCode);
         //noinspection ConstantConditions
         if (this.minecraft.options.keyInventory.isActiveAndMatches(mapping) && !(this.getFocused() instanceof EditBox)) {
@@ -85,7 +119,92 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.charTyped(codePoint, modifiers);
+    }
+
+    @Override
+    public boolean changeFocus(boolean focus) {
+        if (this.preventUserInput) {
+            return false;
+        }
+
+        return super.changeFocus(focus);
+    }
+
+    @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    protected LoadingResult getResult() {
+        LoadingResult tempResult = null;
+        if (RESULT != null) {
+            tempResult = RESULT;
+            RESULT = null;
+        }
+
+        return tempResult;
+    }
+
+    public void setResult(@Nonnull LoadingResult result) {
+        RESULT = result;
+    }
+
+    public interface OnConfirm {
+        void onConfirm();
+    }
+
+    public interface OnAbort {
+        void onAbort();
     }
 }

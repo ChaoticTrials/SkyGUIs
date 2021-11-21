@@ -1,9 +1,9 @@
-package de.melanx.easyskyblockmanagement.client.screen.info;
+package de.melanx.easyskyblockmanagement.client.screen.edit;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
-import de.melanx.easyskyblockmanagement.client.screen.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
+import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;
@@ -40,15 +40,17 @@ public class TeamPlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, new TextComponent("Kick"), (button -> {
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(this, new TextComponent("Do you really want to kick these " + this.getSelectedIds().size() + " player(s)?"), () -> {
+            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to kick these " + this.getSelectedIds().size() + " player(s)?"), () -> {
                 // TODO remove the players on server side
                 this.team.removePlayers(this.getSelectedIds());
                 Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
             }, () -> Minecraft.getInstance().setScreen(this)));
         })));
+
         this.addRenderableWidget(new Button(this.x(57), this.y(200), 115, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
+
         this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, (checkbox, poseStack, mouseX, mouseY) -> {
             this.renderTooltip(poseStack, this.allSelected() ? UNSELECT_ALL : SELECT_ALL, mouseX, mouseY);
         }) {
@@ -62,6 +64,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
                 }
             }
         });
+
         super.init();
         this.updateButtons();
     }
