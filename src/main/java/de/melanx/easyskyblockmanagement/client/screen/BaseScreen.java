@@ -45,7 +45,7 @@ public abstract class BaseScreen extends Screen {
     }
 
     public void renderTitle(@Nonnull PoseStack poseStack) {
-        this.font.draw(poseStack, this.title, this.relX + ((float) this.xSize / 2) - (float) this.font.width(this.title.getVisualOrderText()) / 2, this.relY + 10, Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, this.title, this.x(((float) this.xSize / 2) - (float) this.font.width(this.title.getVisualOrderText()) / 2), this.y(10), Color.DARK_GRAY.getRGB());
     }
 
     public int getRelX() {
@@ -61,6 +61,14 @@ public abstract class BaseScreen extends Screen {
     }
 
     public int y(int y) {
+        return this.relY + y;
+    }
+
+    public float x(float x) {
+        return this.relX + x;
+    }
+
+    public float y(float y) {
         return this.relY + y;
     }
 

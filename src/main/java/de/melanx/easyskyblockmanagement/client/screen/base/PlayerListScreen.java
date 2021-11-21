@@ -54,7 +54,7 @@ public abstract class PlayerListScreen extends BaseScreen {
     protected void init() {
         this.playerWidgets.clear();
         this.scrollbar = new ScrollbarWidget(this, this.scrollbarInfo.x, this.scrollbarInfo.y, 12, this.scrollbarInfo.height);
-        this.renderArea = this.addRenderableWidget(new RenderArea(this, this.relX + this.renderAreaInfo.x, this.relY + this.renderAreaInfo.y, this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT));
+        this.renderArea = this.addRenderableWidget(new RenderArea(this, this.x(this.renderAreaInfo.x), this.y(this.renderAreaInfo.y), this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT));
         for (int i = 0; i < this.players.size(); i++) {
             this.playerWidgets.add(this.renderArea.addRenderableWidget2(new PlayerWidget(this.players.get(i), this, 0, ENTRY_HEIGHT * i, 100, 12)));
         }

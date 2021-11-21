@@ -36,7 +36,7 @@ public class TeamEditScreen extends BaseScreen {
     // TODO TranslatableTextComponent
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 45, 70, 20, new TextComponent("Show"), button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(45), 70, 20, new TextComponent("Show"), button -> {
             for (BlockPos spawn : this.team.getPossibleSpawns()) {
                 double posX = spawn.getX() + 0.5D;
                 double posY = spawn.getY() + 0.5D;
@@ -62,7 +62,7 @@ public class TeamEditScreen extends BaseScreen {
         }));
 
         // TODO check for config
-        this.addButton = new Button(this.relX + 85, this.relY + 45, 70, 20, new TextComponent("Add"), button -> {
+        this.addButton = new Button(this.x(85), this.y(45), 70, 20, new TextComponent("Add"), button -> {
             if (this.posValid) {
                 // TODO networking
                 this.onClose();
@@ -78,25 +78,25 @@ public class TeamEditScreen extends BaseScreen {
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
         String posStr = (int) pos.x + " " + (int) pos.y + " " + (int) pos.z;
-        this.posBox = new BlinkingEditBox(this.font, this.relX + 10, this.relY + 70, 145, 18, new TextComponent(posStr));
+        this.posBox = new BlinkingEditBox(this.font, this.x(10), this.y(70), 145, 18, new TextComponent(posStr));
         this.posBox.setValue(posStr);
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);
 
         // TODO check for config
-        this.addRenderableWidget(new Button(this.relX + 160, this.relY + 45, 70, 20, new TextComponent("Remove"), button -> {
+        this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, new TextComponent("Remove"), button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
 
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 115, 70, 20, new TextComponent("Show"), button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(115), 70, 20, new TextComponent("Show"), button -> {
             Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this));
         }));
 
-        this.addRenderableWidget(new Button(this.relX + 85, this.relY + 115, 70, 20, new TextComponent("Invite"), button -> {
+        this.addRenderableWidget(new Button(this.x(85), this.y(115), 70, 20, new TextComponent("Invite"), button -> {
             // TODO open list with invitable users
         }));
 
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 155, 226, 20, PREV_SCREEN_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(155), 226, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
     }
@@ -114,13 +114,13 @@ public class TeamEditScreen extends BaseScreen {
         this.renderTitle(poseStack);
 
         // TODO TranslatableTextComponent
-        this.font.draw(poseStack, "Spawns", this.relX + 10, this.relY + 30, Color.DARK_GRAY.getRGB());
-        this.font.draw(poseStack, "Members", this.relX + 10, this.relY + 100, Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, "Spawns", this.x(10), this.y(30), Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, "Members", this.x(10), this.y(100), Color.DARK_GRAY.getRGB());
 
         if (!this.posValid) {
             poseStack.pushPose();
             poseStack.scale(1.3F, 1.3F, 1.3F);
-            this.font.draw(poseStack, "INVALID", (float) ((this.relX + 191 - this.font.width("INVALID") / 2) / 1.3), (float) ((this.relY + 74) / 1.3), Color.RED.getRGB());
+            this.font.draw(poseStack, "INVALID", (float) ((this.x(191) - this.font.width("INVALID") / 2) / 1.3), (float) ((this.y(74)) / 1.3), Color.RED.getRGB());
             poseStack.popPose();
         }
     }

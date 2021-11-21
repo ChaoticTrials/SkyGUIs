@@ -56,9 +56,9 @@ public class AllTeamsScreen extends BaseScreen {
         this.renderBackground(poseStack);
         super.render(poseStack, mouseX, mouseY, partialTick);
         this.scrollbar.render(poseStack);
-        this.font.draw(poseStack, TEAMS_COMPONENT, this.relX + 10, this.relY + 13, Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB());
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
-        this.font.draw(poseStack, MEMBERS_COMPONENT, this.relX + 179 - memberLength, this.relY + 13, Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB());
         int j = 0;
         for (int i = this.scrollbar.getOffset(); i < this.teams.size(); i++) {
             if (j >= ENTRIES) break;
@@ -68,11 +68,11 @@ public class AllTeamsScreen extends BaseScreen {
 
             TextComponent playerSizeComponent = new TextComponent(String.valueOf(team.getPlayers().size()));
             TextComponent teamNameComponent = new TextComponent(s);
-            float x = this.relX + 179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2;
-            int y = this.relY + 37 + j * 12;
-            this.font.draw(poseStack, teamNameComponent, this.relX + 10, y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB());
+            float x = this.x(179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2);
+            int y = this.y(37 + j * 12);
+            this.font.draw(poseStack, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB());
             this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
-            boolean inBounds = Math2.isInBounds(this.relX + 10, y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
+            boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
                 ArrayList<TextComponent> textLines = Lists.newArrayList(new TextComponent(name));
                 ArrayList<String> smallTextLines = Lists.newArrayList();

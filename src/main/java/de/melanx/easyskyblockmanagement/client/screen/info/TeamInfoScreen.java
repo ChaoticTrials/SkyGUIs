@@ -39,7 +39,7 @@ public class TeamInfoScreen extends BaseScreen {
 
     @Override
     protected void init() {
-        Button joinButton = new Button(this.relX + 10, this.relY + 30, 110, 20, this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
+        Button joinButton = new Button(this.x(10), this.y(30), 110, 20, this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
         }, (button, poseStack, mouseX, mouseY) -> {
             //noinspection ConstantConditions
             if (SkyblockSavedData.get(Minecraft.getInstance().level).hasPlayerTeam(Minecraft.getInstance().player)) {
@@ -53,7 +53,7 @@ public class TeamInfoScreen extends BaseScreen {
         joinButton.active = ConfigHandler.Utility.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
         this.addRenderableWidget(joinButton);
 
-        Button visitButton = new Button(this.relX + 125, this.relY + 30, 110, 20, VISIT_TEAM, button -> {
+        Button visitButton = new Button(this.x(125), this.y(30), 110, 20, VISIT_TEAM, button -> {
         }, (button, poseStack, mouseX, mouseY) -> {
             if (!ConfigHandler.Utility.Teleports.allowVisits) {
                 this.renderTooltip(poseStack, CONFIG_ALLOW_VISITS, mouseX, mouseY);
@@ -64,7 +64,7 @@ public class TeamInfoScreen extends BaseScreen {
         visitButton.active = ConfigHandler.Utility.Teleports.allowVisits && this.team.allowsVisits();
         this.addRenderableWidget(visitButton);
 
-        this.addRenderableWidget(new Button(this.relX + 10, this.relY + 55, 226, 20, PREV_SCREEN_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(55), 226, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
     }

@@ -51,7 +51,7 @@ public class TeamMembersScreen extends BaseScreen {
     protected void init() {
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, TOP_ENTRY - 3, 12, ENTRIES * 12);
 
-        this.addRenderableWidget(new Button(this.relX + (this.xSize - this.font.width(PREV_SCREEN_COMPONENT) - 10) / 2, this.relY + this.ySize - 30, this.font.width(PREV_SCREEN_COMPONENT) + 10, 20, PREV_SCREEN_COMPONENT, button -> {
+        this.addRenderableWidget(new Button(this.x((this.xSize - this.font.width(PREV_SCREEN_COMPONENT) - 10) / 2), this.y(this.ySize - 30), this.font.width(PREV_SCREEN_COMPONENT) + 10, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
         this.updateScrollbar();
@@ -70,9 +70,9 @@ public class TeamMembersScreen extends BaseScreen {
             GameProfile profile = this.members.get(i);
             String name = TextHelper.shorten(this.font, profile.getName(), 175);
             TextComponent teamNameComponent = new TextComponent(name);
-            int y = this.relY + TOP_ENTRY + j * 12;
-            this.font.draw(poseStack, teamNameComponent, this.relX + 10, y, TextHelper.DARK_GREEN.getRGB());
-            boolean inBounds = Math2.isInBounds(this.relX + 10, y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
+            int y = this.y(TOP_ENTRY + j * 12);
+            this.font.draw(poseStack, teamNameComponent, this.x(10), y, TextHelper.DARK_GREEN.getRGB());
+            boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
                 ArrayList<Component> tooltips = Lists.newArrayList(new TextComponent(profile.getName()));
                 //noinspection ConstantConditions
