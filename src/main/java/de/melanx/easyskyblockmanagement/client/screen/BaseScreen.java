@@ -18,6 +18,7 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.Color;
 
 public abstract class BaseScreen extends Screen {
@@ -32,18 +33,27 @@ public abstract class BaseScreen extends Screen {
     protected int relX;
     protected int relY;
     protected boolean preventUserInput;
-    protected LoadingCircle loadingCircle;
+    private LoadingCircle loadingCircle;
 
     public BaseScreen(Component component, int xSize, int ySize) {
         super(component);
         this.xSize = xSize;
         this.ySize = ySize;
-        MinecraftForge.EVENT_BUS.addListener(this::onGuiInit);
+        MinecraftForge.EVENT_BUS.addListener(this::guiInitPre);
+        MinecraftForge.EVENT_BUS.addListener(this::guiInitPost);
     }
 
-    private void onGuiInit(GuiScreenEvent.InitGuiEvent.Pre event) {
+    private void guiInitPre(GuiScreenEvent.InitGuiEvent.Pre event) {
         this.relX = (event.getGui().width - this.xSize) / 2;
         this.relY = (event.getGui().height - this.ySize) / 2;
+    }
+
+    private void guiInitPost(GuiScreenEvent.InitGuiEvent.Post event) {
+        boolean prevActive = this.loadingCircle != null && this.loadingCircle.isActive();
+        this.loadingCircle = this.createLoadingCircle();
+        if (this.loadingCircle != null) {
+            this.loadingCircle.setActive(prevActive);
+        }
     }
 
     @Override
@@ -63,6 +73,15 @@ public abstract class BaseScreen extends Screen {
     public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
         super.render(poseStack, mouseX, mouseY, partialTick);
+    }
+
+    public LoadingCircle createLoadingCircle() {
+        return null;
+    }
+
+    @Nullable
+    public LoadingCircle getLoadingCircle() {
+        return this.loadingCircle;
     }
 
     public void onLoadingResult(LoadingResult result) {

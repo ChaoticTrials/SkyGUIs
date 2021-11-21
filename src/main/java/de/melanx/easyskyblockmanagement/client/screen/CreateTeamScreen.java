@@ -70,16 +70,14 @@ public class CreateTeamScreen extends BaseScreen {
         this.currTemplate = this.templates.get(this.currIndex).getName();
         this.addRenderableWidget(templateButton);
 
-        this.loadingCircle = new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
-        this.loadingCircle.setActive(false);
-
         this.addRenderableWidget(new Button(this.x(27), this.y(92), 60, 20, CREATE, button -> {
             if (this.name.getValue().isBlank()) {
                 this.name.setFocus(true);
                 this.name.setValue(NameGenerator.randomName(new Random()));
             } else {
                 EasySkyblockManagement.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
-                this.loadingCircle.setActive(true);
+                //noinspection ConstantConditions
+                this.getLoadingCircle().setActive(true);
             }
         }));
         this.addRenderableWidget(new Button(this.x(106), this.y(92), 60, 20, ABORT, button -> this.onClose()));
@@ -89,6 +87,11 @@ public class CreateTeamScreen extends BaseScreen {
     public void tick() {
         this.name.tick();
         super.tick();
+    }
+
+    @Override
+    public LoadingCircle createLoadingCircle() {
+        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
     }
 
     @Override
