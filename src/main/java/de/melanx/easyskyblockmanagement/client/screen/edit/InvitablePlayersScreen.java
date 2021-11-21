@@ -1,5 +1,6 @@
 package de.melanx.easyskyblockmanagement.client.screen.edit;
 
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
@@ -7,10 +8,13 @@ import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
 import de.melanx.easyskyblockmanagement.client.screen.info.AllTeamsScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -20,20 +24,19 @@ import java.awt.Color;
 import java.util.Set;
 import java.util.UUID;
 
-// TODO TextComponents to TranslatableComponents
-public class TeamPlayersScreen extends PlayerListScreen {
+public class InvitablePlayersScreen extends PlayerListScreen {
 
     private static final Component SELECT_ALL = new TextComponent("Select all");
     private static final Component UNSELECT_ALL = new TextComponent("Unselect all");
 
     private final Team team;
     private final BaseScreen prev;
-    private Button kickButton;
+    private Button inviteButton;
     private Checkbox selectAll;
     private int selectedAmount = 0;
 
-    public TeamPlayersScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), team.getPlayers(), 200, 230,
+    public InvitablePlayersScreen(Team team, BaseScreen prev) {
+        super(new TextComponent(team.getName()), InvitablePlayersScreen.getInvitablePlayers(), 200, 230,
                 new PlayerListScreen.ScrollbarInfo(180, 10, 210),
                 new PlayerListScreen.RenderAreaInfo(10, 50, 180));
         this.team = team;
@@ -42,9 +45,9 @@ public class TeamPlayersScreen extends PlayerListScreen {
 
     @Override
     protected void init() {
-        this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, new TextComponent("Kick"), (button -> {
+        this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, new TextComponent("Invite"), (button -> {
             Set<UUID> removalIds = this.getSelectedIds();
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to kick these " + removalIds.size() + " player(s)?"), () -> {
+            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to invite these " + removalIds.size() + " player(s)?"), () -> {
                 EasySkyblockManagement.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                 //noinspection ConstantConditions
                 if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
@@ -66,9 +69,9 @@ public class TeamPlayersScreen extends PlayerListScreen {
             public void onPress() {
                 super.onPress();
                 if (this.selected) {
-                    TeamPlayersScreen.this.selectAll();
+                    InvitablePlayersScreen.this.selectAll();
                 } else {
-                    TeamPlayersScreen.this.unselectAll();
+                    InvitablePlayersScreen.this.unselectAll();
                 }
             }
         });
@@ -85,7 +88,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
 
     public void updateButtons() {
         Set<UUID> selectedIds = this.getSelectedIds();
-        this.kickButton.active = selectedIds.size() > 0;
+        this.inviteButton.active = selectedIds.size() > 0;
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
     }
@@ -100,5 +103,25 @@ public class TeamPlayersScreen extends PlayerListScreen {
     @Override
     protected int entriesPerPage() {
         return 10;
+    }
+
+    private static Set<UUID> getInvitablePlayers() {
+        Set<UUID> ids = Sets.newHashSet();
+
+        Minecraft minecraft = Minecraft.getInstance();
+        ClientLevel level = minecraft.level;
+        LocalPlayer player = minecraft.player;
+        if (level == null || player == null) {
+            return ids;
+        }
+
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        for (UUID id : player.connection.getOnlinePlayerIds()) {
+            if (!data.hasPlayerTeam(id)) {
+                ids.add(id);
+            }
+        }
+
+        return ids;
     }
 }
