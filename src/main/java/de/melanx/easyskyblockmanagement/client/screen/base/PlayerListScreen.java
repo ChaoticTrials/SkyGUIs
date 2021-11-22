@@ -15,11 +15,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -73,11 +74,16 @@ public abstract class PlayerListScreen extends BaseScreen {
                 super.render(poseStack, mouseX, mouseY, partialTick);
                 PlayerListScreen.this.isCapturingTooltips = false;
                 PlayerListScreen.this.capturedTooltips.forEach(pair -> {
-                    poseStack.pushPose();
-                    poseStack.setIdentity();
-                    poseStack.mulPoseMatrix(pair.getLeft().pose());
-                    pair.getRight().run();
-                    poseStack.popPose();
+                    int x = mouseX - this.getInitX();
+                    int y = mouseY - this.getInitY();
+                    if (x > 0 && x < this.getRenderWidth()
+                            && y > 0 && y < this.getRenderHeight()) {
+                        poseStack.pushPose();
+                        poseStack.setIdentity();
+                        poseStack.mulPoseMatrix(pair.getLeft().pose());
+                        pair.getRight().run();
+                        poseStack.popPose();
+                    }
                 });
                 PlayerListScreen.this.capturedTooltips.clear();
             }
@@ -192,11 +198,7 @@ public abstract class PlayerListScreen extends BaseScreen {
                 tooltip.add(new TextComponent(profile.getId().toString()).withStyle(ChatFormatting.GRAY));
             }
             TextWidget textWidget = new TextWidget(screen, height + 5, 0, Math.min(width, screen.getMinecraft().font.width(profile.getName())), height,
-                    new TextComponent(profile.getName())
-                            .setStyle(Style.EMPTY.withClickEvent(
-                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, (ModList.get().isLoaded("minemention") ? "@ " : "/msg ") + profile.getName() + " ")
-                            )),
-                    tooltip);
+                    new TextComponent(profile.getName()), tooltip);
             this.addRenderableWidget(textWidget);
         }
 

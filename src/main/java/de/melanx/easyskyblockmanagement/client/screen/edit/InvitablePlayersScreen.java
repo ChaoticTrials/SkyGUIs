@@ -38,7 +38,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     public InvitablePlayersScreen(Team team, BaseScreen prev) {
         super(new TextComponent(team.getName()), InvitablePlayersScreen.getInvitablePlayers(), 200, 230,
                 new PlayerListScreen.ScrollbarInfo(180, 10, 210),
-                new PlayerListScreen.RenderAreaInfo(10, 50, 180));
+                new PlayerListScreen.RenderAreaInfo(10, 50, 160));
         this.team = team;
         this.prev = prev;
     }
