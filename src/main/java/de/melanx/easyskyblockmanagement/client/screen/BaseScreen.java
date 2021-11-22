@@ -26,13 +26,13 @@ public abstract class BaseScreen extends Screen {
     private static final ResourceLocation GENERIC = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.previous_screen");
     public static final OnAbort DEFAULT_ABORT = () -> ForgeHooksClient.popGuiLayer(Minecraft.getInstance());
-    private static LoadingResult RESULT;
 
     protected final int xSize;
     protected final int ySize;
     protected int relX;
     protected int relY;
     protected boolean preventUserInput;
+    private LoadingResult loadingResult;
     private LoadingCircle loadingCircle;
 
     public BaseScreen(Component component, int xSize, int ySize) {
@@ -238,16 +238,16 @@ public abstract class BaseScreen extends Screen {
 
     protected LoadingResult getResult() {
         LoadingResult tempResult = null;
-        if (RESULT != null) {
-            tempResult = RESULT;
-            RESULT = null;
+        if (this.loadingResult != null) {
+            tempResult = this.loadingResult;
+            this.loadingResult = null;
         }
 
         return tempResult;
     }
 
     public void setResult(@Nonnull LoadingResult result) {
-        RESULT = result;
+        this.loadingResult = result;
     }
 
     public interface OnConfirm {
