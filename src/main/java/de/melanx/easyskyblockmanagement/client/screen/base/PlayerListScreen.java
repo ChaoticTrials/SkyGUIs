@@ -12,12 +12,18 @@ import de.melanx.skyblockbuilder.client.GameProfileCache;
 import io.github.noeppi_noeppi.libx.impl.config.gui.screen.widget.TextWidget;
 import io.github.noeppi_noeppi.libx.screen.Panel;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.ModList;
+import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +37,12 @@ public abstract class PlayerListScreen extends BaseScreen {
     protected RenderArea renderArea;
     protected final List<GameProfile> players;
     protected ScrollbarWidget scrollbar;
+
+    // While rendering the scrollable view, tooltips must be delayed
+    // Because scissors is enabled, and they need to be rendered with
+    // absolute coordinates as they should not be cut by the screen border.
+    private final List<Pair<PoseStack.Pose, Runnable>> capturedTooltips = new LinkedList<>();
+    private boolean isCapturingTooltips = false;
 
     public PlayerListScreen(Component title, Set<UUID> players, int xSize, int ySize, ScrollbarInfo scrollbarInfo, RenderAreaInfo renderAreaInfo) {
         super(title, xSize, ySize);
@@ -54,10 +66,27 @@ public abstract class PlayerListScreen extends BaseScreen {
     protected void init() {
         this.playerWidgets.clear();
         this.scrollbar = new ScrollbarWidget(this, this.scrollbarInfo.x, this.scrollbarInfo.y, 12, this.scrollbarInfo.height);
-        this.renderArea = this.addRenderableWidget(new RenderArea(this, this.x(this.renderAreaInfo.x), this.y(this.renderAreaInfo.y), this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT));
+        this.renderArea = this.addWidget(new RenderArea(this, this.x(this.renderAreaInfo.x), this.y(this.renderAreaInfo.y), this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.players.size() * ENTRY_HEIGHT, ENTRY_HEIGHT) {
+            @Override
+            public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+                PlayerListScreen.this.isCapturingTooltips = true;
+                super.render(poseStack, mouseX, mouseY, partialTick);
+                PlayerListScreen.this.isCapturingTooltips = false;
+                PlayerListScreen.this.capturedTooltips.forEach(pair -> {
+                    poseStack.pushPose();
+                    poseStack.setIdentity();
+                    poseStack.mulPoseMatrix(pair.getLeft().pose());
+                    pair.getRight().run();
+                    poseStack.popPose();
+                });
+                PlayerListScreen.this.capturedTooltips.clear();
+            }
+        });
+
         for (int i = 0; i < this.players.size(); i++) {
             this.playerWidgets.add(this.renderArea.addRenderableWidget2(new PlayerWidget(this.players.get(i), this, 0, ENTRY_HEIGHT * i, 100, 12)));
         }
+
         this.scrollbar.addListener(this.renderArea);
         this.updateScrollbar();
     }
@@ -103,6 +132,7 @@ public abstract class PlayerListScreen extends BaseScreen {
         super.render_(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
         this.scrollbar.render(poseStack);
+        this.renderArea.render(poseStack, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -161,7 +191,12 @@ public abstract class PlayerListScreen extends BaseScreen {
             if (screen.getMinecraft().options.advancedItemTooltips) {
                 tooltip.add(new TextComponent(profile.getId().toString()).withStyle(ChatFormatting.GRAY));
             }
-            TextWidget textWidget = new TextWidget(screen, height + 5, 0, Math.min(width, screen.getMinecraft().font.width(profile.getName())), height, new TextComponent(profile.getName()), tooltip);
+            TextWidget textWidget = new TextWidget(screen, height + 5, 0, Math.min(width, screen.getMinecraft().font.width(profile.getName())), height,
+                    new TextComponent(profile.getName())
+                            .setStyle(Style.EMPTY.withClickEvent(
+                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND, (ModList.get().isLoaded("minemention") ? "@ " : "/msg ") + profile.getName() + " ")
+                            )),
+                    tooltip);
             this.addRenderableWidget(textWidget);
         }
 
@@ -171,6 +206,119 @@ public abstract class PlayerListScreen extends BaseScreen {
 
         public boolean selected() {
             return this.checkbox.selected();
+        }
+    }
+
+    private void captureTooltip(PoseStack.Pose pose, Runnable action) {
+        this.capturedTooltips.add(Pair.of(pose, action));
+    }
+
+    @Override
+    protected void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull ItemStack stack, int x, int y) {
+        if (this.isCapturingTooltips) {
+            // Not inside lambda as the value may change
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, stack, x, y));
+        } else {
+            super.renderTooltip(poseStack, stack, x, y);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<Component> tooltip, @Nonnull Optional<TooltipComponent> special, int x, int y) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, special, x, y));
+        } else {
+            super.renderTooltip(poseStack, tooltip, special, x, y);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull Component tooltip, int x, int y) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, x, y));
+        } else {
+            super.renderTooltip(poseStack, tooltip, x, y);
+        }
+    }
+
+    @Override
+    public void renderComponentTooltip(@Nonnull PoseStack poseStack, @Nonnull List<Component> tooltip, int x, int y) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderComponentTooltip(poseStack, tooltip, x, y));
+        } else {
+            super.renderComponentTooltip(poseStack, tooltip, x, y);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<? extends FormattedCharSequence> tooltip, int x, int y) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, x, y));
+        } else {
+            super.renderTooltip(poseStack, tooltip, x, y);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<Component> tooltip, @Nonnull Optional<TooltipComponent> tooltipComponent, int x, int y, @Nonnull ItemStack stack) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, stack));
+        } else {
+            super.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, stack);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<Component> tooltip, @Nonnull Optional<TooltipComponent> tooltipComponent, int x, int y, @Nullable Font font) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, font));
+        } else {
+            super.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, font);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<Component> tooltip, @Nonnull Optional<TooltipComponent> tooltipComponent, int x, int y, @Nullable Font font, @Nonnull ItemStack stack) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, font, stack));
+        } else {
+            super.renderTooltip(poseStack, tooltip, tooltipComponent, x, y, font, stack);
+        }
+    }
+
+    @Override
+    public void renderComponentTooltip(@Nonnull PoseStack poseStack, @Nonnull List<? extends FormattedText> tooltip, int mouseX, int mouseY, @Nonnull ItemStack stack) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, stack));
+        } else {
+            super.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, stack);
+        }
+    }
+
+    @Override
+    public void renderComponentTooltip(@Nonnull PoseStack poseStack, @Nonnull List<? extends FormattedText> tooltip, int mouseX, int mouseY, @Nullable Font font) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, font));
+        } else {
+            super.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, font);
+        }
+    }
+
+    @Override
+    public void renderComponentTooltip(@Nonnull PoseStack poseStack, @Nonnull List<? extends FormattedText> tooltip, int mouseX, int mouseY, @Nullable Font font, @Nonnull ItemStack stack) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, font, stack));
+        } else {
+            super.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, font, stack);
+        }
+    }
+
+    @Override
+    public void renderTooltip(@Nonnull PoseStack poseStack, @Nonnull List<? extends FormattedCharSequence> tooltip, int x, int y, @Nonnull Font font) {
+        if (this.isCapturingTooltips) {
+            this.captureTooltip(poseStack.last(), () -> this.renderTooltip(poseStack, tooltip, x, y, font));
+        } else {
+            super.renderTooltip(poseStack, tooltip, x, y, font);
         }
     }
 }
