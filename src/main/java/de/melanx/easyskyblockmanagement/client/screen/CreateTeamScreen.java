@@ -6,7 +6,6 @@ import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
-import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import net.minecraft.client.Minecraft;
@@ -29,7 +28,7 @@ public class CreateTeamScreen extends BaseScreen {
     private static final Component CREATE = new TranslatableComponent("screen.easyskyblockmanagement.button.create");
     private static final Component ABORT = new TranslatableComponent("screen.easyskyblockmanagement.button.abort");
 
-    private final List<ConfiguredTemplate> templates;
+    private final List<String> templates;
     private String currTemplate;
     private EditBox name;
     private int currIndex = 0;
@@ -37,7 +36,7 @@ public class CreateTeamScreen extends BaseScreen {
 
     public CreateTeamScreen() {
         super(new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".title.create_team"), 200, 125);
-        this.templates = TemplateLoader.getConfiguredTemplates();
+        this.templates = TemplateLoader.getTemplateNames();
     }
 
     public static void open() {
@@ -51,13 +50,13 @@ public class CreateTeamScreen extends BaseScreen {
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);
 
-        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, new TextComponent(this.templates.get(this.currIndex).getName()), button -> {
+        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, new TextComponent(this.templates.get(this.currIndex)), button -> {
             this.currIndex++;
             if (this.currIndex >= this.templates.size()) {
                 this.currIndex = 0;
             }
 
-            String orig = this.templates.get(this.currIndex).getName();
+            String orig = this.templates.get(this.currIndex);
             String s = TextHelper.shorten(this.font, orig, 110);
             this.enableTooltip = false;
             this.currTemplate = orig;
@@ -67,7 +66,7 @@ public class CreateTeamScreen extends BaseScreen {
                 this.renderTooltip(poseStack, new TextComponent(this.currTemplate), mouseX, mouseY);
             }
         });
-        this.currTemplate = this.templates.get(this.currIndex).getName();
+        this.currTemplate = this.templates.get(this.currIndex);
         this.addRenderableWidget(templateButton);
 
         this.addRenderableWidget(new Button(this.x(27), this.y(92), 60, 20, CREATE, button -> {
