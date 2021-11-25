@@ -5,6 +5,7 @@ import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
@@ -13,7 +14,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
@@ -23,10 +23,11 @@ import java.util.Random;
 
 public class CreateTeamScreen extends BaseScreen {
 
-    private static final Component NAME_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.name");
-    private static final Component TEMPLATE_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".template");
-    private static final Component CREATE = new TranslatableComponent("screen.easyskyblockmanagement.button.create");
-    private static final Component ABORT = new TranslatableComponent("screen.easyskyblockmanagement.button.abort");
+    private static final Component NAME_COMPONENT = ComponentBuilder.text("name");
+    private static final Component TEMPLATE_COMPONENT = ComponentBuilder.raw("template");
+    private static final Component CREATE = ComponentBuilder.button("create");
+    private static final Component ABORT = ComponentBuilder.button("abort");
+    private static final Component TITLE = ComponentBuilder.title("create_team");
 
     private final List<String> templates;
     private String currTemplate;
@@ -35,7 +36,7 @@ public class CreateTeamScreen extends BaseScreen {
     private boolean enableTooltip;
 
     public CreateTeamScreen() {
-        super(new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".title.create_team"), 200, 125);
+        super(TITLE, 200, 125);
         this.templates = TemplateLoader.getTemplateNames();
     }
 
@@ -45,7 +46,7 @@ public class CreateTeamScreen extends BaseScreen {
 
     @Override
     protected void init() {
-        this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, new TextComponent(""));
+        this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, TextComponent.EMPTY);
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);

@@ -1,6 +1,8 @@
 package de.melanx.easyskyblockmanagement.network.handler;
 
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.network.EasyNetwork;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -28,35 +30,35 @@ public class CreateTeamScreenClick {
                 return;
             }
 
+            EasyNetwork network = EasySkyblockManagement.getNetwork();
             if (SkyblockHooks.onCreateTeam(msg.name)) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED)); // TODO real name
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED));
                 return;
             }
 
             ServerLevel level = player.getLevel();
             ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate(msg.shape);
             if (template == null) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("This shape does not exist.")); // TODO real name
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("shape_does_not_exist").withStyle(ChatFormatting.RED));
                 return;
             }
 
             SkyblockSavedData data = SkyblockSavedData.get(level);
 
             if (data.hasPlayerTeam(player)) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("You already have a team!!!11!").withStyle(ChatFormatting.RED)); // TODO real name
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED));
                 return;
             }
 
             Team team = data.createTeam(msg.name, template.getTemplate());
             if (team == null) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("This team already exists.")); // TODO real name
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.team_already_exist", msg.name).withStyle(ChatFormatting.RED));
                 return;
             }
 
             team.addPlayer(player);
             WorldUtil.teleportToIsland(player, team);
-            // TODO add message for player and for team
-            EasySkyblockManagement.getNetwork().handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.success.create_team", team.getName()));
+            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, new TranslatableComponent("skyblockbuilder.command.success.create_team", team.getName()).withStyle(ChatFormatting.GREEN));
         });
         ctx.setPacketHandled(true);
     }

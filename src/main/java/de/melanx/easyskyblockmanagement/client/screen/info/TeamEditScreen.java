@@ -5,12 +5,14 @@ import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.easyskyblockmanagement.client.screen.edit.TeamPlayersScreen;
 import de.melanx.easyskyblockmanagement.client.widget.BlinkingEditBox;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.phys.Vec3;
 
@@ -20,6 +22,15 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class TeamEditScreen extends BaseScreen {
+
+    private static final Component SPAWNS = ComponentBuilder.text("spawns");
+    private static final Component MEMBERS = ComponentBuilder.text("members");
+    private static final Component INVALID = ComponentBuilder.text("invalid");
+    private static final Component ADD = ComponentBuilder.text("add");
+    private static final Component REMOVE = ComponentBuilder.text("remove");
+    private static final Component SHOW = ComponentBuilder.text("show");
+    private static final Component INVITE = ComponentBuilder.text("invite");
+    private static final Component INVALID_POS = ComponentBuilder.text("position_invalid").withStyle(ChatFormatting.RED);
 
     private final Team team;
     private final BaseScreen prev;
@@ -35,10 +46,9 @@ public class TeamEditScreen extends BaseScreen {
         this.random = new Random();
     }
 
-    // TODO TranslatableTextComponent
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.x(10), this.y(45), 70, 20, new TextComponent("Show"), button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(45), 70, 20, SHOW, button -> {
             for (BlockPos spawn : this.team.getPossibleSpawns()) {
                 double posX = spawn.getX() + 0.5D;
                 double posY = spawn.getY() + 0.5D;
@@ -62,7 +72,7 @@ public class TeamEditScreen extends BaseScreen {
         }));
 
         // TODO check for config
-        this.addButton = new Button(this.x(85), this.y(45), 70, 20, new TextComponent("Add"), button -> {
+        this.addButton = new Button(this.x(85), this.y(45), 70, 20, ADD, button -> {
             if (this.posValid) {
                 // TODO networking
                 this.onClose();
@@ -70,7 +80,7 @@ public class TeamEditScreen extends BaseScreen {
         }, (button, poseStack, mouseX, mouseY) -> {
             this.posBox.blink();
             if (!button.active) {
-                this.renderTooltip(poseStack, new TextComponent("Position is invalid!").withStyle(ChatFormatting.RED), mouseX, mouseY);
+                this.renderTooltip(poseStack, INVALID_POS, mouseX, mouseY);
             }
         });
         this.addRenderableWidget(this.addButton);
@@ -84,15 +94,15 @@ public class TeamEditScreen extends BaseScreen {
         this.addRenderableWidget(this.posBox);
 
         // TODO check for config
-        this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, new TextComponent("Remove"), button -> {
+        this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, REMOVE, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
 
-        this.addRenderableWidget(new Button(this.x(10), this.y(115), 70, 20, new TextComponent("Show"), button -> {
+        this.addRenderableWidget(new Button(this.x(10), this.y(115), 70, 20, SHOW, button -> {
             Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this));
         }));
 
-        this.addRenderableWidget(new Button(this.x(85), this.y(115), 70, 20, new TextComponent("Invite"), button -> {
+        this.addRenderableWidget(new Button(this.x(85), this.y(115), 70, 20, INVITE, button -> {
             Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this));
         }));
 
@@ -113,14 +123,13 @@ public class TeamEditScreen extends BaseScreen {
         super.render_(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
 
-        // TODO TranslatableTextComponent
-        this.font.draw(poseStack, "Spawns", this.x(10), this.y(30), Color.DARK_GRAY.getRGB());
-        this.font.draw(poseStack, "Members", this.x(10), this.y(100), Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, SPAWNS, this.x(10), this.y(30), Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, MEMBERS, this.x(10), this.y(100), Color.DARK_GRAY.getRGB());
 
         if (!this.posValid) {
             poseStack.pushPose();
             poseStack.scale(1.3F, 1.3F, 1.3F);
-            this.font.draw(poseStack, "INVALID", (float) ((this.x(191) - this.font.width("INVALID") / 2) / 1.3), (float) ((this.y(74)) / 1.3), Color.RED.getRGB());
+            this.font.draw(poseStack, INVALID, (float) ((this.x(191) - this.font.width(INVALID) / 2) / 1.3), (float) ((this.y(74)) / 1.3), Color.RED.getRGB());
             poseStack.popPose();
         }
     }

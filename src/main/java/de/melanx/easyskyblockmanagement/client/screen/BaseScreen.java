@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.Minecraft;
@@ -11,7 +12,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -24,7 +24,7 @@ import java.awt.Color;
 public abstract class BaseScreen extends Screen {
 
     private static final ResourceLocation GENERIC = new ResourceLocation(EasySkyblockManagement.getInstance().modid, "textures/gui/generic.png");
-    protected static final MutableComponent PREV_SCREEN_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.previous_screen");
+    protected static final MutableComponent PREV_SCREEN_COMPONENT = ComponentBuilder.text("previous_screen");
     public static final OnAbort DEFAULT_ABORT = () -> ForgeHooksClient.popGuiLayer(Minecraft.getInstance());
 
     protected final int xSize;
@@ -33,7 +33,8 @@ public abstract class BaseScreen extends Screen {
     protected int relY;
     protected boolean preventUserInput;
     private LoadingResult loadingResult;
-    private LoadingCircle loadingCircle; // TODO replace by using WaitingScreen
+    @Nullable
+    private LoadingCircle loadingCircle;
 
     public BaseScreen(Component component, int xSize, int ySize) {
         super(component);
@@ -75,6 +76,7 @@ public abstract class BaseScreen extends Screen {
         super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
+    @Nullable
     public LoadingCircle createLoadingCircle() {
         return null;
     }

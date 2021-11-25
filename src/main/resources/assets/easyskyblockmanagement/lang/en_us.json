@@ -2,17 +2,35 @@
   "itemGroup.easyskyblockmanagement": "Easy Skyblock Management",
 
   "screen.easyskyblockmanagement.template": "Template",
+
   "screen.easyskyblockmanagement.title.create_team": "Create New Team",
   "screen.easyskyblockmanagement.title.all_teams": "All Teams",
+
   "screen.easyskyblockmanagement.text.name": "Name",
   "screen.easyskyblockmanagement.text.members": "Members",
   "screen.easyskyblockmanagement.text.teams": "Teams",
+  "screen.easyskyblockmanagement.text.spawns": "Spawns",
+  "screen.easyskyblockmanagement.text.invalid": "INVALID",
+  "screen.easyskyblockmanagement.text.add": "Add",
+  "screen.easyskyblockmanagement.text.remove": "Remove",
+  "screen.easyskyblockmanagement.text.show": "Show",
+  "screen.easyskyblockmanagement.text.invite": "Invite",
   "screen.easyskyblockmanagement.text.created_at": "Created at",
   "screen.easyskyblockmanagement.text.last_changed": "Last changed",
   "screen.easyskyblockmanagement.text.previous_screen": "Previous Screen",
   "screen.easyskyblockmanagement.text.visit_team": "Visit Team",
   "screen.easyskyblockmanagement.text.request_to_join": "Request to Join",
   "screen.easyskyblockmanagement.text.requested_to_join": "Requested to Join",
+  "screen.easyskyblockmanagement.text.player_not_in_team": "You are not part of this team.",
+  "screen.easyskyblockmanagement.text.shape_does_not_exist": "This shape does not exist.",
+  "screen.easyskyblockmanagement.text.select_all": "Select all",
+  "screen.easyskyblockmanagement.text.unselect_all": "Unselect all",
+  "screen.easyskyblockmanagement.text.selected_amount": "%s player(s) selected",
+  "screen.easyskyblockmanagement.text.kick": "Kick",
+  "screen.easyskyblockmanagement.text.you_sure_kick": "Do you really want to kick these %s player(s)?",
+  "screen.easyskyblockmanagement.text.you_sure_invite": "Do you really want to invite these %s player(s)?",
+
   "screen.easyskyblockmanagement.button.create": "Create",
+  "screen.easyskyblockmanagement.button.confirm": "Confirm",
   "screen.easyskyblockmanagement.button.abort": "Abort"
 }

@@ -1,8 +1,8 @@
 package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
@@ -18,15 +18,14 @@ import javax.annotation.Nonnull;
 
 public class TeamInfoScreen extends BaseScreen {
 
-    private static final MutableComponent MEMBERS_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.members");
     private static final MutableComponent CONFIG_SELF_MANAGEMENT = new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED);
     private static final MutableComponent TEAM_JOIN_REQUESTS = new TranslatableComponent("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED);
     private static final MutableComponent CONFIG_ALLOW_VISITS = new TranslatableComponent("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED);
     private static final MutableComponent TEAM_ALLOW_VISITS = new TranslatableComponent("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED);
     private static final MutableComponent USER_HAS_TEAM = new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED);
-    private static final MutableComponent VISIT_TEAM = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.visit_team");
-    private static final MutableComponent REQUEST_TO_JOIN = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.request_to_join");
-    private static final MutableComponent REQUESTED_TO_JOIN = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.requested_to_join").withStyle(ChatFormatting.GREEN);
+    private static final MutableComponent VISIT_TEAM = ComponentBuilder.text("visit_team");
+    private static final MutableComponent REQUEST_TO_JOIN = ComponentBuilder.text("request_to_join");
+    private static final MutableComponent REQUESTED_TO_JOIN = ComponentBuilder.text("requested_to_join").withStyle(ChatFormatting.GREEN);
 
     private final Team team;
     private final BaseScreen prev;

@@ -8,6 +8,7 @@ import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
 import de.melanx.easyskyblockmanagement.client.screen.info.AllTeamsScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;
@@ -26,8 +27,7 @@ import java.util.UUID;
 
 public class InvitablePlayersScreen extends PlayerListScreen {
 
-    private static final Component SELECT_ALL = new TextComponent("Select all");
-    private static final Component UNSELECT_ALL = new TextComponent("Unselect all");
+    private static final Component INVITE = ComponentBuilder.text("invite");
 
     private final Team team;
     private final BaseScreen prev;
@@ -45,9 +45,9 @@ public class InvitablePlayersScreen extends PlayerListScreen {
 
     @Override
     protected void init() {
-        this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, new TextComponent("Invite"), (button -> {
+        this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, INVITE, (button -> {
             Set<UUID> removalIds = this.getSelectedIds();
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(new TextComponent("Do you really want to invite these " + removalIds.size() + " player(s)?"), () -> {
+            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_invite", removalIds.size()), () -> {
                 EasySkyblockManagement.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                 //noinspection ConstantConditions
                 if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
@@ -83,7 +83,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     @Override
     public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.font.draw(poseStack, new TextComponent(this.selectedAmount + " player(s) selected"), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
+        this.font.draw(poseStack, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
     }
 
     public void updateButtons() {

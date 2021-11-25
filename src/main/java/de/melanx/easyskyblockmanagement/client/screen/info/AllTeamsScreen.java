@@ -2,11 +2,11 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.util.Math2;
@@ -15,7 +15,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
@@ -26,8 +25,8 @@ import java.util.stream.Collectors;
 public class AllTeamsScreen extends BaseScreen {
 
     public static final int ENTRIES = 15;
-    private static final MutableComponent TEAMS_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.teams").setStyle(Style.EMPTY.withBold(true));
-    private static final MutableComponent MEMBERS_COMPONENT = new TranslatableComponent("screen." + EasySkyblockManagement.getInstance().modid + ".text.members").setStyle(Style.EMPTY.withBold(true));
+    private static final MutableComponent TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
+    private static final MutableComponent MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
     private final List<Team> teams;
     private ScrollbarWidget scrollbar;
 

@@ -8,6 +8,7 @@ import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.widget.RenderArea;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import io.github.noeppi_noeppi.libx.impl.config.gui.screen.widget.TextWidget;
 import io.github.noeppi_noeppi.libx.screen.Panel;
@@ -30,6 +31,8 @@ import java.util.stream.Collectors;
 
 public abstract class PlayerListScreen extends BaseScreen {
 
+    protected static final Component SELECT_ALL = ComponentBuilder.text("select_all");
+    protected static final Component UNSELECT_ALL = ComponentBuilder.text("unselect_all");
     private static final int ENTRY_HEIGHT = 14;
 
     private final ScrollbarInfo scrollbarInfo;

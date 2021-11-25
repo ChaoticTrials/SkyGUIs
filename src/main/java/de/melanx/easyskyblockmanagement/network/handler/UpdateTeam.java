@@ -2,12 +2,13 @@ package de.melanx.easyskyblockmanagement.network.handler;
 
 import com.google.common.collect.Sets;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
@@ -16,7 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-// TODO translatable components
+// TODO check config/events
 public class UpdateTeam {
 
     public static void handle(UpdateTeam.Message msg, Supplier<NetworkEvent.Context> context) {
@@ -30,7 +31,7 @@ public class UpdateTeam {
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, new TextComponent("You're not in this team"));
+                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team"));
                 return;
             }
 
@@ -39,7 +40,7 @@ public class UpdateTeam {
                     data.removePlayerFromTeam(id);
                 }
             } else {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, new TextComponent("It's not your team"));
+                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
             }
         });
         context.get().setPacketHandled(true);
