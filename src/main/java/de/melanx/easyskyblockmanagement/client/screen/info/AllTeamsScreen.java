@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
-import de.melanx.easyskyblockmanagement.client.screen.edit.TeamPlayersScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -48,6 +47,7 @@ public class AllTeamsScreen extends BaseScreen {
 
     @Override
     protected void init() {
+        // TODO add button to create new team when in no team
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateScrollbar();
     }
@@ -87,6 +87,7 @@ public class AllTeamsScreen extends BaseScreen {
         }
     }
 
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.scrollbar.mouseClicked(mouseX, mouseY, button)) {
@@ -101,7 +102,6 @@ public class AllTeamsScreen extends BaseScreen {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
             if (Math2.isInBounds(10, 37, this.font.width(team.getName()), entries * 12, mouseX, mouseY)) {
-                Minecraft.getInstance().setScreen(new TeamPlayersScreen(team, this));
                 if (team.hasPlayer(Minecraft.getInstance().player)) {
                     Minecraft.getInstance().setScreen(new TeamEditScreen(team, this));
                 } else {

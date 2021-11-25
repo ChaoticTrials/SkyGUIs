@@ -33,7 +33,7 @@ public abstract class BaseScreen extends Screen {
     protected int relY;
     protected boolean preventUserInput;
     private LoadingResult loadingResult;
-    private LoadingCircle loadingCircle;
+    private LoadingCircle loadingCircle; // TODO replace by using WaitingScreen
 
     public BaseScreen(Component component, int xSize, int ySize) {
         super(component);

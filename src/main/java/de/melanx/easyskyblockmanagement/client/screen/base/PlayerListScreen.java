@@ -45,6 +45,7 @@ public abstract class PlayerListScreen extends BaseScreen {
     private final List<Pair<PoseStack.Pose, Runnable>> capturedTooltips = new LinkedList<>();
     private boolean isCapturingTooltips = false;
 
+
     public PlayerListScreen(Component title, Set<UUID> players, int xSize, int ySize, ScrollbarInfo scrollbarInfo, RenderAreaInfo renderAreaInfo) {
         super(title, xSize, ySize);
 
@@ -191,7 +192,7 @@ public abstract class PlayerListScreen extends BaseScreen {
             this.profile = profile;
             this.checkbox = new SizeableCheckbox(0, 0, height, false);
             this.addRenderableWidget(this.checkbox);
-            ArrayList<Component> tooltip = Lists.newArrayList(
+            List<Component> tooltip = Lists.newArrayList(
                     new TextComponent(profile.getName())
             );
             if (screen.getMinecraft().options.advancedItemTooltips) {

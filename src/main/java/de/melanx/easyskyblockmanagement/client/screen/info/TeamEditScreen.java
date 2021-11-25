@@ -57,8 +57,6 @@ public class TeamEditScreen extends BaseScreen {
                     //noinspection ConstantConditions
                     this.minecraft.level.addParticle(ParticleTypes.HAPPY_VILLAGER, false, posX + offsetX, posY + offsetY, posZ + offsetZ, speedX, speedY, speedZ);
                 }
-
-                System.out.println(spawn);
             }
             this.onClose();
         }));
