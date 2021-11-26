@@ -5,20 +5,23 @@ import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.network.EasyNetwork;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-// TODO check config/events
 public class UpdateTeam {
 
     public static void handle(UpdateTeam.Message msg, Supplier<NetworkEvent.Context> context) {
@@ -30,6 +33,11 @@ public class UpdateTeam {
             }
 
             EasyNetwork network = EasySkyblockManagement.getNetwork();
+            if (!player.hasPermissions(2)) {
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
+                return;
+            }
+
             ServerLevel level = player.getLevel();
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
@@ -38,14 +46,29 @@ public class UpdateTeam {
                 return;
             }
 
+//            SkyblockHooks.onManageRemoveFromTeam(null, team, msg.players); TODO when event allows UUIDs
+
             if (team.getName().equalsIgnoreCase(msg.teamName)) {
+                //noinspection ConstantConditions
+                PlayerList playerList = player.getServer().getPlayerList();
                 for (UUID id : msg.players) {
-                    data.removePlayerFromTeam(id);
+                    if (team.hasPlayer(id)) {
+                        data.removePlayerFromTeam(id);
+                        ServerPlayer toRemove = playerList.getPlayer(id);
+                        if (toRemove != null) {
+                            if (ConfigHandler.Inventory.dropItems) {
+                                RandomUtility.dropInventories(toRemove);
+                            }
+                            WorldUtil.teleportToIsland(toRemove, data.getSpawn());
+                        }
+                    }
                 }
             } else {
                 network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
                 return;
             }
+
+            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, new TranslatableComponent("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
         });
         ctx.setPacketHandled(true);
     }
