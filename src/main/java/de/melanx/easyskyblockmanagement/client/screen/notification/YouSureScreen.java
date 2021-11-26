@@ -13,12 +13,12 @@ public class YouSureScreen extends NotificationScreen {
     private static final Component CONFIRM = ComponentBuilder.button("confirm");
     private static final Component ABORT = ComponentBuilder.button("abort");
 
-    public YouSureScreen(Component component, BaseScreen.OnConfirm onConfirm) {
-        this(component.copy().withStyle(ChatFormatting.RED), onConfirm, BaseScreen.DEFAULT_ABORT);
+    public YouSureScreen(Component title, BaseScreen.OnConfirm onConfirm) {
+        this(title.copy().withStyle(ChatFormatting.RED), onConfirm, BaseScreen.DEFAULT_ABORT);
     }
 
-    public YouSureScreen(Component component, BaseScreen.OnConfirm onConfirm, BaseScreen.OnAbort onAbort) {
-        super(component, TextHelper.stringLength(component) + 30, 80, onConfirm, onAbort);
+    public YouSureScreen(Component title, BaseScreen.OnConfirm onConfirm, BaseScreen.OnAbort onAbort) {
+        super(title, TextHelper.stringLength(title) + 30, 80, onConfirm, onAbort);
     }
 
     @Override

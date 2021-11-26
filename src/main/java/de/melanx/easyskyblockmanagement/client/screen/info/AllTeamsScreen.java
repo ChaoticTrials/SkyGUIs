@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.client.screen.CreateTeamScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
@@ -11,6 +12,7 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -28,6 +30,8 @@ public class AllTeamsScreen extends BaseScreen {
     private static final MutableComponent TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
     private static final MutableComponent MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
     private final List<Team> teams;
+    private final int entries;
+    private final boolean playerHasTeam;
     private ScrollbarWidget scrollbar;
 
     public AllTeamsScreen() {
@@ -38,6 +42,8 @@ public class AllTeamsScreen extends BaseScreen {
                 .filter(team -> !team.isSpawn())
                 .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
                 .collect(Collectors.toList());
+        this.playerHasTeam = SkyblockSavedData.get(Minecraft.getInstance().level).getTeamFromPlayer(Minecraft.getInstance().player) != null;
+        this.entries = this.playerHasTeam ? ENTRIES : ENTRIES - 2;
     }
 
     public static void open() {
@@ -46,7 +52,11 @@ public class AllTeamsScreen extends BaseScreen {
 
     @Override
     protected void init() {
-        // TODO add button to create new team when in no team
+        if (!this.playerHasTeam) {
+            this.addRenderableWidget(new Button(this.x(10), this.y(199), 160, 20, ComponentBuilder.title("create_team"), button -> {
+                Minecraft.getInstance().setScreen(new CreateTeamScreen());
+            }));
+        }
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateScrollbar();
     }
@@ -61,7 +71,7 @@ public class AllTeamsScreen extends BaseScreen {
         this.font.draw(poseStack, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB());
         int j = 0;
         for (int i = this.scrollbar.getOffset(); i < this.teams.size(); i++) {
-            if (j >= ENTRIES) break;
+            if (j >= this.entries) break;
             Team team = this.teams.get(i);
             String name = team.getName();
             String s = TextHelper.shorten(this.font, name, 175 - memberLength);
@@ -96,7 +106,7 @@ public class AllTeamsScreen extends BaseScreen {
         mouseX -= this.relX;
         mouseY -= this.relY;
 
-        int entries = Math.min(ENTRIES, this.teams.size());
+        int entries = Math.min(this.entries, this.teams.size());
         if (Math2.isInBounds(10, 37, 175, entries * 12, mouseX, mouseY)) {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
@@ -111,7 +121,7 @@ public class AllTeamsScreen extends BaseScreen {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseX + this.relX, mouseY + this.relY, button);
     }
 
     @Override
@@ -131,7 +141,7 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     public void updateScrollbar() {
-        this.scrollbar.setEnabled(this.teams.size() > ENTRIES);
-        this.scrollbar.setMaxOffset(this.teams.size() - ENTRIES);
+        this.scrollbar.setEnabled(this.teams.size() > this.entries);
+        this.scrollbar.setMaxOffset(this.teams.size() - this.entries);
     }
 }

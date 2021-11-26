@@ -51,7 +51,11 @@ public class CreateTeamScreen extends BaseScreen {
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);
 
-        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, new TextComponent(this.templates.get(this.currIndex)), button -> {
+        String original = this.templates.get(this.currIndex);
+        String shortened = TextHelper.shorten(this.font, original, 110);
+        this.enableTooltip = !shortened.equals(original);
+        this.currTemplate = original;
+        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, new TextComponent(shortened), button -> {
             this.currIndex++;
             if (this.currIndex >= this.templates.size()) {
                 this.currIndex = 0;
@@ -59,7 +63,7 @@ public class CreateTeamScreen extends BaseScreen {
 
             String orig = this.templates.get(this.currIndex);
             String s = TextHelper.shorten(this.font, orig, 110);
-            this.enableTooltip = false;
+            this.enableTooltip = !s.equals(orig);
             this.currTemplate = orig;
             button.setMessage(new TextComponent(s));
         }, (button, poseStack, mouseX, mouseY) -> {
