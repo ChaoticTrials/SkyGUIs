@@ -15,6 +15,7 @@
   "screen.easyskyblockmanagement.text.remove": "Remove",
   "screen.easyskyblockmanagement.text.show": "Show",
   "screen.easyskyblockmanagement.text.invite": "Invite",
+  "screen.easyskyblockmanagement.text.invite_multiple_users": "Successfully invited %s players",
   "screen.easyskyblockmanagement.text.created_at": "Created at",
   "screen.easyskyblockmanagement.text.last_changed": "Last changed",
   "screen.easyskyblockmanagement.text.previous_screen": "Previous Screen",

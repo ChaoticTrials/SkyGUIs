@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
-import de.melanx.easyskyblockmanagement.client.screen.info.AllTeamsScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
@@ -46,15 +45,10 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, INVITE, (button -> {
-            Set<UUID> removalIds = this.getSelectedIds();
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_invite", removalIds.size()), () -> {
-                EasySkyblockManagement.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
-                //noinspection ConstantConditions
-                if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
-                    Minecraft.getInstance().setScreen(new AllTeamsScreen());
-                } else {
-                    Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
-                }
+            Set<UUID> inviteIds = this.getSelectedIds();
+            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
+                EasySkyblockManagement.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
+                Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
             }, () -> Minecraft.getInstance().setScreen(this)));
         })));
 
