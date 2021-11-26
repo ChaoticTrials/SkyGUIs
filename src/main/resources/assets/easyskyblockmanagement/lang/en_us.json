@@ -32,5 +32,6 @@
 
   "screen.easyskyblockmanagement.button.create": "Create",
   "screen.easyskyblockmanagement.button.confirm": "Confirm",
-  "screen.easyskyblockmanagement.button.abort": "Abort"
+  "screen.easyskyblockmanagement.button.abort": "Abort",
+  "screen.easyskyblockmanagement.button.ok": "OK"
 }

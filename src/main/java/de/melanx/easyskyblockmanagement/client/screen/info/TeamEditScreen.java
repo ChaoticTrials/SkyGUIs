@@ -1,13 +1,19 @@
 package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.easyskyblockmanagement.client.screen.edit.TeamPlayersScreen;
+import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.widget.BlinkingEditBox;
+import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
+import de.melanx.easyskyblockmanagement.network.handler.EditSpawns;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
+import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.Team;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
@@ -15,8 +21,10 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Random;
@@ -30,13 +38,13 @@ public class TeamEditScreen extends BaseScreen {
     private static final Component REMOVE = ComponentBuilder.text("remove");
     private static final Component SHOW = ComponentBuilder.text("show");
     private static final Component INVITE = ComponentBuilder.text("invite");
-    private static final Component INVALID_POS = ComponentBuilder.text("position_invalid").withStyle(ChatFormatting.RED);
 
     private final Team team;
     private final BaseScreen prev;
     private final Random random;
     private BlinkingEditBox posBox;
     private Button addButton;
+    private Button removeButton;
     private boolean posValid;
 
     public TeamEditScreen(Team team, BaseScreen prev) {
@@ -71,19 +79,14 @@ public class TeamEditScreen extends BaseScreen {
             this.onClose();
         }));
 
-        // TODO check for config
-        this.addButton = new Button(this.x(85), this.y(45), 70, 20, ADD, button -> {
-            if (this.posValid) {
-                // TODO networking
-                this.onClose();
+        this.addButton = this.addRenderableWidget(new Button(this.x(85), this.y(45), 70, 20, ADD, button -> {
+            BlockPos pos = this.getPos();
+            if (this.posValid && pos != null) {
+                EasySkyblockManagement.getNetwork().handleEditSpawns(EditSpawns.Type.ADD, pos);
+                //noinspection ConstantConditions
+                this.getLoadingCircle().setActive(true);
             }
-        }, (button, poseStack, mouseX, mouseY) -> {
-            this.posBox.blink();
-            if (!button.active) {
-                this.renderTooltip(poseStack, INVALID_POS, mouseX, mouseY);
-            }
-        });
-        this.addRenderableWidget(this.addButton);
+        }, (button, poseStack, mouseX, mouseY) -> this.posBox.blink()));
 
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
@@ -93,9 +96,13 @@ public class TeamEditScreen extends BaseScreen {
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);
 
-        // TODO check for config
-        this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, REMOVE, button -> {
-            Minecraft.getInstance().setScreen(this.prev);
+        this.removeButton = this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, REMOVE, button -> {
+            BlockPos removePos = this.getPos();
+            if (this.posValid && removePos != null) {
+                EasySkyblockManagement.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos);
+                //noinspection ConstantConditions
+                this.getLoadingCircle().setActive(true);
+            }
         }));
 
         this.addRenderableWidget(new Button(this.x(10), this.y(115), 70, 20, SHOW, button -> {
@@ -109,12 +116,32 @@ public class TeamEditScreen extends BaseScreen {
         this.addRenderableWidget(new Button(this.x(10), this.y(155), 226, 20, PREV_SCREEN_COMPONENT, button -> {
             Minecraft.getInstance().setScreen(this.prev);
         }));
+
+        if (!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) {
+            this.addButton.active = false;
+            this.removeButton.active = false;
+        }
+    }
+
+    @Nullable
+    @Override
+    public LoadingCircle createLoadingCircle() {
+        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        Minecraft minecraft = Minecraft.getInstance();
+        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
+            ForgeHooksClient.popGuiLayer(minecraft);
+        }));
     }
 
     @Override
     public void tick() {
         this.posBox.tick();
         this.updatePositionValidation();
+        super.tick();
     }
 
     @Override
@@ -152,10 +179,29 @@ public class TeamEditScreen extends BaseScreen {
 
         if (this.posValid) {
             this.posBox.setValid();
-            this.addButton.active = true;
+            if (ConfigHandler.Utility.selfManage && ConfigHandler.Utility.Spawns.modifySpawns) {
+                this.addButton.active = true;
+                this.removeButton.active = true;
+            }
         } else {
             this.posBox.setInvalid();
             this.addButton.active = false;
+            this.removeButton.active = false;
         }
+    }
+
+    @Nullable
+    private BlockPos getPos() {
+        if (this.posValid) {
+            String value = this.posBox.getValue();
+            String[] args = value.split(" ");
+            int x = Integer.parseInt(args[0]);
+            int y = Integer.parseInt(args[1]);
+            int z = Integer.parseInt(args[2]);
+
+            return new BlockPos(x, y, z);
+        }
+
+        return null;
     }
 }

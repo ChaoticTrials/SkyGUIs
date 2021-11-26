@@ -1,11 +1,13 @@
 package de.melanx.easyskyblockmanagement.network;
 
 import de.melanx.easyskyblockmanagement.network.handler.CreateTeamScreenClick;
+import de.melanx.easyskyblockmanagement.network.handler.EditSpawns;
 import de.melanx.easyskyblockmanagement.network.handler.SendLoadingResult;
 import de.melanx.easyskyblockmanagement.network.handler.UpdateTeam;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.mod.ModX;
 import io.github.noeppi_noeppi.libx.network.NetworkX;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.fmllegacy.network.NetworkDirection;
 import net.minecraftforge.fmllegacy.network.NetworkEvent;
@@ -28,6 +30,7 @@ public class EasyNetwork extends NetworkX {
     protected void registerPackets() {
         this.register(new CreateTeamScreenClick.Serializer(), () -> CreateTeamScreenClick::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new UpdateTeam.Serializer(), () -> UpdateTeam::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new EditSpawns.Serializer(), () -> EditSpawns::handle, NetworkDirection.PLAY_TO_SERVER);
 
         this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
@@ -38,6 +41,10 @@ public class EasyNetwork extends NetworkX {
 
     public void handleKickPlayers(String teamName, Set<UUID> players) {
         this.channel.sendToServer(new UpdateTeam.Message(teamName, players));
+    }
+
+    public void handleEditSpawns(EditSpawns.Type type, BlockPos pos) {
+        this.channel.sendToServer(new EditSpawns.Message(type, pos));
     }
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {
