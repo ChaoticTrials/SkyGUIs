@@ -2,6 +2,7 @@ package de.melanx.easyskyblockmanagement.network.handler;
 
 import com.google.common.collect.Sets;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.network.EasyNetwork;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -21,17 +22,19 @@ import java.util.function.Supplier;
 public class UpdateTeam {
 
     public static void handle(UpdateTeam.Message msg, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            ServerPlayer player = context.get().getSender();
+        NetworkEvent.Context ctx = context.get();
+        ctx.enqueueWork(() -> {
+            ServerPlayer player = ctx.getSender();
             if (player == null) {
                 return;
             }
 
+            EasyNetwork network = EasySkyblockManagement.getNetwork();
             ServerLevel level = player.getLevel();
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team"));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team"));
                 return;
             }
 
@@ -40,10 +43,11 @@ public class UpdateTeam {
                     data.removePlayerFromTeam(id);
                 }
             } else {
-                EasySkyblockManagement.getNetwork().handleLoadingResult(context.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
+                return;
             }
         });
-        context.get().setPacketHandled(true);
+        ctx.setPacketHandled(true);
     }
 
     public static class Serializer implements PacketSerializer<UpdateTeam.Message> {

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.client.screen.base.LoadingResultHandler;
 import de.melanx.easyskyblockmanagement.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.easyskyblockmanagement.client.screen.edit.TeamPlayersScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
@@ -29,7 +30,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Random;
 
-public class TeamEditScreen extends BaseScreen {
+public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
 
     private static final Component SPAWNS = ComponentBuilder.text("spawns");
     private static final Component MEMBERS = ComponentBuilder.text("members");

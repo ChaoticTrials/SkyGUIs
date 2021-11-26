@@ -3,6 +3,7 @@ package de.melanx.easyskyblockmanagement.client.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.TextHelper;
+import de.melanx.easyskyblockmanagement.client.screen.base.LoadingResultHandler;
 import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
@@ -21,7 +22,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
-public class CreateTeamScreen extends BaseScreen {
+public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler {
 
     private static final Component NAME_COMPONENT = ComponentBuilder.text("name");
     private static final Component TEMPLATE_COMPONENT = ComponentBuilder.raw("template");
