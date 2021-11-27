@@ -1,5 +1,6 @@
 package de.melanx.easyskyblockmanagement.client.screen.edit;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
@@ -19,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.awt.Color;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TeamPlayersScreen extends PlayerListScreen {
 
@@ -39,7 +41,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, ComponentBuilder.text("kick"), (button -> {
-            Set<UUID> removalIds = this.getSelectedIds();
+            Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
             ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_kick"), () -> {
                 EasySkyblockManagement.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                 //noinspection ConstantConditions
@@ -80,7 +82,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
     }
 
     public void updateButtons() {
-        Set<UUID> selectedIds = this.getSelectedIds();
+        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
         this.kickButton.active = selectedIds.size() > 0;
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();

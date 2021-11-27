@@ -5,6 +5,7 @@
 
   "screen.easyskyblockmanagement.title.create_team": "Create New Team",
   "screen.easyskyblockmanagement.title.all_teams": "All Teams",
+  "screen.easyskyblockmanagement.title.invitations": "Your Invitations",
 
   "screen.easyskyblockmanagement.text.name": "Name",
   "screen.easyskyblockmanagement.text.members": "Members",
@@ -30,6 +31,8 @@
   "screen.easyskyblockmanagement.text.kick": "Kick",
   "screen.easyskyblockmanagement.text.you_sure_kick": "Do you really want to kick these %s player(s)?",
   "screen.easyskyblockmanagement.text.you_sure_invite": "Do you really want to invite these %s player(s)?",
+  "screen.easyskyblockmanagement.text.you_sure_join": "Do you really want to join \"%s\"?",
+  "screen.easyskyblockmanagement.text.you_sure_ignore": "Do you really want to ignore invitation by \"%s\"?",
 
   "screen.easyskyblockmanagement.button.create": "Create",
   "screen.easyskyblockmanagement.button.confirm": "Confirm",

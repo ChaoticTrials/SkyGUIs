@@ -29,6 +29,7 @@ public class EasyNetwork extends NetworkX {
         this.register(new UpdateTeam.Serializer(), () -> UpdateTeam::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new EditSpawns.Serializer(), () -> EditSpawns::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new InvitePlayers.Serializer(), () -> InvitePlayers::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new AnswerInvitation.Serializer(), () -> AnswerInvitation::handle, NetworkDirection.PLAY_TO_SERVER);
 
         this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
@@ -43,6 +44,10 @@ public class EasyNetwork extends NetworkX {
 
     public void handleInvitePlayers(String teamName, Set<UUID> players) {
         this.channel.sendToServer(new InvitePlayers.Message(teamName, players));
+    }
+
+    public void handleInvitationAnswer(String teamName, AnswerInvitation.Type type) {
+        this.channel.sendToServer(new AnswerInvitation.Message(teamName, type));
     }
 
     public void handleEditSpawns(EditSpawns.Type type, BlockPos pos) {

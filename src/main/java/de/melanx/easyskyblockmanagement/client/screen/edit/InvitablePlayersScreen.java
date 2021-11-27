@@ -1,13 +1,19 @@
 package de.melanx.easyskyblockmanagement.client.screen.edit;
 
 import com.google.common.collect.Sets;
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
+import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
+import de.melanx.easyskyblockmanagement.client.screen.base.LoadingResultHandler;
 import de.melanx.easyskyblockmanagement.client.screen.base.PlayerListScreen;
+import de.melanx.easyskyblockmanagement.client.screen.notification.InformationScreen;
 import de.melanx.easyskyblockmanagement.client.screen.notification.YouSureScreen;
+import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
 import de.melanx.easyskyblockmanagement.client.widget.SizeableCheckbox;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
+import de.melanx.easyskyblockmanagement.util.LoadingResult;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;
@@ -20,11 +26,13 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-public class InvitablePlayersScreen extends PlayerListScreen {
+public class InvitablePlayersScreen extends PlayerListScreen implements LoadingResultHandler {
 
     private static final Component INVITE = ComponentBuilder.text("invite");
 
@@ -35,7 +43,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     private int selectedAmount = 0;
 
     public InvitablePlayersScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), InvitablePlayersScreen.getInvitablePlayers(), 200, 230,
+        super(new TextComponent(team.getName()), InvitablePlayersScreen.getInvitablePlayers(team), 200, 230,
                 new PlayerListScreen.ScrollbarInfo(180, 10, 210),
                 new PlayerListScreen.RenderAreaInfo(10, 50, 160));
         this.team = team;
@@ -45,10 +53,10 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, INVITE, (button -> {
-            Set<UUID> inviteIds = this.getSelectedIds();
+            Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
             ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
                 EasySkyblockManagement.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
-                Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
+                Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
             }, () -> Minecraft.getInstance().setScreen(this)));
         })));
 
@@ -74,6 +82,20 @@ public class InvitablePlayersScreen extends PlayerListScreen {
         this.updateButtons();
     }
 
+    @Nullable
+    @Override
+    public LoadingCircle createLoadingCircle() {
+        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        Minecraft minecraft = Minecraft.getInstance();
+        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
+            ForgeHooksClient.popGuiLayer(minecraft);
+        }));
+    }
+
     @Override
     public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.render_(poseStack, mouseX, mouseY, partialTick);
@@ -81,7 +103,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     }
 
     public void updateButtons() {
-        Set<UUID> selectedIds = this.getSelectedIds();
+        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
         this.inviteButton.active = selectedIds.size() > 0;
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
@@ -99,7 +121,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
         return 10;
     }
 
-    private static Set<UUID> getInvitablePlayers() {
+    private static Set<UUID> getInvitablePlayers(Team team) {
         Set<UUID> ids = Sets.newHashSet();
 
         Minecraft minecraft = Minecraft.getInstance();
@@ -111,7 +133,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
 
         SkyblockSavedData data = SkyblockSavedData.get(level);
         for (UUID id : player.connection.getOnlinePlayerIds()) {
-            if (!data.hasPlayerTeam(id)) {
+            if (!data.hasPlayerTeam(id) && !data.hasInviteFrom(team, id)) {
                 ids.add(id);
             }
         }

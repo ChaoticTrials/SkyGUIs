@@ -1,7 +1,7 @@
 package de.melanx.easyskyblockmanagement.items;
 
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
-import de.melanx.easyskyblockmanagement.client.screen.CreateTeamScreen;
+import de.melanx.easyskyblockmanagement.client.screen.edit.HandleInvitationsScreen;
 import io.github.noeppi_noeppi.libx.base.ItemBase;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -22,7 +22,7 @@ public class CreateTeam extends ItemBase {
     @Override
     public InteractionResultHolder<ItemStack> use(@Nonnull Level level, @Nonnull Player player, @Nonnull InteractionHand hand) {
         if (level.isClientSide) {
-            CreateTeamScreen.open();
+            HandleInvitationsScreen.open();
         }
 
         return super.use(level, player, hand);
