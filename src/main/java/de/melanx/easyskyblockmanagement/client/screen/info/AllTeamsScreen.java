@@ -7,17 +7,17 @@ import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.CreateTeamScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
+import de.melanx.easyskyblockmanagement.tooltip.SmallTextTooltip;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -29,6 +29,9 @@ public class AllTeamsScreen extends BaseScreen {
     public static final int ENTRIES = 15;
     private static final MutableComponent TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
     private static final MutableComponent MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
+    private static final MutableComponent SMALL_MEMBERS = ComponentBuilder.text("members");
+    private static final MutableComponent SMALL_CREATED_AT = ComponentBuilder.text("created_at");
+    private static final MutableComponent SMALL_LAST_CHANGED = ComponentBuilder.text("last_changed");
     private final List<Team> teams;
     private final int entries;
     private final boolean playerHasTeam;
@@ -84,13 +87,12 @@ public class AllTeamsScreen extends BaseScreen {
             this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
             boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
-                ArrayList<TextComponent> textLines = Lists.newArrayList(new TextComponent(name));
-                ArrayList<String> smallTextLines = Lists.newArrayList();
-                smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.members") + ": " + team.getPlayers().size());
-                smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.created_at") + ": " + ClientConfig.date.format(new Date(team.getCreatedAt())));
-                smallTextLines.add(I18n.get("screen.easyskyblockmanagement.text.last_changed") + ": " + ClientConfig.date.format(new Date(team.getLastChanged())));
-                TextHelper.drawHoveringText(poseStack, textLines, smallTextLines, mouseX, mouseY, this.width, this.height,
-                        GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, GuiUtils.DEFAULT_BORDER_COLOR_END);
+                List<Component> textLines = Lists.newArrayList(new TextComponent(name));
+                List<Component> smallTextLines = Lists.newArrayList();
+                smallTextLines.add(SMALL_MEMBERS.append(": " + team.getPlayers().size()));
+                smallTextLines.add(SMALL_CREATED_AT.append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
+                smallTextLines.add(SMALL_LAST_CHANGED.append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
+                this.renderTooltip(poseStack, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
             }
             j++;
         }

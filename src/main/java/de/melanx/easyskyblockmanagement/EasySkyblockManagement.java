@@ -1,11 +1,14 @@
 package de.melanx.easyskyblockmanagement;
 
 import de.melanx.easyskyblockmanagement.network.EasyNetwork;
+import de.melanx.easyskyblockmanagement.tooltip.ClientSmallTextTooltip;
+import de.melanx.easyskyblockmanagement.tooltip.SmallTextTooltip;
 import de.melanx.skyblockbuilder.Registration;
 import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
 import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -46,7 +49,7 @@ public final class EasySkyblockManagement extends ModXRegistration {
 
     @Override
     protected void clientSetup(FMLClientSetupEvent event) {
-
+        MinecraftForgeClient.registerTooltipComponentFactory(SmallTextTooltip.class, ClientSmallTextTooltip::new);
     }
 
     @Override
