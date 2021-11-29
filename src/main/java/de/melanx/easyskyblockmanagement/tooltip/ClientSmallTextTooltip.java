@@ -45,7 +45,7 @@ public class ClientSmallTextTooltip implements ClientTooltipComponent {
 
     @Override
     public int getHeight() {
-        return (this.tooltips.size() * 7) + 2;
+        return (this.tooltips.size() * 8);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ClientSmallTextTooltip implements ClientTooltipComponent {
         int w = -1;
         float textScale = Minecraft.getInstance().isEnforceUnicode() ? 1 : 0.7F;
         for (Component tooltip : this.tooltips) {
-            int width = (int) (font.width(tooltip) * textScale);
+            int width = (int) (font.width(tooltip.getVisualOrderText()) * textScale);
             if (width > w) {
                 w = width;
             }

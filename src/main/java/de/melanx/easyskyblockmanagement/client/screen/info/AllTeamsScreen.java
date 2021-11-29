@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.CreateTeamScreen;
+import de.melanx.easyskyblockmanagement.client.widget.ClickableText;
 import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
 import de.melanx.easyskyblockmanagement.tooltip.SmallTextTooltip;
@@ -26,16 +27,17 @@ import java.util.stream.Collectors;
 
 public class AllTeamsScreen extends BaseScreen {
 
-    public static final int ENTRIES = 15;
+    public static final int ENTRIES = 13;
     private static final MutableComponent TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
     private static final MutableComponent MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
+    private static final MutableComponent YOUR_TEAM = ComponentBuilder.text("your_team");
     private static final MutableComponent SMALL_MEMBERS = ComponentBuilder.text("members");
     private static final MutableComponent SMALL_CREATED_AT = ComponentBuilder.text("created_at");
     private static final MutableComponent SMALL_LAST_CHANGED = ComponentBuilder.text("last_changed");
     private final List<Team> teams;
-    private final int entries;
-    private final boolean playerHasTeam;
+    private final Team playerTeam;
     private ScrollbarWidget scrollbar;
+    private Button yourTeamButton;
 
     public AllTeamsScreen() {
         super(TEAMS_COMPONENT, 200, 230);
@@ -45,8 +47,7 @@ public class AllTeamsScreen extends BaseScreen {
                 .filter(team -> !team.isSpawn())
                 .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
                 .collect(Collectors.toList());
-        this.playerHasTeam = SkyblockSavedData.get(Minecraft.getInstance().level).getTeamFromPlayer(Minecraft.getInstance().player) != null;
-        this.entries = this.playerHasTeam ? ENTRIES : ENTRIES - 2;
+        this.playerTeam = SkyblockSavedData.get(Minecraft.getInstance().level).getTeamFromPlayer(Minecraft.getInstance().player);
     }
 
     public static void open() {
@@ -55,9 +56,15 @@ public class AllTeamsScreen extends BaseScreen {
 
     @Override
     protected void init() {
-        if (!this.playerHasTeam) {
+        if (this.playerTeam == null) {
             this.addRenderableWidget(new Button(this.x(10), this.y(199), 160, 20, ComponentBuilder.title("create_team"), button -> {
                 Minecraft.getInstance().setScreen(new CreateTeamScreen());
+            }));
+            this.yourTeamButton = null;
+        } else {
+            MutableComponent component = new TextComponent(this.playerTeam.getName());
+            this.yourTeamButton = this.addRenderableWidget(new ClickableText(this.x(15) + TextHelper.stringLength(YOUR_TEAM), this.y(207), TextHelper.DARK_GREEN.getRGB(), component, button -> {
+                Minecraft.getInstance().setScreen(new TeamEditScreen(this.playerTeam, this));
             }));
         }
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
@@ -72,9 +79,20 @@ public class AllTeamsScreen extends BaseScreen {
         this.font.draw(poseStack, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB());
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
         this.font.draw(poseStack, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB());
+
+        if (this.playerTeam != null) {
+            this.hLine(poseStack, this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
+            this.font.draw(poseStack, YOUR_TEAM, (this.x(10)), this.y(207), Color.DARK_GRAY.getRGB());
+
+            // need to render tooltip here to be on top of scrollbar
+            if (this.yourTeamButton.isHovered()) {
+                this.renderTeamTooltip(poseStack, mouseX, mouseY, this.playerTeam);
+            }
+        }
+
         int j = 0;
         for (int i = this.scrollbar.getOffset(); i < this.teams.size(); i++) {
-            if (j >= this.entries) break;
+            if (j >= ENTRIES) break;
             Team team = this.teams.get(i);
             String name = team.getName();
             String s = TextHelper.shorten(this.font, name, 175 - memberLength);
@@ -87,17 +105,23 @@ public class AllTeamsScreen extends BaseScreen {
             this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
             boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
-                List<Component> textLines = Lists.newArrayList(new TextComponent(name));
-                List<Component> smallTextLines = Lists.newArrayList();
-                smallTextLines.add(SMALL_MEMBERS.append(": " + team.getPlayers().size()));
-                smallTextLines.add(SMALL_CREATED_AT.append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
-                smallTextLines.add(SMALL_LAST_CHANGED.append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
-                this.renderTooltip(poseStack, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
+                this.renderTeamTooltip(poseStack, mouseX, mouseY, team);
             }
             j++;
         }
+
+        if (this.playerTeam != null && this.yourTeamButton.isHovered()) {
+        }
     }
 
+    private void renderTeamTooltip(@Nonnull PoseStack poseStack, int mouseX, int mouseY, @Nonnull Team team) {
+        List<Component> textLines = Lists.newArrayList(new TextComponent(team.getName()));
+        List<Component> smallTextLines = Lists.newArrayList();
+        smallTextLines.add(SMALL_MEMBERS.append(": " + team.getPlayers().size()));
+        smallTextLines.add(SMALL_CREATED_AT.append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
+        smallTextLines.add(SMALL_LAST_CHANGED.append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
+        this.renderTooltip(poseStack, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
+    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
@@ -108,7 +132,7 @@ public class AllTeamsScreen extends BaseScreen {
         mouseX -= this.relX;
         mouseY -= this.relY;
 
-        int entries = Math.min(this.entries, this.teams.size());
+        int entries = Math.min(ENTRIES, this.teams.size());
         if (Math2.isInBounds(10, 37, 175, entries * 12, mouseX, mouseY)) {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
@@ -143,7 +167,7 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     public void updateScrollbar() {
-        this.scrollbar.setEnabled(this.teams.size() > this.entries);
-        this.scrollbar.setMaxOffset(this.teams.size() - this.entries);
+        this.scrollbar.setEnabled(this.teams.size() > ENTRIES);
+        this.scrollbar.setMaxOffset(this.teams.size() - ENTRIES);
     }
 }
