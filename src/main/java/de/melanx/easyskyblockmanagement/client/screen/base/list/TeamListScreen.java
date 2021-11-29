@@ -1,7 +1,6 @@
-package de.melanx.easyskyblockmanagement.client.screen.base;
+package de.melanx.easyskyblockmanagement.client.screen.base.list;
 
 import com.google.common.collect.Lists;
-import de.melanx.easyskyblockmanagement.client.screen.base.list.ListScreen;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

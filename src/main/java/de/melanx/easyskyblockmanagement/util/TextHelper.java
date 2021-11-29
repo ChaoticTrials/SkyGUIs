@@ -1,4 +1,4 @@
-package de.melanx.easyskyblockmanagement;
+package de.melanx.easyskyblockmanagement.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

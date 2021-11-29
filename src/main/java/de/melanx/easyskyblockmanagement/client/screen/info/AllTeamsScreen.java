@@ -2,7 +2,6 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.CreateTeamScreen;
 import de.melanx.easyskyblockmanagement.client.widget.ClickableText;
@@ -10,6 +9,7 @@ import de.melanx.easyskyblockmanagement.client.widget.ScrollbarWidget;
 import de.melanx.easyskyblockmanagement.config.ClientConfig;
 import de.melanx.easyskyblockmanagement.tooltip.SmallTextTooltip;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
+import de.melanx.easyskyblockmanagement.util.TextHelper;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import io.github.noeppi_noeppi.libx.util.Math2;

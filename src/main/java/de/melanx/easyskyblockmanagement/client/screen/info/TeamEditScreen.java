@@ -2,7 +2,6 @@ package de.melanx.easyskyblockmanagement.client.screen.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.easyskyblockmanagement.EasySkyblockManagement;
-import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.base.LoadingResultHandler;
 import de.melanx.easyskyblockmanagement.client.screen.edit.InvitablePlayersScreen;
@@ -13,6 +12,7 @@ import de.melanx.easyskyblockmanagement.client.widget.LoadingCircle;
 import de.melanx.easyskyblockmanagement.network.handler.EditSpawns;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
 import de.melanx.easyskyblockmanagement.util.LoadingResult;
+import de.melanx.easyskyblockmanagement.util.TextHelper;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.Team;
 import net.minecraft.client.Minecraft;

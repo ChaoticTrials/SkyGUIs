@@ -1,9 +1,9 @@
 package de.melanx.easyskyblockmanagement.client.screen.notification;
 
-import de.melanx.easyskyblockmanagement.TextHelper;
 import de.melanx.easyskyblockmanagement.client.screen.BaseScreen;
 import de.melanx.easyskyblockmanagement.client.screen.base.NotificationScreen;
 import de.melanx.easyskyblockmanagement.util.ComponentBuilder;
+import de.melanx.easyskyblockmanagement.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;

@@ -1,8 +1,7 @@
-package de.melanx.easyskyblockmanagement.client.screen.base;
+package de.melanx.easyskyblockmanagement.client.screen.base.list;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import de.melanx.easyskyblockmanagement.client.screen.base.list.ListScreen;
 import de.melanx.skyblockbuilder.client.GameProfileCache;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -13,7 +12,7 @@ import net.minecraft.network.chat.TextComponent;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class PlayerListScreen extends ListScreen<GameProfile> {
+public class PlayerListScreen extends ListScreen<GameProfile> {
 
     public PlayerListScreen(Component title, Set<UUID> players, int xSize, int ySize, ScrollbarInfo scrollbarInfo, RenderAreaInfo renderAreaInfo) {
         this(title, players.stream().toList(), xSize, ySize, scrollbarInfo, renderAreaInfo);

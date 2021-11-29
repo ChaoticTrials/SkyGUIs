@@ -1,7 +1,7 @@
 package de.melanx.easyskyblockmanagement.client.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.easyskyblockmanagement.TextHelper;
+import de.melanx.easyskyblockmanagement.util.TextHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
