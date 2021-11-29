@@ -28,12 +28,9 @@ import java.util.stream.Collectors;
 public class AllTeamsScreen extends BaseScreen {
 
     public static final int ENTRIES = 13;
-    private static final MutableComponent TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
-    private static final MutableComponent MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
-    private static final MutableComponent YOUR_TEAM = ComponentBuilder.text("your_team");
-    private static final MutableComponent SMALL_MEMBERS = ComponentBuilder.text("members");
-    private static final MutableComponent SMALL_CREATED_AT = ComponentBuilder.text("created_at");
-    private static final MutableComponent SMALL_LAST_CHANGED = ComponentBuilder.text("last_changed");
+    private static final Component TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
+    private static final Component MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
+    private static final Component YOUR_TEAM = ComponentBuilder.text("your_team");
     private final List<Team> teams;
     private final Team playerTeam;
     private ScrollbarWidget scrollbar;
@@ -109,17 +106,14 @@ public class AllTeamsScreen extends BaseScreen {
             }
             j++;
         }
-
-        if (this.playerTeam != null && this.yourTeamButton.isHovered()) {
-        }
     }
 
     private void renderTeamTooltip(@Nonnull PoseStack poseStack, int mouseX, int mouseY, @Nonnull Team team) {
         List<Component> textLines = Lists.newArrayList(new TextComponent(team.getName()));
         List<Component> smallTextLines = Lists.newArrayList();
-        smallTextLines.add(SMALL_MEMBERS.append(": " + team.getPlayers().size()));
-        smallTextLines.add(SMALL_CREATED_AT.append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
-        smallTextLines.add(SMALL_LAST_CHANGED.append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
+        smallTextLines.add(ComponentBuilder.text("members").append(": " + team.getPlayers().size()));
+        smallTextLines.add(ComponentBuilder.text("created_at").append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
+        smallTextLines.add(ComponentBuilder.text("last_changed").append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
         this.renderTooltip(poseStack, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
     }
 

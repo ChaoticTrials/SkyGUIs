@@ -53,7 +53,7 @@ public class ClientSmallTextTooltip implements ClientTooltipComponent {
         int w = -1;
         float textScale = Minecraft.getInstance().isEnforceUnicode() ? 1 : 0.7F;
         for (Component tooltip : this.tooltips) {
-            int width = (int) (font.width(tooltip.getVisualOrderText()) * textScale);
+            int width = (int) (font.width(tooltip) * textScale);
             if (width > w) {
                 w = width;
             }
