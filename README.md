@@ -1,4 +1,4 @@
-# Easy Skyblock Management
+# Sky GUIs
 A mod used with [Skyblock Builder](https://www.curseforge.com/minecraft/mc-mods/skyblock-builder) to make managing the
 team and other things easier.
 
