@@ -39,5 +39,7 @@
   "screen.skyguis.button.create": "Create",
   "screen.skyguis.button.confirm": "Confirm",
   "screen.skyguis.button.abort": "Abort",
-  "screen.skyguis.button.ok": "OK"
+  "screen.skyguis.button.ok": "OK",
+
+  "skyguis.key.all_teams_screen": "Open main screen"
 }

@@ -41,7 +41,6 @@ public final class SkyGUIs extends ModXRegistration {
             ClientRegistry.registerKeyBinding(Keybinds.ALL_TEAMS);
             MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
         });
-        MinecraftForge.EVENT_BUS.register(new EventHandler());
     }
 
     public static SkyGUIs getInstance() {
