@@ -72,6 +72,9 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 this.renderTooltip(poseStack, new TextComponent(this.currTemplate), mouseX, mouseY);
             }
         });
+        if (this.templates.size() == 1) {
+            templateButton.active = false;
+        }
         this.currTemplate = this.templates.get(this.currIndex);
         this.addRenderableWidget(templateButton);
 

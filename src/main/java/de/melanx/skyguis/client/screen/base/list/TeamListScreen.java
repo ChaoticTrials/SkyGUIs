@@ -2,6 +2,7 @@ package de.melanx.skyguis.client.screen.base.list;
 
 import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.data.Team;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -38,7 +39,7 @@ public class TeamListScreen extends ListScreen<Team> {
                     new TextComponent(team.getName())
             );
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-//                tooltip.add(new TextComponent(team.getId().toString()).withStyle(ChatFormatting.GRAY)); TODO team id
+                tooltip.add(new TextComponent(team.getId().toString()).withStyle(ChatFormatting.GRAY));
             }
 
             return tooltip;

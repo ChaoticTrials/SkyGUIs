@@ -72,7 +72,7 @@ public class EditSpawns {
 
                 // handle removing spawns
                 case REMOVE -> {
-                    if (level != level.getServer().getLevel(ConfigHandler.Spawn.dimension.getResourceKey())) {
+                    if (level != level.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
                         network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.wrong_position"));
                         return;
                     }
