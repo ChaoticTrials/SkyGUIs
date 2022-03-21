@@ -50,7 +50,7 @@ public class CreateTeamScreenClick {
                 return;
             }
 
-            Team team = data.createTeam(msg.name, template.getTemplate());
+            Team team = data.createTeam(msg.name, template);
             if (team == null) {
                 network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.team_already_exist", msg.name).withStyle(ChatFormatting.RED));
                 return;

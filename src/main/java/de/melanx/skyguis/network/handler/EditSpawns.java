@@ -55,7 +55,7 @@ public class EditSpawns {
                                 return;
                             }
 
-                            Vec3i templateSize = TemplateData.get(level).getTemplate().getSize();
+                            Vec3i templateSize = TemplateData.get(level).getConfiguredTemplate().getTemplate().getSize();
                             BlockPos center = team.getIsland().getCenter().mutable();
                             center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                             if (!msg.pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {
