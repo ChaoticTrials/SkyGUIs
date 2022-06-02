@@ -1,9 +1,11 @@
 package de.melanx.skyguis.client.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyguis.SkyGUIs;
+import de.melanx.skyguis.client.TemplateRenderer;
 import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.widget.LoadingCircle;
@@ -19,7 +21,9 @@ import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler {
@@ -30,6 +34,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     private static final Component ABORT = ComponentBuilder.button("abort");
     private static final Component TITLE = ComponentBuilder.title("create_team");
 
+    private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
     private final List<String> templates;
     private String currTemplate;
     private EditBox name;
@@ -108,6 +113,16 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         this.renderTitle(poseStack);
         this.font.draw(poseStack, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB());
         this.font.draw(poseStack, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB());
+        if (!this.structureCache.containsKey(this.currTemplate)) {
+            SkyGUIs.getNetwork().requestTemplateFromServer(this.currTemplate);
+            this.structureCache.put(this.currTemplate, null);
+            return;
+        }
+
+        TemplateRenderer renderer = this.structureCache.get(this.currTemplate);
+        if (renderer != null) {
+            renderer.render(poseStack, this.width / 6, this.centeredY(0));
+        }
     }
 
     @Override
@@ -121,5 +136,9 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 }));
             }
         }
+    }
+
+    public void addStructureToCache(String name, ConfiguredTemplate template) {
+        this.structureCache.put(name, new TemplateRenderer(template.getTemplate(), 130));
     }
 }

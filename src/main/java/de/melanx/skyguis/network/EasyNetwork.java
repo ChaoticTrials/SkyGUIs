@@ -1,5 +1,6 @@
 package de.melanx.skyguis.network;
 
+import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyguis.network.handler.*;
 import de.melanx.skyguis.util.LoadingResult;
 import io.github.noeppi_noeppi.libx.mod.ModX;
@@ -20,7 +21,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("0");
+        return Protocol.of("1");
     }
 
     @Override
@@ -30,9 +31,11 @@ public class EasyNetwork extends NetworkX {
         this.register(new EditSpawns.Serializer(), () -> EditSpawns::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new InvitePlayers.Serializer(), () -> InvitePlayers::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new AnswerInvitation.Serializer(), () -> AnswerInvitation::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer::handle, NetworkDirection.PLAY_TO_SERVER);
 
         this.register(new OpenGui.Serializer(), () -> OpenGui::handle, NetworkDirection.PLAY_TO_CLIENT);
         this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);
+        this.register(new SendTemplateToClient.Serializer(), () -> SendTemplateToClient::handle, NetworkDirection.PLAY_TO_CLIENT);
     }
 
     public void handleCreateTeam(String name, String shape) {
@@ -57,5 +60,13 @@ public class EasyNetwork extends NetworkX {
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {
         this.channel.reply(new SendLoadingResult.Message(result, reason), ctx);
+    }
+
+    public void requestTemplateFromServer(String name) {
+        this.channel.sendToServer(new RequestTemplateFromServer.Message(name));
+    }
+
+    public void sendTemplateToClient(NetworkEvent.Context ctx, String name) {
+        this.channel.reply(new SendTemplateToClient.Message(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
     }
 }
