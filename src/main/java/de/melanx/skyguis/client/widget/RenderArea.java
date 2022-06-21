@@ -53,7 +53,6 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (Math2.isInBounds(this.initX, this.initY, this.renderWidth, this.renderHeight, mouseX, mouseY)) {
-            System.out.println("X: " + mouseX + ", Y: " + mouseY);
             return super.mouseClicked(mouseX, mouseY, button);
         }
 

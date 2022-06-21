@@ -12,6 +12,8 @@ import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -57,6 +59,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);
 
+        if (this.templates.isEmpty()) {
+            Minecraft.getInstance().setScreen(null);
+            //noinspection ConstantConditions
+            Minecraft.getInstance().player.sendMessage(ComponentBuilder.text("empty_templates").withStyle(ChatFormatting.BOLD, ChatFormatting.RED), Util.NIL_UUID);
+            return;
+        }
         String original = this.templates.get(this.currIndex);
         String shortened = TextHelper.shorten(this.font, original, 110);
         this.enableTooltip = !shortened.equals(original);
