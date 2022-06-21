@@ -8,13 +8,16 @@ import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Set;
 import java.util.UUID;
@@ -35,7 +38,7 @@ public class InvitePlayers {
 
             EasyNetwork network = SkyGUIs.getNetwork();
             if (team == null) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.team_not_exist"));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_not_exist"));
                 return;
             }
 
@@ -50,13 +53,13 @@ public class InvitePlayers {
                 data.addInvite(team, player, id);
                 ServerPlayer toInvite = playerList.getPlayer(id);
                 if (toInvite != null) {
-                    MutableComponent invite = new TranslatableComponent("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).withStyle(ChatFormatting.GOLD);
-                    invite.append(new TextComponent("/skyblock accept \"" + team.getName() + "\"").setStyle(Style.EMPTY
+                    MutableComponent invite = Component.translatable("skyblockbuilder.command.info.invited_to_team0", player.getDisplayName().getString(), team.getName()).withStyle(ChatFormatting.GOLD);
+                    invite.append(Component.literal("/skyblock accept \"" + team.getName() + "\"").setStyle(Style.EMPTY
                             .withHoverEvent(InviteCommand.COPY_TEXT)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept \"" + team.getName() + "\""))
                             .applyFormat(ChatFormatting.UNDERLINE).applyFormat(ChatFormatting.GOLD)));
-                    invite.append(new TranslatableComponent("skyblockbuilder.command.info.invited_to_team1").withStyle(ChatFormatting.GOLD));
-                    toInvite.sendMessage(invite, player.getGameProfile().getId());
+                    invite.append(Component.translatable("skyblockbuilder.command.info.invited_to_team1").withStyle(ChatFormatting.GOLD));
+                    toInvite.sendSystemMessage(invite);
                 }
                 i++;
             }

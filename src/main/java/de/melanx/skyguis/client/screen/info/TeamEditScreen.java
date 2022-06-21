@@ -20,7 +20,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
 
@@ -49,7 +48,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     private boolean posValid;
 
     public TeamEditScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), 245, 185);
+        super(Component.literal(team.getName()), 245, 185);
         this.team = team;
         this.prev = prev;
         this.random = new Random();
@@ -92,7 +91,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
         String posStr = (int) pos.x + " " + (int) pos.y + " " + (int) pos.z;
-        this.posBox = new BlinkingEditBox(this.font, this.x(10), this.y(70), 145, 18, new TextComponent(posStr));
+        this.posBox = new BlinkingEditBox(this.font, this.x(10), this.y(70), 145, 18, Component.literal(posStr));
         this.posBox.setValue(posStr);
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);

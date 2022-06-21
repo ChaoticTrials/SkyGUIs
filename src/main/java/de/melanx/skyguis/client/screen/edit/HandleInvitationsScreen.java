@@ -15,13 +15,12 @@ import de.melanx.skyguis.network.handler.AnswerInvitation;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
-import io.github.noeppi_noeppi.libx.impl.config.gui.screen.widget.TextWidget;
-import io.github.noeppi_noeppi.libx.screen.Panel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
+import org.moddingx.libx.impl.config.gui.screen.widget.TextWidget;
+import org.moddingx.libx.screen.Panel;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -97,13 +96,13 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
 
         public JoinTeamWidget(Team team, Screen screen, int x, int y, int width, int height, Consumer<Team> onJoin, Consumer<Team> onIgnore) {
             super(screen, x, y, width, height);
-            this.addRenderableWidget(new SizableButton(0, 0, 30, height, new TextComponent("Join"), button -> {
+            this.addRenderableWidget(new SizableButton(0, 0, 30, height, Component.literal("Join"), button -> {
                 onJoin.accept(team);
             }));
-            this.addRenderableWidget(new SizableButton(33, 0, 30, height, new TextComponent("Ignore"), button -> {
+            this.addRenderableWidget(new SizableButton(33, 0, 30, height, Component.literal("Ignore"), button -> {
                 onIgnore.accept(team);
             }));
-            this.addRenderableOnly(new TextWidget(screen, 66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, new TextComponent(team.getName()), Lists.newArrayList()));
+            this.addRenderableOnly(new TextWidget(screen, 66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));
         }
     }
 }

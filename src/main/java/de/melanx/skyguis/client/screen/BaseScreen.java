@@ -6,7 +6,6 @@ import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.render.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -16,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
+import org.moddingx.libx.render.RenderHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

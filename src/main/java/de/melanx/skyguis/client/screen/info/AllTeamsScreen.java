@@ -11,14 +11,13 @@ import de.melanx.skyguis.client.widget.ScrollbarWidget;
 import de.melanx.skyguis.config.ClientConfig;
 import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import de.melanx.skyguis.util.ComponentBuilder;
+import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
-import io.github.noeppi_noeppi.libx.util.Math2;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -59,7 +58,7 @@ public class AllTeamsScreen extends BaseScreen {
             }));
             this.yourTeamButton = null;
         } else {
-            MutableComponent component = new TextComponent(this.playerTeam.getName());
+            MutableComponent component = Component.literal(this.playerTeam.getName());
             this.yourTeamButton = this.addRenderableWidget(new ClickableText(this.x(15) + TextHelper.stringLength(YOUR_TEAM), this.y(207), TextHelper.DARK_GREEN.getRGB(), component, button -> {
                 Minecraft.getInstance().setScreen(new TeamEditScreen(this.playerTeam, this));
             }));
@@ -93,8 +92,8 @@ public class AllTeamsScreen extends BaseScreen {
             String name = team.getName();
             String s = TextHelper.shorten(this.font, name, 175 - memberLength);
 
-            TextComponent playerSizeComponent = new TextComponent(String.valueOf(team.getPlayers().size()));
-            TextComponent teamNameComponent = new TextComponent(s);
+            Component playerSizeComponent = Component.literal(String.valueOf(team.getPlayers().size()));
+            Component teamNameComponent = Component.literal(s);
             float x = this.x(179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2);
             int y = this.y(37 + j * 12);
             this.font.draw(poseStack, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB());
@@ -108,7 +107,7 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     private void renderTeamTooltip(@Nonnull PoseStack poseStack, int mouseX, int mouseY, @Nonnull Team team) {
-        List<Component> textLines = Lists.newArrayList(new TextComponent(team.getName()));
+        List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()));
         List<Component> smallTextLines = Lists.newArrayList();
         if (this.minecraft != null && this.minecraft.options.advancedItemTooltips) {
             smallTextLines.add(ComponentBuilder.text("team_id").append(": " + team.getId().toString()));

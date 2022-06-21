@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +50,7 @@ public class PlayerListScreen extends ListScreen<GameProfile> {
     protected class PlayerWidget extends CheckboxTextWidget {
 
         public PlayerWidget(GameProfile profile, Screen screen, int x, int y, int width, int height) {
-            super(profile, screen, x, y, width, height, PlayerWidget.buildTooltip(profile), new TextComponent(profile.getName()));
+            super(profile, screen, x, y, width, height, PlayerWidget.buildTooltip(profile), Component.literal(profile.getName()));
         }
 
         public UUID getId() {
@@ -60,10 +59,10 @@ public class PlayerListScreen extends ListScreen<GameProfile> {
 
         private static List<Component> buildTooltip(GameProfile profile) {
             List<Component> tooltip = Lists.newArrayList(
-                    new TextComponent(profile.getName())
+                    Component.literal(profile.getName())
             );
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                tooltip.add(new TextComponent(profile.getId().toString()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.literal(profile.getId().toString()).withStyle(ChatFormatting.GRAY));
             }
 
             return tooltip;

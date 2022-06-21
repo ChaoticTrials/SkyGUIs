@@ -9,8 +9,6 @@ import de.melanx.skyguis.client.widget.ScrollbarWidget;
 import de.melanx.skyguis.client.widget.sizable.SizeableCheckbox;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.TextHelper;
-import io.github.noeppi_noeppi.libx.impl.config.gui.screen.widget.TextWidget;
-import io.github.noeppi_noeppi.libx.screen.Panel;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,6 +18,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.tuple.Pair;
+import org.moddingx.libx.impl.config.gui.screen.widget.TextWidget;
+import org.moddingx.libx.screen.Panel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

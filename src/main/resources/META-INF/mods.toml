@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[41,)"
 license="The Apache License, Version 2.0"
 issueTrackerURL="https://github.com/MelanX/SkyGUIs/issues"
 
@@ -17,27 +17,27 @@ An addon for Skyblock Builder which provides GUIs to easily modify and view team
 [[dependencies.skyguis]]
     modId="forge"
     mandatory=true
-    versionRange="[40.0.19,)"
+    versionRange="[41.0.45,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyguis]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.18.2, 1.19)"
+    versionRange="[1.19, 1.20)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyguis]]
     modId="skyblockbuilder"
     mandatory=true
-    versionRange="[1.18.2-3.3.9,)"
+    versionRange="[1.19-4.0.0,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyguis]]
     modId="libx"
     mandatory=true
-    versionRange="[1.18.2-3.2.2,)"
+    versionRange="[1.19-4.0.4,)"
     ordering="AFTER"
     side="BOTH"

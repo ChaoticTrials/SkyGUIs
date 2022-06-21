@@ -1,10 +1,10 @@
 package de.melanx.skyguis.client.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.noeppi_noeppi.libx.render.ClientTickHandler;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import org.moddingx.libx.render.ClientTickHandler;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;

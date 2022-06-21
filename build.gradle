@@ -1,8 +1,8 @@
 buildscript {
-    apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/buildscript.gradle', to: buildscript
+    apply from: 'https://moddingx.github.io/ModUtils/v4/buildscript.gradle', to: buildscript
 }
 
-apply from: 'https://noeppi-noeppi.github.io/ModUtils/v3/mod.gradle'
+apply from: 'https://moddingx.github.io/ModUtils/v4/mod.gradle'
 
 repositories {
     maven {
@@ -16,10 +16,10 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.17"
+    annotationProcessor "org.moddingx:LibX:1.19-4.0.4"
 
-    implementation fg.deobf("io.github.noeppi_noeppi.mods:LibX:1.18.2-3.2.17")
-    implementation fg.deobf("de.melanx:SkyblockBuilder:1.18.2-3.3.9")
+    implementation fg.deobf("org.moddingx:LibX:1.19-4.0.4")
+    implementation fg.deobf("de.melanx:SkyblockBuilder:1.19-4.0.0")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.18.2:9.5.5.174")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.19-forge:11.0.0.206")
 }

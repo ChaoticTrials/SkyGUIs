@@ -1,9 +1,9 @@
 package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 

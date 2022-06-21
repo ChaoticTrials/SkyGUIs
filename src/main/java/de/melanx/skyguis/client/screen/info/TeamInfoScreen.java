@@ -10,19 +10,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import javax.annotation.Nonnull;
 
 public class TeamInfoScreen extends BaseScreen {
 
-    private static final MutableComponent CONFIG_SELF_MANAGEMENT = new TranslatableComponent("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED);
-    private static final MutableComponent TEAM_JOIN_REQUESTS = new TranslatableComponent("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED);
-    private static final MutableComponent CONFIG_ALLOW_VISITS = new TranslatableComponent("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED);
-    private static final MutableComponent TEAM_ALLOW_VISITS = new TranslatableComponent("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED);
-    private static final MutableComponent USER_HAS_TEAM = new TranslatableComponent("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED);
+    private static final MutableComponent CONFIG_SELF_MANAGEMENT = Component.translatable("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED);
+    private static final MutableComponent TEAM_JOIN_REQUESTS = Component.translatable("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED);
+    private static final MutableComponent CONFIG_ALLOW_VISITS = Component.translatable("skyblockbuilder.command.disabled.team_visit").withStyle(ChatFormatting.RED);
+    private static final MutableComponent TEAM_ALLOW_VISITS = Component.translatable("skyblockbuilder.command.disabled.visit_team").withStyle(ChatFormatting.RED);
+    private static final MutableComponent USER_HAS_TEAM = Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED);
     private static final MutableComponent VISIT_TEAM = ComponentBuilder.text("visit_team");
     private static final MutableComponent REQUEST_TO_JOIN = ComponentBuilder.text("request_to_join");
     private static final MutableComponent REQUESTED_TO_JOIN = ComponentBuilder.text("requested_to_join").withStyle(ChatFormatting.GREEN);
@@ -31,7 +30,7 @@ public class TeamInfoScreen extends BaseScreen {
     private final BaseScreen prev;
 
     public TeamInfoScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), 245, 85);
+        super(Component.literal(team.getName()), 245, 85);
         this.team = team;
         this.prev = prev;
     }

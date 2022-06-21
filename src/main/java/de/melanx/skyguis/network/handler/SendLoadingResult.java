@@ -2,11 +2,11 @@ package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 

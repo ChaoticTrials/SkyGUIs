@@ -1,12 +1,12 @@
 package de.melanx.skyguis.client.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.noeppi_noeppi.libx.screen.Panel;
-import io.github.noeppi_noeppi.libx.util.Math2;
+import de.melanx.skyguis.util.Math2;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import org.lwjgl.opengl.GL11;
+import org.moddingx.libx.screen.Panel;
 
 import javax.annotation.Nonnull;
 
@@ -53,7 +53,6 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (Math2.isInBounds(this.initX, this.initY, this.renderWidth, this.renderHeight, mouseX, mouseY)) {
-            System.out.println("X: " + mouseX + ", Y: " + mouseY);
             return super.mouseClicked(mouseX, mouseY, button);
         }
 

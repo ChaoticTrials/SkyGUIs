@@ -2,11 +2,11 @@ package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Objects;
 import java.util.function.Supplier;

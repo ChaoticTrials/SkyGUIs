@@ -4,8 +4,6 @@ import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.network.handler.OpenGui;
 import de.melanx.skyguis.tooltip.ClientSmallTextTooltip;
 import de.melanx.skyguis.tooltip.SmallTextTooltip;
-import io.github.noeppi_noeppi.libx.mod.registration.ModXRegistration;
-import io.github.noeppi_noeppi.libx.mod.registration.RegistrationBuilder;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,6 +16,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.network.NetworkDirection;
+import org.moddingx.libx.mod.ModXRegistration;
+import org.moddingx.libx.registration.RegistrationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public final class SkyGUIs extends ModXRegistration {
 
     private static SkyGUIs instance;
-    private static EasyNetwork network;
+    private final EasyNetwork network;
     public final Logger logger;
 
     public SkyGUIs() {
@@ -46,7 +46,7 @@ public final class SkyGUIs extends ModXRegistration {
     }
 
     public static EasyNetwork getNetwork() {
-        return network;
+        return instance.network;
     }
 
     @Override
@@ -61,14 +61,14 @@ public final class SkyGUIs extends ModXRegistration {
 
     @Override
     protected void initRegistration(RegistrationBuilder builder) {
-        builder.setVersion(1);
+
     }
 
     public static void registerClientCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .then(Commands.literal("gui").executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
-                    network.channel.sendTo(new OpenGui.Message(), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                    SkyGUIs.getNetwork().channel.sendTo(new OpenGui.Message(), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
                     return 1;
                 }))
         );

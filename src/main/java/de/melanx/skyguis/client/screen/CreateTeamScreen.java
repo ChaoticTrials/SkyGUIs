@@ -12,11 +12,11 @@ import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
@@ -52,16 +52,22 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
     @Override
     protected void init() {
-        this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, TextComponent.EMPTY);
+        this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, Component.empty());
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
         this.addRenderableWidget(this.name);
 
+        if (this.templates.isEmpty()) {
+            Minecraft.getInstance().setScreen(null);
+            //noinspection ConstantConditions
+            Minecraft.getInstance().player.sendSystemMessage(ComponentBuilder.text("empty_templates").withStyle(ChatFormatting.BOLD, ChatFormatting.RED));
+            return;
+        }
         String original = this.templates.get(this.currIndex);
         String shortened = TextHelper.shorten(this.font, original, 110);
         this.enableTooltip = !shortened.equals(original);
         this.currTemplate = original;
-        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, new TextComponent(shortened), button -> {
+        Button templateButton = new Button(this.x(65), this.y(60), 122, 20, Component.literal(shortened), button -> {
             this.currIndex++;
             if (this.currIndex >= this.templates.size()) {
                 this.currIndex = 0;
@@ -71,10 +77,10 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
             String s = TextHelper.shorten(this.font, orig, 110);
             this.enableTooltip = !s.equals(orig);
             this.currTemplate = orig;
-            button.setMessage(new TextComponent(s));
+            button.setMessage(Component.literal(s));
         }, (button, poseStack, mouseX, mouseY) -> {
             if (this.enableTooltip) {
-                this.renderTooltip(poseStack, new TextComponent(this.currTemplate), mouseX, mouseY);
+                this.renderTooltip(poseStack, Component.literal(this.currTemplate), mouseX, mouseY);
             }
         });
         if (this.templates.size() == 1) {

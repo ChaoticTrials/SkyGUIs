@@ -11,14 +11,14 @@ import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Set;
 import java.util.UUID;
@@ -45,14 +45,14 @@ public class UpdateTeam {
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team"));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
                 return;
             }
 
             PlayerList playerList = level.getServer().getPlayerList();
             Pair<Boolean, Set<ServerPlayer>> result = SkyblockHooks.onManageRemoveFromTeam(null, team, msg.players.stream().map(playerList::getPlayer).collect(Collectors.toList()));
             if (result.getLeft()) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.denied.remove_players_from_team"));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.remove_players_from_team"));
                 return;
             }
 
@@ -74,7 +74,7 @@ public class UpdateTeam {
                 return;
             }
 
-            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, new TranslatableComponent("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
+            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
         });
         ctx.setPacketHandled(true);
     }

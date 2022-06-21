@@ -3,10 +3,10 @@ package de.melanx.skyguis.client.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.SkyGUIs;
-import io.github.noeppi_noeppi.libx.render.ClientTickHandler;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.resources.ResourceLocation;
+import org.moddingx.libx.render.ClientTickHandler;
 
 import javax.annotation.Nonnull;
 

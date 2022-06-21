@@ -22,7 +22,6 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
@@ -43,7 +42,7 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
     private int selectedAmount = 0;
 
     public InvitablePlayersScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), InvitablePlayersScreen.getInvitablePlayers(team), 200, 230,
+        super(Component.literal(team.getName()), InvitablePlayersScreen.getInvitablePlayers(team), 200, 230,
                 new PlayerListScreen.ScrollbarInfo(180, 10, 210),
                 new PlayerListScreen.RenderAreaInfo(10, 50, 160));
         this.team = team;

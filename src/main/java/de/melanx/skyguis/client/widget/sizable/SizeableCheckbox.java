@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
@@ -22,7 +22,7 @@ public class SizeableCheckbox extends Checkbox {
     }
 
     public SizeableCheckbox(int x, int y, int size, boolean selected, OnTooltip onTooltip) {
-        super(x, y, size, size, TextComponent.EMPTY, selected, false);
+        super(x, y, size, size, Component.empty(), selected, false);
         this.onTooltip = onTooltip;
     }
 

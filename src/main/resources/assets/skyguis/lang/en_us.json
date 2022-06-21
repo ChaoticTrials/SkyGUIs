@@ -35,6 +35,7 @@
   "screen.skyguis.text.you_sure_invite": "Do you really want to invite these %s player(s)?",
   "screen.skyguis.text.you_sure_join": "Do you really want to join \"%s\"?",
   "screen.skyguis.text.you_sure_ignore": "Do you really want to ignore invitation by \"%s\"?",
+  "screen.skyguis.text.empty_templates": "No templates available",
 
   "screen.skyguis.button.create": "Create",
   "screen.skyguis.button.confirm": "Confirm",

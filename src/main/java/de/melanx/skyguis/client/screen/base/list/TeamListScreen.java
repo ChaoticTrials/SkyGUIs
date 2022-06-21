@@ -6,7 +6,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 
@@ -31,15 +30,15 @@ public class TeamListScreen extends ListScreen<Team> {
     protected class TeamWidget extends CheckboxTextWidget {
 
         public TeamWidget(Team team, Screen screen, int x, int y, int width, int height) {
-            super(team, screen, x, y, width, height, TeamWidget.buildTooltip(team), new TextComponent(team.getName()));
+            super(team, screen, x, y, width, height, TeamWidget.buildTooltip(team), Component.literal(team.getName()));
         }
 
         private static List<Component> buildTooltip(Team team) {
             List<Component> tooltip = Lists.newArrayList(
-                    new TextComponent(team.getName())
+                    Component.literal(team.getName())
             );
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                tooltip.add(new TextComponent(team.getId().toString()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.literal(team.getId().toString()).withStyle(ChatFormatting.GRAY));
             }
 
             return tooltip;

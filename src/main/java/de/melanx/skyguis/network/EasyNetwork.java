@@ -3,12 +3,12 @@ package de.melanx.skyguis.network;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyguis.network.handler.*;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.mod.ModX;
-import io.github.noeppi_noeppi.libx.network.NetworkX;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.mod.ModX;
+import org.moddingx.libx.network.NetworkX;
 
 import java.util.Set;
 import java.util.UUID;

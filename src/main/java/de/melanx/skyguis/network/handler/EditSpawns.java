@@ -8,16 +8,17 @@ import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.LoadingResult;
-import io.github.noeppi_noeppi.libx.network.PacketSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
@@ -36,7 +37,7 @@ public class EditSpawns {
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED));
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED));
                 return;
             }
 
@@ -46,12 +47,12 @@ public class EditSpawns {
                     Event.Result result = SkyblockHooks.onAddSpawn(player, team, msg.pos).getLeft();
                     switch (result) {
                         case DENY -> {
-                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.denied.create_spawn"));
+                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.create_spawn"));
                             return;
                         }
                         case DEFAULT -> {
                             if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !player.hasPermissions(2)) {
-                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns"));
+                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
                                 return;
                             }
 
@@ -59,48 +60,48 @@ public class EditSpawns {
                             BlockPos center = team.getIsland().getCenter().mutable();
                             center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
                             if (!msg.pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {
-                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.position_too_far_away"));
+                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.position_too_far_away"));
                                 return;
                             }
                         }
                     }
 
                     team.addPossibleSpawn(msg.pos); // TODO send fail if not added
-                    network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, new TranslatableComponent("skyblockbuilder.command.success.spawn_added", msg.pos.getX(), msg.pos.getY(), msg.pos.getZ()));
+                    network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.spawn_added", msg.pos.getX(), msg.pos.getY(), msg.pos.getZ()));
                     return;
                 }
 
                 // handle removing spawns
                 case REMOVE -> {
                     if (level != level.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
-                        network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.error.wrong_position"));
+                        network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.wrong_position"));
                         return;
                     }
 
                     Event.Result result = SkyblockHooks.onRemoveSpawn(player, team, msg.pos);
                     switch (result) {
                         case DENY -> {
-                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.denied.modify_spawns0"));
+                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.modify_spawns0"));
                             return;
                         }
                         case DEFAULT -> {
                             if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !player.hasPermissions(2)) {
-                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, new TranslatableComponent("skyblockbuilder.command.disabled.modify_spawns"));
+                                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
                                 return;
                             }
                         }
                     }
 
                     if (!team.removePossibleSpawn(msg.pos)) {
-                        TranslatableComponent answer = new TranslatableComponent("skyblockbuilder.command.error.remove_spawn0");
+                        MutableComponent answer = Component.translatable("skyblockbuilder.command.error.remove_spawn0");
                         if (team.getPossibleSpawns().size() <= 1) {
-                            answer.append(" ").append(new TranslatableComponent("skyblockbuilder.command.error.remove_spawn1"));
+                            answer.append(" ").append(Component.translatable("skyblockbuilder.command.error.remove_spawn1"));
                         }
                         network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, answer);
                         return;
                     }
 
-                    network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, new TranslatableComponent("skyblockbuilder.command.success.spawn_removed", msg.pos.getX(), msg.pos.getY(), msg.pos.getZ()));
+                    network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.spawn_removed", msg.pos.getX(), msg.pos.getY(), msg.pos.getZ()));
                     return;
                 }
 

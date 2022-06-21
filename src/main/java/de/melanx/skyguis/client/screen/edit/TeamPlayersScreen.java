@@ -13,7 +13,7 @@ import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
@@ -31,7 +31,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
     private int selectedAmount = 0;
 
     public TeamPlayersScreen(Team team, BaseScreen prev) {
-        super(new TextComponent(team.getName()), team.getPlayers(), 200, 230,
+        super(Component.literal(team.getName()), team.getPlayers(), 200, 230,
                 new PlayerListScreen.ScrollbarInfo(180, 10, 210),
                 new PlayerListScreen.RenderAreaInfo(10, 50, 160));
         this.team = team;
