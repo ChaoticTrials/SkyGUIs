@@ -6,9 +6,11 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
+import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
+import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -17,6 +19,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -91,9 +94,18 @@ public class TeamInfoScreen extends BaseScreen {
 
     @Override
     public void onLoadingResult(LoadingResult result) {
-        Minecraft.getInstance().screen = null;
-        //noinspection ConstantConditions
-        Minecraft.getInstance().player.sendMessage(result.reason(), Util.NIL_UUID);
+        Minecraft minecraft = Minecraft.getInstance();
+        switch (result.status()) {
+            case SUCCESS -> {
+                minecraft.screen = null;
+                //noinspection ConstantConditions
+                minecraft.player.sendMessage(result.reason(), Util.NIL_UUID);
+            }
+            case FAIL ->
+                    ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
+                        ForgeHooksClient.popGuiLayer(minecraft);
+                    }));
+        }
     }
 
     private boolean alreadySentJoinRequest() {
