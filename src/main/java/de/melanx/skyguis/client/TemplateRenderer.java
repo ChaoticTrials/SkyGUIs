@@ -2,6 +2,7 @@ package de.melanx.skyguis.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
@@ -9,6 +10,7 @@ import de.melanx.skyguis.SkyGUIs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -122,7 +124,7 @@ public class TemplateRenderer {
         for (RenderType layer : RenderType.chunkBufferLayers()) {
             if (ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
                 ForgeHooksClient.setRenderType(layer);
-                var buffer = buffers.getBuffer(layer);
+                VertexConsumer buffer = buffers.getBuffer(layer);
                 Minecraft.getInstance().getBlockRenderer()
                         .renderBatched(state, pos, this.clientLevel, poseStack, buffer, false, this.clientLevel.random, EmptyModelData.INSTANCE);
                 ForgeHooksClient.setRenderType(null);
@@ -153,7 +155,7 @@ public class TemplateRenderer {
                     try {
                         BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
                         if (renderer != null) {
-                            renderer.render(te, 0, poseStack, buffers, 0xF000F0, OverlayTexture.NO_OVERLAY);
+                            renderer.render(te, 0, poseStack, buffers, LightTexture.pack(15, 15), OverlayTexture.NO_OVERLAY);
                         }
                     } catch (Exception e) {
                         this.erroredTiles.add(te);

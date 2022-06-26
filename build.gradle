@@ -19,7 +19,7 @@ dependencies {
     annotationProcessor "org.moddingx:LibX:1.19-4.0.4"
 
     implementation fg.deobf("org.moddingx:LibX:1.19-4.0.4")
-    implementation fg.deobf("de.melanx:SkyblockBuilder:1.19-4.0.0")
+    implementation fg.deobf("de.melanx:SkyblockBuilder:1.19-4.0.3")
 
     runtimeOnly fg.deobf("mezz.jei:jei-1.19-forge:11.0.0.206")
 }
