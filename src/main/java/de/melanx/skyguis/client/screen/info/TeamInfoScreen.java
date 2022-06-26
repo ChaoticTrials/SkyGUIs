@@ -4,9 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
+import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
+import de.melanx.skyguis.util.LoadingResult;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,6 +19,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class TeamInfoScreen extends BaseScreen {
 
@@ -53,6 +58,9 @@ public class TeamInfoScreen extends BaseScreen {
         this.addRenderableWidget(joinButton);
 
         Button visitButton = new Button(this.x(125), this.y(30), 110, 20, VISIT_TEAM, button -> {
+            SkyGUIs.getNetwork().handleVisitTeam(this.team.getId());
+            //noinspection ConstantConditions
+            this.getLoadingCircle().setActive(true);
         }, (button, poseStack, mouseX, mouseY) -> {
             if (!ConfigHandler.Utility.Teleports.allowVisits) {
                 this.renderTooltip(poseStack, CONFIG_ALLOW_VISITS, mouseX, mouseY);
@@ -73,6 +81,19 @@ public class TeamInfoScreen extends BaseScreen {
         this.renderBackground(poseStack);
         super.render_(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
+    }
+
+    @Nullable
+    @Override
+    public LoadingCircle createLoadingCircle() {
+        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        Minecraft.getInstance().screen = null;
+        //noinspection ConstantConditions
+        Minecraft.getInstance().player.sendMessage(result.reason(), Util.NIL_UUID);
     }
 
     private boolean alreadySentJoinRequest() {
