@@ -21,7 +21,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("1");
+        return Protocol.of("2");
     }
 
     @Override
@@ -32,6 +32,7 @@ public class EasyNetwork extends NetworkX {
         this.register(new InvitePlayers.Serializer(), () -> InvitePlayers::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new AnswerInvitation.Serializer(), () -> AnswerInvitation::handle, NetworkDirection.PLAY_TO_SERVER);
         this.register(new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.register(new VisitTeam.Serializer(), () -> VisitTeam::handle, NetworkDirection.PLAY_TO_SERVER);
 
         this.register(new OpenGui.Serializer(), () -> OpenGui::handle, NetworkDirection.PLAY_TO_CLIENT);
         this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);

@@ -5,15 +5,21 @@ import de.melanx.skyblockbuilder.config.ConfigHandler;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.client.screen.BaseScreen;
+import de.melanx.skyguis.client.screen.notification.InformationScreen;
+import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
+import de.melanx.skyguis.util.LoadingResult;
+import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class TeamInfoScreen extends BaseScreen {
 
@@ -38,6 +44,7 @@ public class TeamInfoScreen extends BaseScreen {
     @Override
     protected void init() {
         Button joinButton = new Button(this.x(10), this.y(30), 110, 20, this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
+
         }, (button, poseStack, mouseX, mouseY) -> {
             //noinspection ConstantConditions
             if (SkyblockSavedData.get(Minecraft.getInstance().level).hasPlayerTeam(Minecraft.getInstance().player)) {
@@ -72,6 +79,28 @@ public class TeamInfoScreen extends BaseScreen {
         this.renderBackground(poseStack);
         super.render_(poseStack, mouseX, mouseY, partialTick);
         this.renderTitle(poseStack);
+    }
+
+    @Nullable
+    @Override
+    public LoadingCircle createLoadingCircle() {
+        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        Minecraft minecraft = Minecraft.getInstance();
+        switch (result.status()) {
+            case SUCCESS -> {
+                minecraft.screen = null;
+                //noinspection ConstantConditions
+                minecraft.player.sendSystemMessage(result.reason());
+            }
+            case FAIL ->
+                    ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
+                        ForgeHooksClient.popGuiLayer(minecraft);
+                    }));
+        }
     }
 
     private boolean alreadySentJoinRequest() {
