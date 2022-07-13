@@ -17,7 +17,7 @@ An addon for Skyblock Builder which provides GUIs to easily modify and view team
 [[dependencies.skyguis]]
     modId="forge"
     mandatory=true
-    versionRange="[41.0.45,)"
+    versionRange="[41.0.98,)"
     ordering="NONE"
     side="BOTH"
 
@@ -31,13 +31,13 @@ An addon for Skyblock Builder which provides GUIs to easily modify and view team
 [[dependencies.skyguis]]
     modId="skyblockbuilder"
     mandatory=true
-    versionRange="[1.19-4.0.3,)"
+    versionRange="[1.19-4.0.12,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.skyguis]]
     modId="libx"
     mandatory=true
-    versionRange="[1.19-4.0.4,)"
+    versionRange="[1.19-4.0.7,)"
     ordering="AFTER"
     side="BOTH"

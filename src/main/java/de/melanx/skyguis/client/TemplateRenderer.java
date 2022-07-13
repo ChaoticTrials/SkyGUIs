@@ -9,20 +9,22 @@ import com.mojang.math.Vector4f;
 import de.melanx.skyguis.SkyGUIs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.model.data.EmptyModelData;
+import net.minecraftforge.client.model.data.ModelData;
 import org.moddingx.libx.render.ClientTickHandler;
 
 import java.util.*;
@@ -34,6 +36,7 @@ import java.util.*;
  */
 public class TemplateRenderer {
 
+    private final RandomSource random = RandomSource.create();
     private final ClientLevel clientLevel = Objects.requireNonNull(Minecraft.getInstance().level);
     private final StructureTemplate template;
     private final float maxX;
@@ -121,13 +124,12 @@ public class TemplateRenderer {
     }
 
     private void renderForMultiblock(BlockState state, BlockPos pos, PoseStack poseStack, MultiBufferSource.BufferSource buffers) {
-        for (RenderType layer : RenderType.chunkBufferLayers()) {
-            if (ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
-                ForgeHooksClient.setRenderType(layer);
+        if (state.getRenderShape() != RenderShape.INVISIBLE) {
+            BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+            BakedModel model = blockRenderer.getBlockModel(state);
+            for (RenderType layer : model.getRenderTypes(state, this.random, ModelData.EMPTY)) {
                 VertexConsumer buffer = buffers.getBuffer(layer);
-                Minecraft.getInstance().getBlockRenderer()
-                        .renderBatched(state, pos, this.clientLevel, poseStack, buffer, false, this.clientLevel.random, EmptyModelData.INSTANCE);
-                ForgeHooksClient.setRenderType(null);
+                blockRenderer.renderBatched(state, pos, this.clientLevel, poseStack, buffer, false, this.clientLevel.random, ModelData.EMPTY, layer);
             }
         }
     }

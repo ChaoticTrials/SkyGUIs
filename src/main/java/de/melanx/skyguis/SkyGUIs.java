@@ -2,13 +2,9 @@ package de.melanx.skyguis;
 
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.network.handler.OpenGui;
-import de.melanx.skyguis.tooltip.ClientSmallTextTooltip;
-import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -30,11 +26,10 @@ public final class SkyGUIs extends ModXRegistration {
 
     public SkyGUIs() {
         instance = this;
-        network = new EasyNetwork(this);
+        this.network = new EasyNetwork(this);
         this.logger = LoggerFactory.getLogger(this.modid);
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            ClientRegistry.registerKeyBinding(Keybinds.ALL_TEAMS);
             MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
         });
 
@@ -56,7 +51,7 @@ public final class SkyGUIs extends ModXRegistration {
 
     @Override
     protected void clientSetup(FMLClientSetupEvent event) {
-        MinecraftForgeClient.registerTooltipComponentFactory(SmallTextTooltip.class, ClientSmallTextTooltip::new);
+
     }
 
     @Override

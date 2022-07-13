@@ -17,7 +17,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -137,9 +136,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
             case SUCCESS -> this.onClose();
             case FAIL -> {
                 Minecraft minecraft = Minecraft.getInstance();
-                ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-                    ForgeHooksClient.popGuiLayer(minecraft);
-                }));
+                minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
             }
         }
     }

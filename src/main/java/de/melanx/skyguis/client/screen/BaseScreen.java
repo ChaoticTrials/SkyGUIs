@@ -44,12 +44,12 @@ public abstract class BaseScreen extends Screen {
         MinecraftForge.EVENT_BUS.addListener(this::guiInitPost);
     }
 
-    private void guiInitPre(ScreenEvent.InitScreenEvent.Pre event) {
+    private void guiInitPre(ScreenEvent.Init.Pre event) {
         this.relX = (event.getScreen().width - this.xSize) / 2;
         this.relY = (event.getScreen().height - this.ySize) / 2;
     }
 
-    private void guiInitPost(ScreenEvent.InitScreenEvent.Post event) {
+    private void guiInitPost(ScreenEvent.Init.Post event) {
         boolean prevActive = this.loadingCircle != null && this.loadingCircle.isActive();
         this.loadingCircle = this.createLoadingCircle();
         if (this.loadingCircle != null) {

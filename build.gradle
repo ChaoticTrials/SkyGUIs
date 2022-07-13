@@ -16,10 +16,10 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor "org.moddingx:LibX:1.19-4.0.4"
+    annotationProcessor "org.moddingx:LibX:1.19-4.0.7"
 
-    implementation fg.deobf("org.moddingx:LibX:1.19-4.0.4")
-    implementation fg.deobf("de.melanx:SkyblockBuilder:1.19-4.0.3")
+    implementation fg.deobf("org.moddingx:LibX:1.19-4.0.7")
+    implementation fg.deobf("de.melanx:SkyblockBuilder:1.19-4.0.12")
 
-    runtimeOnly fg.deobf("mezz.jei:jei-1.19-forge:11.0.0.206")
+    runtimeOnly fg.deobf("mezz.jei:jei-1.19-forge:11.0.0.211")
 }
