@@ -22,7 +22,6 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -53,7 +52,7 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
     protected void init() {
         this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, INVITE, (button -> {
             Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
+            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
                 SkyGUIs.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
                 Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
             }, () -> Minecraft.getInstance().setScreen(this)));
@@ -90,9 +89,7 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
     @Override
     public void onLoadingResult(LoadingResult result) {
         Minecraft minecraft = Minecraft.getInstance();
-        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-            ForgeHooksClient.popGuiLayer(minecraft);
-        }));
+        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
     }
 
     @Override

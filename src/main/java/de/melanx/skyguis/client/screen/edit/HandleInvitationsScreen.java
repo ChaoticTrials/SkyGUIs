@@ -51,9 +51,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
     @Override
     public void onLoadingResult(LoadingResult result) {
         Minecraft minecraft = Minecraft.getInstance();
-        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-            ForgeHooksClient.popGuiLayer(minecraft);
-        }));
+        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
     }
 
     @Override
@@ -63,7 +61,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
             this.renderArea.addRenderableWidget2(new JoinTeamWidget(this.values.get(i), this, 0, ENTRY_HEIGHT * i, 100, 12,
                     // pressing join button
                     team -> {
-                        ForgeHooksClient.pushGuiLayer(minecraft, new YouSureScreen(ComponentBuilder.text("you_sure_join", team.getName()), () -> {
+                        minecraft.pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_join", team.getName()), () -> {
                             SkyGUIs.getNetwork().handleInvitationAnswer(team.getName(), AnswerInvitation.Type.ACCEPT);
                             ForgeHooksClient.clearGuiLayers(minecraft);
                         }
@@ -71,7 +69,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
                     },
                     // pressing ignore button
                     team -> {
-                        ForgeHooksClient.pushGuiLayer(minecraft, new YouSureScreen(ComponentBuilder.text("you_sure_ignore", team.getName()), () -> {
+                        minecraft.pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_ignore", team.getName()), () -> {
                             SkyGUIs.getNetwork().handleInvitationAnswer(team.getName(), AnswerInvitation.Type.IGNORE);
                             Minecraft.getInstance().setScreen(new HandleInvitationsScreen());
                         }));

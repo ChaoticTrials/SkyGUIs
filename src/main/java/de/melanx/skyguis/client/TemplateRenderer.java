@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,7 +35,6 @@ import java.util.*;
  */
 public class TemplateRenderer {
 
-    private final RandomSource random = RandomSource.create();
     private final ClientLevel clientLevel = Objects.requireNonNull(Minecraft.getInstance().level);
     private final StructureTemplate template;
     private final float maxX;
@@ -127,7 +125,7 @@ public class TemplateRenderer {
         if (state.getRenderShape() != RenderShape.INVISIBLE) {
             BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
             BakedModel model = blockRenderer.getBlockModel(state);
-            for (RenderType layer : model.getRenderTypes(state, this.random, ModelData.EMPTY)) {
+            for (RenderType layer : model.getRenderTypes(state, this.clientLevel.random, ModelData.EMPTY)) {
                 VertexConsumer buffer = buffers.getBuffer(layer);
                 blockRenderer.renderBatched(state, pos, this.clientLevel, poseStack, buffer, false, this.clientLevel.random, ModelData.EMPTY, layer);
             }

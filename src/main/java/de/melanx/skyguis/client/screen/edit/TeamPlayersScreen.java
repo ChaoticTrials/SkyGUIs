@@ -14,7 +14,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -42,7 +41,7 @@ public class TeamPlayersScreen extends PlayerListScreen {
     protected void init() {
         this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, ComponentBuilder.text("kick"), (button -> {
             Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-            ForgeHooksClient.pushGuiLayer(Minecraft.getInstance(), new YouSureScreen(ComponentBuilder.text("you_sure_kick"), () -> {
+            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_kick"), () -> {
                 SkyGUIs.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                 //noinspection ConstantConditions
                 if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
