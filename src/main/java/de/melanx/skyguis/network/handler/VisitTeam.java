@@ -12,25 +12,32 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class VisitTeam {
+public record VisitTeam(UUID team) {
 
-    public static void handle(Message msg, Supplier<NetworkEvent.Context> context) {
-        NetworkEvent.Context ctx = context.get();
-        ctx.enqueueWork(() -> {
-            ServerPlayer player = ctx.getSender();
+    public static class Handler implements PacketHandler<VisitTeam> {
+
+        @Override
+        public Target target() {
+            return Target.MAIN_THREAD;
+        }
+
+        @Override
+        public boolean handle(VisitTeam msg, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
             if (player == null) {
-                return;
+                return true;
             }
 
             EasyNetwork network = SkyGUIs.getNetwork();
             if (!ConfigHandler.Utility.Teleports.allowVisits) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.team_visit"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.team_visit"));
+                return true;
             }
 
             ServerLevel level = player.getLevel();
@@ -38,43 +45,40 @@ public class VisitTeam {
             Team team = data.getTeam(msg.team);
             if (team == null) {
                 // should never be the case
-                return;
+                return true;
             }
 
             if (!team.allowsVisits()) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.visit_team"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.visit_team"));
+                return true;
             }
 
             if (team.equals(data.getTeamFromPlayer(player))) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.visit_own_team"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.visit_own_team"));
+                return true;
             }
 
             WorldUtil.teleportToIsland(player, team);
-            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.visit_team", team.getName()));
-        });
-        ctx.setPacketHandled(true);
+            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.visit_team", team.getName()));
+            return true;
+        }
     }
 
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Serializer implements PacketSerializer<VisitTeam> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Class<VisitTeam> messageClass() {
+            return VisitTeam.class;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
+        public void encode(VisitTeam msg, FriendlyByteBuf buffer) {
             buffer.writeUUID(msg.team);
         }
 
         @Override
-        public Message decode(FriendlyByteBuf buffer) {
-            return new Message(buffer.readUUID());
+        public VisitTeam decode(FriendlyByteBuf buffer) {
+            return new VisitTeam(buffer.readUUID());
         }
-    }
-
-    public record Message(UUID team) {
     }
 }

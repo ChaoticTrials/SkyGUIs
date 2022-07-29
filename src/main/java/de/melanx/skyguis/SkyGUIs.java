@@ -63,7 +63,7 @@ public final class SkyGUIs extends ModXRegistration {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .then(Commands.literal("gui").executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
-                    SkyGUIs.getNetwork().channel.sendTo(new OpenGui.Message(), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                    SkyGUIs.getNetwork().channel.sendTo(new OpenGui(), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
                     return 1;
                 }))
         );

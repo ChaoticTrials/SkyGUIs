@@ -21,53 +21,53 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("2");
+        return Protocol.of("3");
     }
 
     @Override
     protected void registerPackets() {
-        this.register(new CreateTeamScreenClick.Serializer(), () -> CreateTeamScreenClick::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new UpdateTeam.Serializer(), () -> UpdateTeam::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new EditSpawns.Serializer(), () -> EditSpawns::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new InvitePlayers.Serializer(), () -> InvitePlayers::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new AnswerInvitation.Serializer(), () -> AnswerInvitation::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer::handle, NetworkDirection.PLAY_TO_SERVER);
-        this.register(new VisitTeam.Serializer(), () -> VisitTeam::handle, NetworkDirection.PLAY_TO_SERVER);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new CreateTeamScreenClick.Serializer(), () -> CreateTeamScreenClick.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateTeam.Serializer(), () -> UpdateTeam.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new EditSpawns.Serializer(), () -> EditSpawns.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new InvitePlayers.Serializer(), () -> InvitePlayers.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new);
 
-        this.register(new OpenGui.Serializer(), () -> OpenGui::handle, NetworkDirection.PLAY_TO_CLIENT);
-        this.register(new SendLoadingResult.Serializer(), () -> SendLoadingResult::handle, NetworkDirection.PLAY_TO_CLIENT);
-        this.register(new SendTemplateToClient.Serializer(), () -> SendTemplateToClient::handle, NetworkDirection.PLAY_TO_CLIENT);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new OpenGui.Serializer(), () -> OpenGui.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendLoadingResult.Serializer(), () -> SendLoadingResult.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendTemplateToClient.Serializer(), () -> SendTemplateToClient.Handler::new);
     }
 
     public void handleCreateTeam(String name, String shape) {
-        this.channel.sendToServer(new CreateTeamScreenClick.Message(name, shape));
+        this.channel.sendToServer(new CreateTeamScreenClick(name, shape));
     }
 
     public void handleKickPlayers(String teamName, Set<UUID> players) {
-        this.channel.sendToServer(new UpdateTeam.Message(teamName, players));
+        this.channel.sendToServer(new UpdateTeam(teamName, players));
     }
 
     public void handleInvitePlayers(String teamName, Set<UUID> players) {
-        this.channel.sendToServer(new InvitePlayers.Message(teamName, players));
+        this.channel.sendToServer(new InvitePlayers(teamName, players));
     }
 
     public void handleInvitationAnswer(String teamName, AnswerInvitation.Type type) {
-        this.channel.sendToServer(new AnswerInvitation.Message(teamName, type));
+        this.channel.sendToServer(new AnswerInvitation(teamName, type));
     }
 
     public void handleEditSpawns(EditSpawns.Type type, BlockPos pos) {
-        this.channel.sendToServer(new EditSpawns.Message(type, pos));
+        this.channel.sendToServer(new EditSpawns(type, pos));
     }
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {
-        this.channel.reply(new SendLoadingResult.Message(result, reason), ctx);
+        this.channel.reply(new SendLoadingResult(result, reason), ctx);
     }
 
     public void requestTemplateFromServer(String name) {
-        this.channel.sendToServer(new RequestTemplateFromServer.Message(name));
+        this.channel.sendToServer(new RequestTemplateFromServer(name));
     }
 
     public void sendTemplateToClient(NetworkEvent.Context ctx, String name) {
-        this.channel.reply(new SendTemplateToClient.Message(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
+        this.channel.reply(new SendTemplateToClient(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
     }
 }

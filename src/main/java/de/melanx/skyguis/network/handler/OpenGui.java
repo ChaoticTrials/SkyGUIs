@@ -3,36 +3,42 @@ package de.melanx.skyguis.network.handler;
 import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public class OpenGui {
+public record OpenGui() {
 
-    public static void handle(Message msg, Supplier<NetworkEvent.Context> context) {
-        NetworkEvent.Context ctx = context.get();
-        ctx.enqueueWork(AllTeamsScreen::open);
-        ctx.setPacketHandled(true);
-    }
-
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Handler implements PacketHandler<OpenGui> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Target target() {
+            return Target.MAIN_THREAD;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
-
-        }
-
-        @Override
-        public Message decode(FriendlyByteBuf buffer) {
-            return new Message();
+        public boolean handle(OpenGui msg, Supplier<NetworkEvent.Context> ctx) {
+            AllTeamsScreen.open();
+            return true;
         }
     }
 
-    public record Message() {
+    public static class Serializer implements PacketSerializer<OpenGui> {
+
+        @Override
+        public Class<OpenGui> messageClass() {
+            return OpenGui.class;
+        }
+
+        @Override
+        public void encode(OpenGui msg, FriendlyByteBuf buffer) {
+
+        }
+
+        @Override
+        public OpenGui decode(FriendlyByteBuf buffer) {
+            return new OpenGui();
+        }
     }
 }

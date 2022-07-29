@@ -17,20 +17,27 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class InvitePlayers {
+public record InvitePlayers(String teamName, Set<UUID> players) {
 
-    public static void handle(Message msg, Supplier<NetworkEvent.Context> context) {
-        NetworkEvent.Context ctx = context.get();
-        ctx.enqueueWork(() -> {
-            ServerPlayer player = ctx.getSender();
+    public static class Handler implements PacketHandler<InvitePlayers> {
+
+        @Override
+        public Target target() {
+            return Target.MAIN_THREAD;
+        }
+
+        @Override
+        public boolean handle(InvitePlayers msg, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
             if (player == null) {
-                return;
+                return true;
             }
 
             SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
@@ -38,8 +45,8 @@ public class InvitePlayers {
 
             EasyNetwork network = SkyGUIs.getNetwork();
             if (team == null) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_not_exist"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_not_exist"));
+                return true;
             }
 
             //noinspection ConstantConditions
@@ -64,20 +71,20 @@ public class InvitePlayers {
                 i++;
             }
 
-            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, ComponentBuilder.text("invite_multiple_users", i));
-        });
-        ctx.setPacketHandled(true);
+            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, ComponentBuilder.text("invite_multiple_users", i));
+            return true;
+        }
     }
 
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Serializer implements PacketSerializer<InvitePlayers> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Class<InvitePlayers> messageClass() {
+            return InvitePlayers.class;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
+        public void encode(InvitePlayers msg, FriendlyByteBuf buffer) {
             buffer.writeUtf(msg.teamName);
             buffer.writeVarInt(msg.players.size());
             for (UUID id : msg.players) {
@@ -86,7 +93,7 @@ public class InvitePlayers {
         }
 
         @Override
-        public Message decode(FriendlyByteBuf buffer) {
+        public InvitePlayers decode(FriendlyByteBuf buffer) {
             String teamName = buffer.readUtf();
             int size = buffer.readVarInt();
             Set<UUID> ids = Sets.newHashSet();
@@ -94,10 +101,7 @@ public class InvitePlayers {
                 ids.add(buffer.readUUID());
             }
 
-            return new Message(teamName, ids);
+            return new InvitePlayers(teamName, ids);
         }
-    }
-
-    public record Message(String teamName, Set<UUID> players) {
     }
 }

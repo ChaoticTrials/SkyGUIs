@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.Pair;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Set;
@@ -25,35 +26,41 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class UpdateTeam {
+public record UpdateTeam(String teamName, Set<UUID> players) {
 
-    public static void handle(Message msg, Supplier<NetworkEvent.Context> context) {
-        NetworkEvent.Context ctx = context.get();
-        ctx.enqueueWork(() -> {
-            ServerPlayer player = ctx.getSender();
+    public static class Handler implements PacketHandler<UpdateTeam> {
+
+        @Override
+        public Target target() {
+            return Target.MAIN_THREAD;
+        }
+
+        @Override
+        public boolean handle(UpdateTeam msg, Supplier<NetworkEvent.Context> ctx) {
+            ServerPlayer player = ctx.get().getSender();
             if (player == null) {
-                return;
+                return true;
             }
 
             EasyNetwork network = SkyGUIs.getNetwork();
             if (!player.hasPermissions(2)) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
+                return true;
             }
 
             ServerLevel level = player.getLevel();
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
+                return true;
             }
 
             PlayerList playerList = level.getServer().getPlayerList();
             Pair<Boolean, Set<ServerPlayer>> result = SkyblockHooks.onManageRemoveFromTeam(null, team, msg.players.stream().map(playerList::getPlayer).collect(Collectors.toList()));
             if (result.getLeft()) {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.remove_players_from_team"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.remove_players_from_team"));
+                return true;
             }
 
             if (team.getName().equalsIgnoreCase(msg.teamName)) {
@@ -70,24 +77,24 @@ public class UpdateTeam {
                     }
                 }
             } else {
-                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
-                return;
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
+                return true;
             }
 
-            network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
-        });
-        ctx.setPacketHandled(true);
+            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
+            return true;
+        }
     }
 
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Serializer implements PacketSerializer<UpdateTeam> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Class<UpdateTeam> messageClass() {
+            return UpdateTeam.class;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
+        public void encode(UpdateTeam msg, FriendlyByteBuf buffer) {
             buffer.writeUtf(msg.teamName);
             buffer.writeVarInt(msg.players.size());
             for (UUID id : msg.players) {
@@ -96,7 +103,7 @@ public class UpdateTeam {
         }
 
         @Override
-        public Message decode(FriendlyByteBuf buffer) {
+        public UpdateTeam decode(FriendlyByteBuf buffer) {
             String teamName = buffer.readUtf();
             int size = buffer.readVarInt();
             Set<UUID> ids = Sets.newHashSet();
@@ -104,10 +111,7 @@ public class UpdateTeam {
                 ids.add(buffer.readUUID());
             }
 
-            return new Message(teamName, ids);
+            return new UpdateTeam(teamName, ids);
         }
-    }
-
-    public record Message(String teamName, Set<UUID> players) {
     }
 }

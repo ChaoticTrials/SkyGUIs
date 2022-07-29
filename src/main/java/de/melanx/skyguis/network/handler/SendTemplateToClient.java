@@ -6,43 +6,46 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.network.PacketHandler;
 import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class SendTemplateToClient {
+public record SendTemplateToClient(String name, ConfiguredTemplate template) {
 
-    public static void handle(Message msg, Supplier<NetworkEvent.Context> context) {
-        NetworkEvent.Context ctx = context.get();
-        ctx.enqueueWork(() -> {
-            if (Minecraft.getInstance().screen instanceof CreateTeamScreen screen) {
-                screen.addStructureToCache(msg.name, msg.template);
-            }
-        });
-        ctx.setPacketHandled(true);
-    }
-
-    public static class Serializer implements PacketSerializer<Message> {
+    public static class Handler implements PacketHandler<SendTemplateToClient> {
 
         @Override
-        public Class<Message> messageClass() {
-            return Message.class;
+        public Target target() {
+            return Target.MAIN_THREAD;
         }
 
         @Override
-        public void encode(Message msg, FriendlyByteBuf buffer) {
+        public boolean handle(SendTemplateToClient msg, Supplier<NetworkEvent.Context> ctx) {
+            if (Minecraft.getInstance().screen instanceof CreateTeamScreen screen) {
+                screen.addStructureToCache(msg.name, msg.template);
+            }
+            return true;
+        }
+    }
+
+    public static class Serializer implements PacketSerializer<SendTemplateToClient> {
+
+        @Override
+        public Class<SendTemplateToClient> messageClass() {
+            return SendTemplateToClient.class;
+        }
+
+        @Override
+        public void encode(SendTemplateToClient msg, FriendlyByteBuf buffer) {
             buffer.writeUtf(msg.name);
             buffer.writeNbt(msg.template.write(new CompoundTag()));
         }
 
         @Override
-        public Message decode(FriendlyByteBuf buffer) {
-            return new Message(buffer.readUtf(), ConfiguredTemplate.fromTag(Objects.requireNonNull(buffer.readAnySizeNbt())));
+        public SendTemplateToClient decode(FriendlyByteBuf buffer) {
+            return new SendTemplateToClient(buffer.readUtf(), ConfiguredTemplate.fromTag(Objects.requireNonNull(buffer.readAnySizeNbt())));
         }
-    }
-
-    public record Message(String name, ConfiguredTemplate template) {
-
     }
 }
