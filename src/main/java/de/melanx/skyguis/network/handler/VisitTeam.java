@@ -35,7 +35,7 @@ public record VisitTeam(UUID team) {
             }
 
             EasyNetwork network = SkyGUIs.getNetwork();
-            if (!ConfigHandler.Utility.Teleports.allowVisits) {
+            if (!ConfigHandler.Utility.Teleports.allowVisits && !player.hasPermissions(1)) {
                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.team_visit"));
                 return true;
             }
@@ -48,7 +48,7 @@ public record VisitTeam(UUID team) {
                 return true;
             }
 
-            if (!team.allowsVisits()) {
+            if (!team.allowsVisits() && !player.hasPermissions(1)) {
                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.visit_team"));
                 return true;
             }

@@ -21,7 +21,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("3");
+        return Protocol.of("4");
     }
 
     @Override

@@ -16,7 +16,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -60,13 +59,19 @@ public class TeamInfoScreen extends BaseScreen {
 
         Button visitButton = new Button(this.x(125), this.y(30), 110, 20, VISIT_TEAM, button -> {
         }, (button, poseStack, mouseX, mouseY) -> {
+            //noinspection ConstantConditions
+            if (this.minecraft.player.hasPermissions(1)) {
+                return;
+            }
+
             if (!ConfigHandler.Utility.Teleports.allowVisits) {
                 this.renderTooltip(poseStack, CONFIG_ALLOW_VISITS, mouseX, mouseY);
             } else if (!this.team.allowsVisits()) {
                 this.renderTooltip(poseStack, TEAM_ALLOW_VISITS, mouseX, mouseY);
             }
         });
-        visitButton.active = ConfigHandler.Utility.Teleports.allowVisits && this.team.allowsVisits();
+        //noinspection ConstantConditions
+        visitButton.active = this.minecraft.player.hasPermissions(1) || (ConfigHandler.Utility.Teleports.allowVisits && this.team.allowsVisits());
         this.addRenderableWidget(visitButton);
 
         this.addRenderableWidget(new Button(this.x(10), this.y(55), 226, 20, PREV_SCREEN_COMPONENT, button -> {
@@ -97,9 +102,7 @@ public class TeamInfoScreen extends BaseScreen {
                 minecraft.player.sendSystemMessage(result.reason());
             }
             case FAIL ->
-                    ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-                        ForgeHooksClient.popGuiLayer(minecraft);
-                    }));
+                    minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
         }
     }
 
