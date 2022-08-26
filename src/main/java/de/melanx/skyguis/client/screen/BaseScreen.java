@@ -12,7 +12,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import org.moddingx.libx.render.RenderHelper;
@@ -25,7 +24,7 @@ public abstract class BaseScreen extends Screen {
 
     private static final ResourceLocation GENERIC = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = ComponentBuilder.text("previous_screen");
-    public static final OnAbort DEFAULT_ABORT = () -> ForgeHooksClient.popGuiLayer(Minecraft.getInstance());
+    public static final OnAbort DEFAULT_ABORT = () -> Minecraft.getInstance().popGuiLayer();
 
     protected final int xSize;
     protected final int ySize;

@@ -21,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.ForgeHooksClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -132,9 +131,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     @Override
     public void onLoadingResult(LoadingResult result) {
         Minecraft minecraft = Minecraft.getInstance();
-        ForgeHooksClient.pushGuiLayer(minecraft, new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> {
-            ForgeHooksClient.popGuiLayer(minecraft);
-        }));
+        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
     }
 
     @Override
