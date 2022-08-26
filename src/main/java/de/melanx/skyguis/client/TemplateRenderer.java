@@ -1,5 +1,6 @@
 package de.melanx.skyguis.client;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 import org.moddingx.libx.render.ClientTickHandler;
 
@@ -122,12 +124,16 @@ public class TemplateRenderer {
     }
 
     private void renderForMultiblock(BlockState state, BlockPos pos, PoseStack poseStack, MultiBufferSource.BufferSource buffers) {
-        if (state.getRenderShape() != RenderShape.INVISIBLE) {
+        if (state.getRenderShape() == RenderShape.MODEL) {
             BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
             BakedModel model = blockRenderer.getBlockModel(state);
             for (RenderType layer : model.getRenderTypes(state, this.clientLevel.random, ModelData.EMPTY)) {
-                VertexConsumer buffer = buffers.getBuffer(layer);
-                blockRenderer.renderBatched(state, pos, this.clientLevel, poseStack, buffer, false, this.clientLevel.random, ModelData.EMPTY, layer);
+                poseStack.pushPose();
+                Lighting.setupForFlatItems();
+                Vec3 vec3 = state.getOffset(clientLevel, pos);
+                poseStack.translate(vec3.x, vec3.y, vec3.z);
+                blockRenderer.renderSingleBlock(state, poseStack, buffers, (int) (LightTexture.FULL_BLOCK * 0.8), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, layer);
+                poseStack.popPose();
             }
         }
     }
