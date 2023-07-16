@@ -46,7 +46,7 @@ public class TeamPlayersScreen extends PlayerListScreen implements LoadingResult
     protected void init() {
         this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, ComponentBuilder.text("kick"), (button -> {
             Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_kick"), () -> {
+            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_kick", removalIds.size()), () -> {
                 SkyGUIs.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                 this.onSuccess = () -> {
                     //noinspection DataFlowIssue
