@@ -1,7 +1,7 @@
 package de.melanx.skyguis.network.handler;
 
 import com.google.common.collect.Sets;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.InventoryConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -48,7 +48,7 @@ public record UpdateTeam(String teamName, Set<UUID> players) {
                 return true;
             }
 
-            ServerLevel level = player.getLevel();
+            ServerLevel level = (ServerLevel) player.level();
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeamFromPlayer(player);
             if (team == null) {
@@ -69,7 +69,7 @@ public record UpdateTeam(String teamName, Set<UUID> players) {
                         data.removePlayerFromTeam(id);
                         ServerPlayer toRemove = playerList.getPlayer(id);
                         if (toRemove != null) {
-                            if (ConfigHandler.Inventory.dropItems) {
+                            if (InventoryConfig.dropItems) {
                                 RandomUtility.dropInventories(toRemove);
                             }
                             WorldUtil.teleportToIsland(toRemove, data.getSpawn());

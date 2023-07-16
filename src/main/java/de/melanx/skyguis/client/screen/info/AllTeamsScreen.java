@@ -1,7 +1,6 @@
 package de.melanx.skyguis.client.screen.info;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.client.screen.BaseScreen;
@@ -14,6 +13,7 @@ import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -53,9 +53,9 @@ public class AllTeamsScreen extends BaseScreen {
     @Override
     protected void init() {
         if (this.playerTeam == null) {
-            this.addRenderableWidget(new Button(this.x(10), this.y(199), 160, 20, ComponentBuilder.title("create_team"), button -> {
+            this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> {
                 Minecraft.getInstance().setScreen(new CreateTeamScreen());
-            }));
+            }).bounds(this.x(10), this.y(199), 160, 20).build());
             this.yourTeamButton = null;
         } else {
             MutableComponent component = Component.literal(this.playerTeam.getName());
@@ -68,20 +68,20 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.scrollbar.render(poseStack);
-        this.font.draw(poseStack, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB());
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawString(this.font, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
-        this.font.draw(poseStack, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB());
+        guiGraphics.drawString(this.font, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB(), false);
 
         if (this.playerTeam != null) {
-            this.hLine(poseStack, this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
-            this.font.draw(poseStack, YOUR_TEAM, (this.x(10)), this.y(207), Color.DARK_GRAY.getRGB());
+            guiGraphics.hLine(this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
+            guiGraphics.drawString(this.font, YOUR_TEAM, (this.x(10)), this.y(207), Color.DARK_GRAY.getRGB(), false);
 
             // need to render tooltip here to be on top of scrollbar
             if (this.yourTeamButton.isHovered) {
-                this.renderTeamTooltip(poseStack, mouseX, mouseY, this.playerTeam);
+                this.renderTeamTooltip(guiGraphics, mouseX, mouseY, this.playerTeam);
             }
         }
 
@@ -92,21 +92,21 @@ public class AllTeamsScreen extends BaseScreen {
             String name = team.getName();
             String s = TextHelper.shorten(this.font, name, 175 - memberLength);
 
-            Component playerSizeComponent = Component.literal(String.valueOf(team.getPlayers().size()));
+            String playerSizeComponent = String.valueOf(team.getPlayers().size());
             Component teamNameComponent = Component.literal(s);
-            float x = this.x(179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent.getVisualOrderText()) / 2);
+            float x = this.x(179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent) / 2);
             int y = this.y(37 + j * 12);
-            this.font.draw(poseStack, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB());
-            this.font.draw(poseStack, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB());
+            guiGraphics.drawString(this.font, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB(), false);
+            guiGraphics.drawString(this.font, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB(), false);
             boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
-                this.renderTeamTooltip(poseStack, mouseX, mouseY, team);
+                this.renderTeamTooltip(guiGraphics, mouseX, mouseY, team);
             }
             j++;
         }
     }
 
-    private void renderTeamTooltip(@Nonnull PoseStack poseStack, int mouseX, int mouseY, @Nonnull Team team) {
+    private void renderTeamTooltip(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, @Nonnull Team team) {
         List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()));
         List<Component> smallTextLines = Lists.newArrayList();
         if (this.minecraft != null && this.minecraft.options.advancedItemTooltips) {
@@ -115,7 +115,7 @@ public class AllTeamsScreen extends BaseScreen {
         smallTextLines.add(ComponentBuilder.text("members").append(": " + team.getPlayers().size()));
         smallTextLines.add(ComponentBuilder.text("created_at").append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
         smallTextLines.add(ComponentBuilder.text("last_changed").append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
-        this.renderTooltip(poseStack, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
+        guiGraphics.renderTooltip(Minecraft.getInstance().font, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
     }
 
     @Override

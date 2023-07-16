@@ -4,6 +4,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyguis.network.handler.*;
 import de.melanx.skyguis.util.LoadingResult;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -55,8 +56,8 @@ public class EasyNetwork extends NetworkX {
         this.channel.sendToServer(new AnswerInvitation(teamName, type));
     }
 
-    public void handleEditSpawns(EditSpawns.Type type, BlockPos pos) {
-        this.channel.sendToServer(new EditSpawns(type, pos));
+    public void handleEditSpawns(EditSpawns.Type type, BlockPos pos, Direction direction) {
+        this.channel.sendToServer(new EditSpawns(type, pos, direction));
     }
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {

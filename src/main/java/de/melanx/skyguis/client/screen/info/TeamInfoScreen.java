@@ -1,7 +1,6 @@
 package de.melanx.skyguis.client.screen.info;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.client.screen.BaseScreen;
@@ -12,7 +11,9 @@ import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -42,48 +43,44 @@ public class TeamInfoScreen extends BaseScreen {
 
     @Override
     protected void init() {
-        Button joinButton = new Button(this.x(10), this.y(30), 110, 20, this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
-
-        }, (button, poseStack, mouseX, mouseY) -> {
-            //noinspection ConstantConditions
-            if (SkyblockSavedData.get(Minecraft.getInstance().level).hasPlayerTeam(Minecraft.getInstance().player)) {
-                this.renderTooltip(poseStack, USER_HAS_TEAM, mouseX, mouseY);
-            } else if (!ConfigHandler.Utility.selfManage) {
-                this.renderTooltip(poseStack, CONFIG_SELF_MANAGEMENT, mouseX, mouseY);
-            } else if (!this.team.allowsJoinRequests()) {
-                this.renderTooltip(poseStack, TEAM_JOIN_REQUESTS, mouseX, mouseY);
-            }
-        });
-        joinButton.active = ConfigHandler.Utility.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
+        Button joinButton = Button.builder(this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {})
+                .bounds(this.x(10), this.y(30), 110, 20)
+                .build();
+        //noinspection DataFlowIssue
+        if (SkyblockSavedData.get(Minecraft.getInstance().level).hasPlayerTeam(Minecraft.getInstance().player)) {
+            joinButton.setTooltip(Tooltip.create(USER_HAS_TEAM));
+        } else if (!PermissionsConfig.selfManage) {
+            joinButton.setTooltip(Tooltip.create(CONFIG_SELF_MANAGEMENT));
+        } else if (!this.team.allowsJoinRequests()) {
+            joinButton.setTooltip(Tooltip.create(TEAM_JOIN_REQUESTS));
+        }
+        joinButton.active = PermissionsConfig.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
         this.addRenderableWidget(joinButton);
 
-        Button visitButton = new Button(this.x(125), this.y(30), 110, 20, VISIT_TEAM, button -> {
-        }, (button, poseStack, mouseX, mouseY) -> {
-            //noinspection ConstantConditions
-            if (this.minecraft.player.hasPermissions(1)) {
-                return;
-            }
-
-            if (!ConfigHandler.Utility.Teleports.allowVisits) {
-                this.renderTooltip(poseStack, CONFIG_ALLOW_VISITS, mouseX, mouseY);
+        Button visitButton = Button.builder(VISIT_TEAM, button -> {})
+                .bounds(this.x(125), this.y(30), 110, 20)
+                .build();
+        //noinspection DataFlowIssue
+        if (!this.minecraft.player.hasPermissions(1)) {
+            if (!PermissionsConfig.Teleports.allowVisits) {
+                visitButton.setTooltip(Tooltip.create(CONFIG_ALLOW_VISITS));
             } else if (!this.team.allowsVisits()) {
-                this.renderTooltip(poseStack, TEAM_ALLOW_VISITS, mouseX, mouseY);
+                visitButton.setTooltip(Tooltip.create(TEAM_ALLOW_VISITS));
             }
-        });
-        //noinspection ConstantConditions
-        visitButton.active = this.minecraft.player.hasPermissions(1) || (ConfigHandler.Utility.Teleports.allowVisits && this.team.allowsVisits());
+        }
+        visitButton.active = this.minecraft.player.hasPermissions(1) || (PermissionsConfig.Teleports.allowVisits && this.team.allowsVisits());
         this.addRenderableWidget(visitButton);
 
-        this.addRenderableWidget(new Button(this.x(10), this.y(55), 226, 20, PREV_SCREEN_COMPONENT, button -> {
-            Minecraft.getInstance().setScreen(this.prev);
-        }));
+        this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
+                .bounds(this.x(10), this.y(55), 226, 20)
+                .build());
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(poseStack);
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.renderTitle(poseStack);
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics);
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        this.renderTitle(guiGraphics);
     }
 
     @Nullable

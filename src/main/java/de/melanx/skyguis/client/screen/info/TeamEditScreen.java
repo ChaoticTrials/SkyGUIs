@@ -1,7 +1,7 @@
 package de.melanx.skyguis.client.screen.info;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
@@ -16,8 +16,10 @@ import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
@@ -55,37 +57,45 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.x(10), this.y(45), 70, 20, SHOW, button -> {
-            for (BlockPos spawn : this.team.getPossibleSpawns()) {
-                double posX = spawn.getX() + 0.5D;
-                double posY = spawn.getY() + 0.5D;
-                double posZ = spawn.getZ() + 0.5D;
+        this.addRenderableWidget(Button.builder(SHOW, button -> {
+                    for (TemplatesConfig.Spawn spawn : this.team.getPossibleSpawns()) {
+                        double posX = spawn.pos().getX() + 0.5D;
+                        double posY = spawn.pos().getY() + 0.5D;
+                        double posZ = spawn.pos().getZ() + 0.5D;
 
-                // [Vanilla copy]
-                // net.minecraft.client.multiplayer.ClientPacketListener#handleParticleEvent(ClientboundLevelParticlesPacket)
-                for (int i = 0; i < 10; i++) {
-                    double offsetX = this.random.nextGaussian() * 0.1;
-                    double offsetY = this.random.nextGaussian() * 0.1;
-                    double offsetZ = this.random.nextGaussian() * 0.1;
-                    double speedX = this.random.nextGaussian() * 10;
-                    double speedY = this.random.nextGaussian() * 10;
-                    double speedZ = this.random.nextGaussian() * 10;
+                        // [Vanilla copy]
+                        // net.minecraft.client.multiplayer.ClientPacketListener#handleParticleEvent(ClientboundLevelParticlesPacket)
+                        for (int i = 0; i < 10; i++) {
+                            double offsetX = this.random.nextGaussian() * 0.1;
+                            double offsetY = this.random.nextGaussian() * 0.1;
+                            double offsetZ = this.random.nextGaussian() * 0.1;
+                            double speedX = this.random.nextGaussian() * 10;
+                            double speedY = this.random.nextGaussian() * 10;
+                            double speedZ = this.random.nextGaussian() * 10;
 
-                    //noinspection ConstantConditions
-                    this.minecraft.level.addParticle(ParticleTypes.HAPPY_VILLAGER, false, posX + offsetX, posY + offsetY, posZ + offsetZ, speedX, speedY, speedZ);
-                }
-            }
-            this.onClose();
-        }));
+                            //noinspection ConstantConditions
+                            this.minecraft.level.addParticle(ParticleTypes.HAPPY_VILLAGER, false,
+                                    posX + offsetX,
+                                    posY + offsetY,
+                                    posZ + offsetZ,
+                                    speedX, speedY, speedZ);
+                        }
+                    }
+                    this.onClose();
+                })
+                .bounds(this.x(10), this.y(45), 70, 20)
+                .build());
 
-        this.addButton = this.addRenderableWidget(new Button(this.x(85), this.y(45), 70, 20, ADD, button -> {
-            BlockPos pos = this.getPos();
-            if (this.posValid && pos != null) {
-                SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.ADD, pos);
-                //noinspection ConstantConditions
-                this.getLoadingCircle().setActive(true);
-            }
-        }, (button, poseStack, mouseX, mouseY) -> this.posBox.blink()));
+        this.addButton = this.addRenderableWidget(Button.builder(ADD, button -> {
+                    BlockPos pos = this.getPos();
+                    if (this.posValid && pos != null) {
+                        SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.ADD, pos, Direction.SOUTH); // todo direction by button?
+                        //noinspection ConstantConditions
+                        this.getLoadingCircle().setActive(true);
+                    }
+                })
+                .bounds(this.x(85), this.y(45), 70, 20)
+                .build());
 
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
@@ -95,28 +105,30 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);
 
-        this.removeButton = this.addRenderableWidget(new Button(this.x(160), this.y(45), 70, 20, REMOVE, button -> {
-            BlockPos removePos = this.getPos();
-            if (this.posValid && removePos != null) {
-                SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos);
-                //noinspection ConstantConditions
-                this.getLoadingCircle().setActive(true);
-            }
-        }));
+        this.removeButton = this.addRenderableWidget(Button.builder(REMOVE, button -> {
+                    BlockPos removePos = this.getPos();
+                    if (this.posValid && removePos != null) {
+                        SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos, null);
+                        //noinspection ConstantConditions
+                        this.getLoadingCircle().setActive(true);
+                    }
+                })
+                .bounds(this.x(160), this.y(45), 70, 20)
+                .build());
 
-        this.addRenderableWidget(new Button(this.x(10), this.y(115), 70, 20, SHOW, button -> {
-            Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this));
-        }));
+        this.addRenderableWidget(Button.builder(SHOW, button -> Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this)))
+                .bounds(this.x(10), this.y(115), 70, 20)
+                .build());
 
-        this.addRenderableWidget(new Button(this.x(85), this.y(115), 70, 20, INVITE, button -> {
-            Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this));
-        }));
+        this.addRenderableWidget(Button.builder(INVITE, button -> Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this)))
+                .bounds(this.x(85), this.y(115), 70, 20)
+                .build());
 
-        this.addRenderableWidget(new Button(this.x(10), this.y(155), 226, 20, PREV_SCREEN_COMPONENT, button -> {
-            Minecraft.getInstance().setScreen(this.prev);
-        }));
+        this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
+                .bounds(this.x(10), this.y(155), 226, 20)
+                .build());
 
-        if (!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) {
+        if (!PermissionsConfig.selfManage || !PermissionsConfig.Spawns.modifySpawns) {
             this.addButton.active = false;
             this.removeButton.active = false;
         }
@@ -142,19 +154,23 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(poseStack);
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.renderTitle(poseStack);
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics);
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        this.renderTitle(guiGraphics);
 
-        this.font.draw(poseStack, SPAWNS, this.x(10), this.y(30), Color.DARK_GRAY.getRGB());
-        this.font.draw(poseStack, MEMBERS, this.x(10), this.y(100), Color.DARK_GRAY.getRGB());
+        guiGraphics.drawString(this.font, SPAWNS, this.x(10), this.y(30), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, MEMBERS, this.x(10), this.y(100), Color.DARK_GRAY.getRGB(), false);
 
         if (!this.posValid) {
-            poseStack.pushPose();
-            poseStack.scale(1.3F, 1.3F, 1.3F);
-            this.font.draw(poseStack, INVALID, (float) ((this.x(191) - this.font.width(INVALID) / 2) / 1.3), (float) ((this.y(74)) / 1.3), Color.RED.getRGB());
-            poseStack.popPose();
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().scale(1.3F, 1.3F, 1.3F);
+            guiGraphics.drawString(this.font, INVALID.getString(), (float) ((this.x(191) - this.font.width(INVALID) / 2) / 1.3), (float) ((this.y(74)) / 1.3), Color.RED.getRGB(), false);
+            guiGraphics.pose().popPose();
+        }
+
+        if (this.addButton.isHovered()) {
+            this.posBox.blink();
         }
     }
 
@@ -176,7 +192,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
 
         if (this.posValid) {
             this.posBox.setValid();
-            if (ConfigHandler.Utility.selfManage && ConfigHandler.Utility.Spawns.modifySpawns) {
+            if (PermissionsConfig.selfManage && PermissionsConfig.Spawns.modifySpawns) {
                 this.addButton.active = true;
                 this.removeButton.active = true;
             }

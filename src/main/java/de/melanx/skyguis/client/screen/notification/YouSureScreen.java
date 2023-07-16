@@ -23,11 +23,11 @@ public class YouSureScreen extends NotificationScreen {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.centeredX(50) - 30, this.y(45), 50, 20, CONFIRM, (button -> {
-            this.onConfirm.onConfirm();
-        })));
-        this.addRenderableWidget(new Button(this.centeredX(50) + 30, this.y(45), 50, 20, ABORT, (button -> {
-            this.onAbort.onAbort();
-        })));
+        this.addRenderableWidget(Button.builder(CONFIRM, (button -> this.onConfirm.onConfirm()))
+                .bounds(this.centeredX(50) - 30, this.y(45), 50, 20)
+                .build());
+        this.addRenderableWidget(Button.builder(ABORT, (button -> this.onAbort.onAbort()))
+                .bounds(this.centeredX(50) + 30, this.y(45), 50, 20)
+                .build());
     }
 }

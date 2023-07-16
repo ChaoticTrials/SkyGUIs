@@ -18,7 +18,6 @@ import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.ForgeHooksClient;
 import org.moddingx.libx.impl.config.gui.screen.widget.TextWidget;
 import org.moddingx.libx.screen.Panel;
 
@@ -63,7 +62,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
                     team -> {
                         minecraft.pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_join", team.getName()), () -> {
                             SkyGUIs.getNetwork().handleInvitationAnswer(team.getName(), AnswerInvitation.Type.ACCEPT);
-                            ForgeHooksClient.clearGuiLayers(minecraft);
+                            minecraft.setScreen(null);
                         }
                         ));
                     },
@@ -93,14 +92,14 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
     private static class JoinTeamWidget extends Panel {
 
         public JoinTeamWidget(Team team, Screen screen, int x, int y, int width, int height, Consumer<Team> onJoin, Consumer<Team> onIgnore) {
-            super(screen, x, y, width, height);
-            this.addRenderableWidget(new SizableButton(0, 0, 30, height, Component.literal("Join"), button -> {
-                onJoin.accept(team);
-            }));
-            this.addRenderableWidget(new SizableButton(33, 0, 30, height, Component.literal("Ignore"), button -> {
-                onIgnore.accept(team);
-            }));
-            this.addRenderableOnly(new TextWidget(screen, 66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));
+            super(x, y, width, height);
+            this.addRenderableWidget(SizableButton.builder(Component.literal("Join"), button -> onJoin.accept(team))
+                    .bounds(0, 0, 30, height)
+                    .build());
+            this.addRenderableWidget(SizableButton.builder(Component.literal("Ignore"), button -> onIgnore.accept(team))
+                    .bounds(33, 0, 30, height)
+                    .build());
+            this.addRenderableOnly(new TextWidget(66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));
         }
     }
 }

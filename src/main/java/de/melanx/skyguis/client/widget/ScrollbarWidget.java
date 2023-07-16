@@ -1,11 +1,10 @@
 package de.melanx.skyguis.client.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.util.Math2;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 
@@ -13,7 +12,7 @@ import javax.annotation.Nonnull;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ScrollbarWidget implements GuiEventListener {
+public class ScrollbarWidget implements GuiEventListener, Renderable {
 
     private static final int SCROLLER_HEIGHT = 15;
     private static final ResourceLocation ICONS = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/icons.png");
@@ -24,7 +23,8 @@ public class ScrollbarWidget implements GuiEventListener {
     private final int height;
     private final List<ScrollbarWidgetListener> listeners = new LinkedList<>();
     private final BaseScreen screen;
-    private boolean enabled = false;
+    private boolean enabled;
+    private boolean focused;
 
     private int offset;
     private int maxOffset;
@@ -60,12 +60,12 @@ public class ScrollbarWidget implements GuiEventListener {
         return this.enabled;
     }
 
-    public void render(@Nonnull PoseStack poseStack) {
-        RenderSystem.setShaderTexture(0, ICONS);
-        GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y - 1, this.width + 2, 1, 0, 15, 14, 1, 256, 256);
-        GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, this.width + 2, this.height, 0, 17, 14, 12, 256, 256);
-        GuiComponent.blit(poseStack, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y + this.height, this.width + 2, 1, 0, 31, 14, 1, 256, 256);
-        this.screen.blit(poseStack, this.screen.getRelX() + this.x, this.screen.getRelY() + this.y + (int) Math.min(this.height - SCROLLER_HEIGHT, (float) this.offset / (float) this.maxOffset * (float) (this.height - SCROLLER_HEIGHT)), this.enabled ? 0 : 12, 0, 12, 15);
+    @Override
+    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y - 1, this.width + 2, 1, 0, 15, 14, 1, 256, 256);
+        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, this.width + 2, this.height, 0, 17, 14, 12, 256, 256);
+        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y + this.height, this.width + 2, 1, 0, 31, 14, 1, 256, 256);
+        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x, this.screen.getRelY() + this.y + (int) Math.min(this.height - SCROLLER_HEIGHT, (float) this.offset / (float) this.maxOffset * (float) (this.height - SCROLLER_HEIGHT)), this.enabled ? 0 : 12, 0, 12, 15);
     }
 
     @Override
@@ -140,5 +140,15 @@ public class ScrollbarWidget implements GuiEventListener {
 
     public int getOffset() {
         return this.offset;
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
+    @Override
+    public boolean isFocused() {
+        return this.focused;
     }
 }

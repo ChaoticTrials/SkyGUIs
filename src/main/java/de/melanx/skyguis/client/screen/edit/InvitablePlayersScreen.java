@@ -2,7 +2,6 @@ package de.melanx.skyguis.client.screen.edit;
 
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
@@ -17,6 +16,7 @@ import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -50,21 +50,21 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
 
     @Override
     protected void init() {
-        this.inviteButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, INVITE, (button -> {
-            Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
-                SkyGUIs.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
-                Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
-            }, () -> Minecraft.getInstance().setScreen(this)));
-        })));
+        this.inviteButton = this.addRenderableWidget(Button.builder(INVITE, (button -> {
+                    Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+                    Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
+                        SkyGUIs.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
+                        Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
+                    }, () -> Minecraft.getInstance().setScreen(this)));
+                }))
+                .bounds(this.x(10), this.y(200), 40, 20)
+                .build());
 
-        this.addRenderableWidget(new Button(this.x(57), this.y(200), 115, 20, PREV_SCREEN_COMPONENT, button -> {
-            Minecraft.getInstance().setScreen(this.prev);
-        }));
+        this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
+                .bounds(this.x(57), this.y(200), 115, 20)
+                .build());
 
-        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, (checkbox, poseStack, mouseX, mouseY) -> {
-            this.renderTooltip(poseStack, this.allSelected() ? UNSELECT_ALL : SELECT_ALL, mouseX, mouseY);
-        }) {
+        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, this.allSelected() ? UNSELECT_ALL : SELECT_ALL) {
             @Override
             public void onPress() {
                 super.onPress();
@@ -93,9 +93,9 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.font.draw(poseStack, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 
     public void updateButtons() {
@@ -110,11 +110,6 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
         boolean ret = super.mouseClicked(mouseX, mouseY, button);
         this.updateButtons();
         return ret;
-    }
-
-    @Override
-    protected int entriesPerPage() {
-        return 10;
     }
 
     private static Set<UUID> getInvitablePlayers(Team team) {

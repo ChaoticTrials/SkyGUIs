@@ -1,7 +1,6 @@
 package de.melanx.skyguis.client.screen.edit;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
@@ -11,6 +10,7 @@ import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.client.widget.sizable.SizeableCheckbox;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.network.chat.Component;
@@ -39,26 +39,26 @@ public class TeamPlayersScreen extends PlayerListScreen {
 
     @Override
     protected void init() {
-        this.kickButton = this.addRenderableWidget(new Button(this.x(10), this.y(200), 40, 20, ComponentBuilder.text("kick"), (button -> {
-            Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-            Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_kick"), () -> {
-                SkyGUIs.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
-                //noinspection ConstantConditions
-                if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
-                    Minecraft.getInstance().setScreen(new AllTeamsScreen());
-                } else {
-                    Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
-                }
-            }, () -> Minecraft.getInstance().setScreen(this)));
-        })));
+        this.kickButton = this.addRenderableWidget(Button.builder(ComponentBuilder.text("kick"), (button -> {
+                    Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+                    Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_kick"), () -> {
+                        SkyGUIs.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
+                        //noinspection ConstantConditions
+                        if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
+                            Minecraft.getInstance().setScreen(new AllTeamsScreen());
+                        } else {
+                            Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
+                        }
+                    }, () -> Minecraft.getInstance().setScreen(this)));
+                }))
+                .bounds(this.x(10), this.y(200), 40, 20)
+                .build());
 
-        this.addRenderableWidget(new Button(this.x(57), this.y(200), 115, 20, PREV_SCREEN_COMPONENT, button -> {
-            Minecraft.getInstance().setScreen(this.prev);
-        }));
+        this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
+                .bounds(this.x(57), this.y(200), 115, 20)
+                .build());
 
-        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, (checkbox, poseStack, mouseX, mouseY) -> {
-            this.renderTooltip(poseStack, this.allSelected() ? UNSELECT_ALL : SELECT_ALL, mouseX, mouseY);
-        }) {
+        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, this.allSelected() ? UNSELECT_ALL : SELECT_ALL) {
             @Override
             public void onPress() {
                 super.onPress();
@@ -75,9 +75,9 @@ public class TeamPlayersScreen extends PlayerListScreen {
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.font.draw(poseStack, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB());
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 
     public void updateButtons() {
@@ -92,10 +92,5 @@ public class TeamPlayersScreen extends PlayerListScreen {
         boolean ret = super.mouseClicked(mouseX, mouseY, button);
         this.updateButtons();
         return ret;
-    }
-
-    @Override
-    protected int entriesPerPage() {
-        return 10;
     }
 }

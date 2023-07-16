@@ -43,7 +43,7 @@ public record CreateTeamScreenClick(String name, String shape) {
                 return true;
             }
 
-            ServerLevel level = player.getLevel();
+            ServerLevel level = (ServerLevel) player.level();
             ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate(msg.shape);
             if (template == null) {
                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("shape_does_not_exist").withStyle(ChatFormatting.RED));

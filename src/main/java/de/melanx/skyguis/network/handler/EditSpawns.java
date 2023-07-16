@@ -1,15 +1,18 @@
 package de.melanx.skyguis.network.handler;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.config.common.SpawnConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.data.TemplateData;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.LoadingResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,7 +26,7 @@ import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public record EditSpawns(Type type, BlockPos pos) {
+public record EditSpawns(Type type, BlockPos pos, Direction direction) {
 
     public static class Handler implements PacketHandler<EditSpawns> {
 
@@ -51,14 +54,14 @@ public record EditSpawns(Type type, BlockPos pos) {
             switch (msg.type) {
                 // handle adding spawns
                 case ADD -> {
-                    Event.Result result = SkyblockHooks.onAddSpawn(player, team, msg.pos).getLeft();
+                    Event.Result result = SkyblockHooks.onAddSpawn(player, team, msg.pos, msg.direction).getLeft();
                     switch (result) {
                         case DENY -> {
                             network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.create_spawn"));
                             return true;
                         }
                         case DEFAULT -> {
-                            if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !player.hasPermissions(2)) {
+                            if ((!PermissionsConfig.selfManage || !PermissionsConfig.Spawns.modifySpawns) && !player.hasPermissions(2)) {
                                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
                                 return true;
                             }
@@ -66,21 +69,21 @@ public record EditSpawns(Type type, BlockPos pos) {
                             Vec3i templateSize = TemplateData.get(level).getConfiguredTemplate().getTemplate().getSize();
                             BlockPos center = team.getIsland().getCenter().mutable();
                             center.offset(templateSize.getX() / 2, templateSize.getY() / 2, templateSize.getZ() / 2);
-                            if (!msg.pos.closerThan(center, ConfigHandler.Utility.Spawns.range)) {
+                            if (!msg.pos.closerThan(center, PermissionsConfig.Spawns.range)) {
                                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.position_too_far_away"));
                                 return true;
                             }
                         }
                     }
 
-                    team.addPossibleSpawn(msg.pos); // TODO send fail if not added
+                    team.addPossibleSpawn(msg.pos, WorldUtil.Directions.fromDirection(msg.direction)); // TODO send fail if not added
                     network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.spawn_added", msg.pos.getX(), msg.pos.getY(), msg.pos.getZ()));
                     return true;
                 }
 
                 // handle removing spawns
                 case REMOVE -> {
-                    if (level != level.getServer().getLevel(ConfigHandler.Spawn.dimension)) {
+                    if (level != level.getServer().getLevel(SpawnConfig.dimension)) {
                         network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.wrong_position"));
                         return true;
                     }
@@ -92,7 +95,7 @@ public record EditSpawns(Type type, BlockPos pos) {
                             return true;
                         }
                         case DEFAULT -> {
-                            if ((!ConfigHandler.Utility.selfManage || !ConfigHandler.Utility.Spawns.modifySpawns) && !player.hasPermissions(2)) {
+                            if ((!PermissionsConfig.selfManage || !PermissionsConfig.Spawns.modifySpawns) && !player.hasPermissions(2)) {
                                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.modify_spawns"));
                                 return true;
                             }
@@ -129,11 +132,12 @@ public record EditSpawns(Type type, BlockPos pos) {
         public void encode(EditSpawns msg, FriendlyByteBuf buffer) {
             buffer.writeEnum(msg.type);
             buffer.writeBlockPos(msg.pos);
+            buffer.writeEnum(msg.direction);
         }
 
         @Override
         public EditSpawns decode(FriendlyByteBuf buffer) {
-            return new EditSpawns(buffer.readEnum(Type.class), buffer.readBlockPos());
+            return new EditSpawns(buffer.readEnum(Type.class), buffer.readBlockPos(), buffer.readEnum(Direction.class));
         }
     }
 

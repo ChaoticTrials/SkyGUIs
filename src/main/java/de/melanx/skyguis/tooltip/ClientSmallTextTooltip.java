@@ -1,12 +1,13 @@
 package de.melanx.skyguis.tooltip;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -36,9 +37,9 @@ public class ClientSmallTextTooltip implements ClientTooltipComponent {
                     true,
                     poseStack.last().pose(),
                     bufferSource,
-                    false,
+                    Font.DisplayMode.NORMAL,
                     0,
-                    15728880
+                    LightTexture.FULL_BRIGHT
             );
             i++;
         }

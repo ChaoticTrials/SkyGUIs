@@ -1,7 +1,7 @@
 package de.melanx.skyguis.client.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import org.moddingx.libx.render.ClientTickHandler;
@@ -20,20 +20,20 @@ public class BlinkingEditBox extends EditBox {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.render(poseStack, mouseX, mouseY, partialTick);
+    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         if (this.highlight) {
-            this.renderOutline(poseStack, Color.GREEN.getRGB());
+            this.renderOutline(guiGraphics, Color.GREEN.getRGB());
         } else if (!this.valid) {
-            this.renderOutline(poseStack, Color.RED.getRGB());
+            this.renderOutline(guiGraphics, Color.RED.getRGB());
         }
     }
 
-    public void renderOutline(PoseStack poseStack, int color) {
-        fill(poseStack, this.x - 1, this.y - 1, this.x + this.width + 1, this.y, color);
-        fill(poseStack, this.x - 1, this.y - 1, this.x, this.y + this.height + 1, color);
-        fill(poseStack, this.x + this.width, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, color);
-        fill(poseStack, this.x - 1, this.y + this.height, this.x + this.width + 1, this.y + this.height + 1, color);
+    public void renderOutline(GuiGraphics guiGraphics, int color) {
+        guiGraphics.fill(this.x - 1, this.y - 1, this.x + this.width + 1, this.y, color);
+        guiGraphics.fill(this.x - 1, this.y - 1, this.x, this.y + this.height + 1, color);
+        guiGraphics.fill(this.x + this.width, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, color);
+        guiGraphics.fill(this.x - 1, this.y + this.height, this.x + this.width + 1, this.y + this.height + 1, color);
     }
 
     public void blink() {
@@ -50,7 +50,7 @@ public class BlinkingEditBox extends EditBox {
 
     @Override
     public void tick() {
-        if (ClientTickHandler.ticksInGame % 5 == 0) {
+        if (ClientTickHandler.ticksInGame() % 5 == 0) {
             if (this.timer > 0) {
                 this.highlight = !this.highlight;
             } else {

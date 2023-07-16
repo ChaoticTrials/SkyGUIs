@@ -1,10 +1,10 @@
 package de.melanx.skyguis.client.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.util.Math2;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
 import org.lwjgl.opengl.GL11;
 import org.moddingx.libx.screen.Panel;
 
@@ -18,12 +18,12 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     private final int renderHeight;
     private final int scrollOffset;
 
-    public RenderArea(Screen screen, int x, int y, int renderWidth, int renderHeight, int totalWidth, int totalHeight) {
-        this(screen, x, y, renderWidth, renderHeight, totalWidth, totalHeight, 0);
+    public RenderArea(int x, int y, int renderWidth, int renderHeight, int totalWidth, int totalHeight) {
+        this(x, y, renderWidth, renderHeight, totalWidth, totalHeight, 0);
     }
 
-    public RenderArea(Screen screen, int x, int y, int renderWidth, int renderHeight, int totalWidth, int totalHeight, int scrollOffset) {
-        super(screen, x, y, totalWidth, totalHeight);
+    public RenderArea(int x, int y, int renderWidth, int renderHeight, int totalWidth, int totalHeight, int scrollOffset) {
+        super(x, y, totalWidth, totalHeight);
         this.initX = x;
         this.initY = y;
         this.renderWidth = renderWidth;
@@ -41,12 +41,11 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     }
 
     @Override
-    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        double guiScale = this.screen.getMinecraft().getWindow().getGuiScale();
-        GL11.glScissor((int) (this.initX * guiScale), this.screen.getMinecraft().getWindow().getHeight() - (int) ((this.initY + this.renderHeight) * guiScale), (int) (this.renderWidth * guiScale), (int) (this.renderHeight * guiScale));
-        super.render(poseStack, mouseX, mouseY, partialTick);
-//        this.screen.renderBackground(poseStack);
+        double guiScale = Minecraft.getInstance().getWindow().getGuiScale();
+        GL11.glScissor((int) (this.initX * guiScale), Minecraft.getInstance().getWindow().getHeight() - (int) ((this.initY + this.renderHeight) * guiScale), (int) (this.renderWidth * guiScale), (int) (this.renderHeight * guiScale));
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
 
@@ -59,11 +58,11 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
         return false;
     }
 
-    public <T extends GuiEventListener & Widget> T addRenderableWidget2(T widget) {
+    public <T extends GuiEventListener & Renderable> T addRenderableWidget2(T widget) {
         return this.addRenderableWidget(widget);
     }
 
-    public <T extends Widget> T addRenderableOnly2(T widget) {
+    public <T extends Renderable> T addRenderableOnly2(T widget) {
         return this.addRenderableOnly(widget);
     }
 

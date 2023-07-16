@@ -1,6 +1,6 @@
 package de.melanx.skyguis.network.handler;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.util.WorldUtil;
@@ -35,12 +35,12 @@ public record VisitTeam(UUID team) {
             }
 
             EasyNetwork network = SkyGUIs.getNetwork();
-            if (!ConfigHandler.Utility.Teleports.allowVisits && !player.hasPermissions(1)) {
+            if (!PermissionsConfig.Teleports.allowVisits && !player.hasPermissions(1)) {
                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.team_visit"));
                 return true;
             }
 
-            ServerLevel level = player.getLevel();
+            ServerLevel level = (ServerLevel) player.level();
             SkyblockSavedData data = SkyblockSavedData.get(level);
             Team team = data.getTeam(msg.team);
             if (team == null) {

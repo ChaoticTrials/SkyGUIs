@@ -14,8 +14,8 @@ public class InformationScreen extends NotificationScreen {
 
     @Override
     protected void init() {
-        this.addRenderableWidget(new Button(this.centeredX(60), this.y(60), 60, 20, ComponentBuilder.button("ok"), button -> {
-            this.onConfirm.onConfirm();
-        }));
+        this.addRenderableWidget(Button.builder(ComponentBuilder.button("ok"), button -> this.onConfirm.onConfirm())
+                .bounds(this.centeredX(60), this.y(60), 60, 20)
+                .build());
     }
 }

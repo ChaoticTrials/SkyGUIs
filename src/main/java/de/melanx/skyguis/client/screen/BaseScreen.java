@@ -1,12 +1,13 @@
 package de.melanx.skyguis.client.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -57,22 +58,22 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public final void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public final void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         boolean loadingCircleActive = this.loadingCircle != null && this.loadingCircle.isActive();
 
         if (!loadingCircleActive) {
-            this.renderBackground(poseStack);
+            this.renderBackground(guiGraphics);
         }
-        this.render_(poseStack, mouseX, mouseY, partialTick);
+        this.render_(guiGraphics, mouseX, mouseY, partialTick);
         if (loadingCircleActive) {
-            this.renderBackground(poseStack);
-            this.loadingCircle.render(poseStack, mouseX, mouseY, partialTick);
+            this.renderBackground(guiGraphics);
+            this.loadingCircle.render(guiGraphics, mouseX, mouseY, partialTick);
         }
     }
 
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        RenderHelper.renderGuiBackground(poseStack, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
-        super.render(poseStack, mouseX, mouseY, partialTick);
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        RenderHelper.renderGuiBackground(guiGraphics, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Nullable
@@ -85,11 +86,10 @@ public abstract class BaseScreen extends Screen {
         return this.loadingCircle;
     }
 
-    public void onLoadingResult(LoadingResult result) {
-    }
+    public void onLoadingResult(LoadingResult result) {}
 
-    public void renderTitle(@Nonnull PoseStack poseStack) {
-        this.font.draw(poseStack, this.title, this.centeredX(this.font.width(this.title.getVisualOrderText())), this.y(10), Color.DARK_GRAY.getRGB());
+    public void renderTitle(@Nonnull GuiGraphics guiGraphics) {
+        guiGraphics.drawString(this.font, this.title, this.centeredX(this.font.width(this.title.getVisualOrderText())), this.y(10), Color.DARK_GRAY.getRGB(), false);
     }
 
     public float centeredX(float width) {
@@ -224,12 +224,10 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public boolean changeFocus(boolean focus) {
-        if (this.preventUserInput) {
-            return false;
+    protected void changeFocus(@Nonnull ComponentPath path) {
+        if (!this.preventUserInput) {
+            super.changeFocus(path);
         }
-
-        return super.changeFocus(focus);
     }
 
     @Override

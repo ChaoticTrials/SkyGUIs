@@ -1,8 +1,8 @@
 package de.melanx.skyguis.client.screen.base;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.client.screen.BaseScreen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
@@ -23,10 +23,10 @@ public class NotificationScreen extends BaseScreen {
     }
 
     @Override
-    public void render_(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(poseStack);
-        super.render_(poseStack, mouseX, mouseY, partialTick);
-        this.renderTitle(poseStack);
+    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics);
+        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+        this.renderTitle(guiGraphics);
     }
 
     @Override

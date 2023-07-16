@@ -1,6 +1,6 @@
 package de.melanx.skyguis.network.handler;
 
-import de.melanx.skyblockbuilder.config.ConfigHandler;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
@@ -60,7 +60,7 @@ public record AnswerInvitation(String teamName, Type type) {
                             return true;
                         }
                         case DEFAULT -> {
-                            if (!ConfigHandler.Utility.selfManage && !player.hasPermissions(2)) {
+                            if (!PermissionsConfig.selfManage && !player.hasPermissions(2)) {
                                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.accept_invitations").withStyle(ChatFormatting.RED));
                                 return true;
                             }
@@ -92,7 +92,7 @@ public record AnswerInvitation(String teamName, Type type) {
                             return true;
                         }
                         case DEFAULT -> {
-                            if (!ConfigHandler.Utility.selfManage && !player.hasPermissions(2)) {
+                            if (!PermissionsConfig.selfManage && !player.hasPermissions(2)) {
                                 network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED));
                                 return true;
                             }
