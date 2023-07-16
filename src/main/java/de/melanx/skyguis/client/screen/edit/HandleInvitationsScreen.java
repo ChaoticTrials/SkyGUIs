@@ -9,7 +9,6 @@ import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.base.list.TeamListScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
-import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.client.widget.sizable.SizableButton;
 import de.melanx.skyguis.network.handler.AnswerInvitation;
 import de.melanx.skyguis.util.ComponentBuilder;
@@ -21,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import org.moddingx.libx.impl.config.gui.screen.widget.TextWidget;
 import org.moddingx.libx.screen.Panel;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -41,14 +39,11 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
         Minecraft.getInstance().setScreen(new HandleInvitationsScreen());
     }
 
-    @Nullable
-    @Override
-    public LoadingCircle createLoadingCircle() {
-        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
-    }
-
     @Override
     public void onLoadingResult(LoadingResult result) {
+        if (result.status() == LoadingResult.Status.SUCCESS) {
+            Minecraft.getInstance().setScreen(null);
+        }
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
     }
@@ -60,7 +55,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
             this.renderArea.addRenderableWidget2(new JoinTeamWidget(this.values.get(i), this, 0, ENTRY_HEIGHT * i, 100, 12,
                     // pressing join button
                     team -> {
-                        minecraft.pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_join", team.getName()), () -> {
+                        minecraft.pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_join", team.getName()), () -> {
                             SkyGUIs.getNetwork().handleInvitationAnswer(team.getName(), AnswerInvitation.Type.ACCEPT);
                             minecraft.setScreen(null);
                         }
@@ -68,7 +63,7 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
                     },
                     // pressing ignore button
                     team -> {
-                        minecraft.pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_ignore", team.getName()), () -> {
+                        minecraft.pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_ignore", team.getName()), () -> {
                             SkyGUIs.getNetwork().handleInvitationAnswer(team.getName(), AnswerInvitation.Type.IGNORE);
                             Minecraft.getInstance().setScreen(new HandleInvitationsScreen());
                         }));

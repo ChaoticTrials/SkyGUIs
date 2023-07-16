@@ -10,7 +10,6 @@ import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
-import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.client.widget.sizable.SizeableCheckbox;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
@@ -24,7 +23,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +50,7 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
     protected void init() {
         this.inviteButton = this.addRenderableWidget(Button.builder(INVITE, (button -> {
                     Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-                    Minecraft.getInstance().pushGuiLayer(new YouSureScreen(ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
+                    Minecraft.getInstance().pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
                         SkyGUIs.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
                         Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
                     }, () -> Minecraft.getInstance().setScreen(this)));
@@ -78,12 +76,6 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
 
         super.init();
         this.updateButtons();
-    }
-
-    @Nullable
-    @Override
-    public LoadingCircle createLoadingCircle() {
-        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
     }
 
     @Override

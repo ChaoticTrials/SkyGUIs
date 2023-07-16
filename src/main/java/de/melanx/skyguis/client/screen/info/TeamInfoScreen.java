@@ -4,8 +4,8 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.client.screen.BaseScreen;
+import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
-import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
@@ -19,9 +19,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class TeamInfoScreen extends BaseScreen {
+public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
 
     private static final MutableComponent CONFIG_SELF_MANAGEMENT = Component.translatable("skyblockbuilder.command.disabled.join_request").withStyle(ChatFormatting.RED);
     private static final MutableComponent TEAM_JOIN_REQUESTS = Component.translatable("skyblockbuilder.command.disabled.team_join_request").withStyle(ChatFormatting.RED);
@@ -81,12 +80,6 @@ public class TeamInfoScreen extends BaseScreen {
         this.renderBackground(guiGraphics);
         super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTitle(guiGraphics);
-    }
-
-    @Nullable
-    @Override
-    public LoadingCircle createLoadingCircle() {
-        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
     }
 
     @Override

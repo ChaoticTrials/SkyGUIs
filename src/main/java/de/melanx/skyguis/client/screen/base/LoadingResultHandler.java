@@ -1,11 +1,14 @@
 package de.melanx.skyguis.client.screen.base;
 
+import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.LoadingResult;
 
 public interface LoadingResultHandler {
 
-    LoadingCircle createLoadingCircle();
+    default LoadingCircle createLoadingCircle(BaseScreen screen) {
+        return new LoadingCircle(screen.centeredX(32), screen.centeredY(32), 32);
+    }
 
     void onLoadingResult(LoadingResult result);
 }
