@@ -58,7 +58,7 @@ public class AllTeamsScreen extends BaseScreen {
             }).bounds(this.x(10), this.y(199), 160, 20).build());
             this.yourTeamButton = null;
         } else {
-            MutableComponent component = Component.literal(this.playerTeam.getName());
+            MutableComponent component = Component.literal(TextHelper.shorten(this.font, this.playerTeam.getName(), this.xSize - TextHelper.stringLength(YOUR_TEAM) - 40));
             this.yourTeamButton = this.addRenderableWidget(new ClickableText(this.x(15) + TextHelper.stringLength(YOUR_TEAM), this.y(207), TextHelper.DARK_GREEN.getRGB(), component, button -> {
                 Minecraft.getInstance().setScreen(new TeamEditScreen(this.playerTeam, this));
             }));
