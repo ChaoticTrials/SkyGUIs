@@ -3,6 +3,7 @@ package de.melanx.skyguis.client.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import de.melanx.skyguis.SkyGUIs;
+import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
@@ -49,10 +50,12 @@ public abstract class BaseScreen extends Screen {
     }
 
     private void guiInitPost(ScreenEvent.Init.Post event) {
-        boolean prevActive = this.loadingCircle != null && this.loadingCircle.isActive();
-        this.loadingCircle = this.createLoadingCircle();
-        if (this.loadingCircle != null) {
-            this.loadingCircle.setActive(prevActive);
+        if (this instanceof LoadingResultHandler loadingResultHandler) {
+            boolean prevActive = this.loadingCircle != null && this.loadingCircle.isActive();
+            this.loadingCircle = loadingResultHandler.createLoadingCircle(this);
+            if (this.loadingCircle != null) {
+                this.loadingCircle.setActive(prevActive);
+            }
         }
     }
 
@@ -76,16 +79,8 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Nullable
-    public LoadingCircle createLoadingCircle() {
-        return null;
-    }
-
-    @Nullable
     public LoadingCircle getLoadingCircle() {
         return this.loadingCircle;
-    }
-
-    public void onLoadingResult(LoadingResult result) {
     }
 
     public void renderTitle(@Nonnull PoseStack poseStack) {
@@ -142,11 +137,11 @@ public abstract class BaseScreen extends Screen {
 
     @Override
     public void tick() {
-        if (this.loadingCircle != null && this.loadingCircle.isActive()) {
+        if (this instanceof LoadingResultHandler loadingResultHandler && this.loadingCircle != null && this.loadingCircle.isActive()) {
             this.preventUserInput = true;
             LoadingResult result = this.getResult();
             if (result != null) {
-                this.onLoadingResult(result);
+                loadingResultHandler.onLoadingResult(result);
                 this.loadingCircle.setActive(false);
                 this.preventUserInput = false;
             }

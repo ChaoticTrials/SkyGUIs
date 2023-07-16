@@ -8,7 +8,6 @@ import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.TemplateRenderer;
 import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
-import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
@@ -105,11 +104,6 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     public void tick() {
         this.name.tick();
         super.tick();
-    }
-
-    @Override
-    public LoadingCircle createLoadingCircle() {
-        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
     }
 
     @Override

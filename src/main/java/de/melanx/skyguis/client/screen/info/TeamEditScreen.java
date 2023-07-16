@@ -10,7 +10,6 @@ import de.melanx.skyguis.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.skyguis.client.screen.edit.TeamPlayersScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.widget.BlinkingEditBox;
-import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.network.handler.EditSpawns;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
@@ -120,12 +119,6 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
             this.addButton.active = false;
             this.removeButton.active = false;
         }
-    }
-
-    @Nullable
-    @Override
-    public LoadingCircle createLoadingCircle() {
-        return new LoadingCircle(this.centeredX(32), this.centeredY(32), 32);
     }
 
     @Override
