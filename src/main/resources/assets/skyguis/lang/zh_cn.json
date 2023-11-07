@@ -1,0 +1,47 @@
+{
+  "itemGroup.skyguis": "空岛图形化界面",
+
+  "screen.skyguis.template": "模板",
+
+  "screen.skyguis.title.create_team": "创建新团队",
+  "screen.skyguis.title.all_teams": "所有团队",
+  "screen.skyguis.title.invitations": "你的邀请",
+
+  "screen.skyguis.text.name": "名字",
+  "screen.skyguis.text.team_id": "团队名字",
+  "screen.skyguis.text.members": "成员",
+  "screen.skyguis.text.teams": "团队列表",
+  "screen.skyguis.text.spawns": "出生点",
+  "screen.skyguis.text.invalid": "无效",
+  "screen.skyguis.text.add": "添加",
+  "screen.skyguis.text.remove": "清楚",
+  "screen.skyguis.text.show": "展示",
+  "screen.skyguis.text.invite": "邀请",
+  "screen.skyguis.text.invite_multiple_users": "邀请成功 %s ",
+  "screen.skyguis.text.created_at": "创建于",
+  "screen.skyguis.text.last_changed": "最后更改",
+  "screen.skyguis.text.previous_screen": "上一屏幕",
+  "screen.skyguis.text.visit_team": "参观团队",
+  "screen.skyguis.text.your_team": "你的团队:",
+  "screen.skyguis.text.request_to_join": "请求加入",
+  "screen.skyguis.text.requested_to_join": "再次请求加入",
+  "screen.skyguis.text.player_not_in_team": "你不是这个团队的一员。",
+  "screen.skyguis.text.shape_does_not_exist": "这个样子不存在。",
+  "screen.skyguis.text.select_all": "全选",
+  "screen.skyguis.text.unselect_all": "取消选择所有",
+  "screen.skyguis.text.selected_amount": "%s 已选择的玩家",
+  "screen.skyguis.text.kick": "踢出",
+  "screen.skyguis.text.you_sure_kick": "确认踢出 %s 吗?",
+  "screen.skyguis.text.you_sure_invite": "确认邀请 %s 吗?",
+  "screen.skyguis.text.you_sure_join": "确定加入 \"%s\"吗?",
+  "screen.skyguis.text.you_sure_ignore": "确认忽略邀请 \"%s\"吗?",
+  "screen.skyguis.text.empty_templates": "没有可用的模板",
+  "screen.skyguis.text.missing_permissions": "你没有执行此操作的权限",
+
+  "screen.skyguis.button.create": "创建",
+  "screen.skyguis.button.confirm": "确认",
+  "screen.skyguis.button.abort": "中止",
+  "screen.skyguis.button.ok": "OK",
+
+  "skyguis.key.all_teams_screen": "打开主屏幕"
+}
