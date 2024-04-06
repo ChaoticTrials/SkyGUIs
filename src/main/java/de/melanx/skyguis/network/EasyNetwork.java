@@ -11,9 +11,11 @@ import net.minecraftforge.network.NetworkEvent;
 import org.moddingx.libx.mod.ModX;
 import org.moddingx.libx.network.NetworkX;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Set;
 import java.util.UUID;
 
+@ParametersAreNonnullByDefault
 public class EasyNetwork extends NetworkX {
 
     public EasyNetwork(ModX mod) {

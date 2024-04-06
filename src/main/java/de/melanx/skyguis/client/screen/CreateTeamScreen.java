@@ -62,20 +62,15 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
             Minecraft.getInstance().player.sendSystemMessage(ComponentBuilder.text("empty_templates").withStyle(ChatFormatting.BOLD, ChatFormatting.RED));
             return;
         }
-        String original = this.templates.get(this.currIndex);
-        String shortened = TextHelper.shorten(this.font, original, 110);
-        this.enableTooltip = !shortened.equals(original);
-        this.currTemplate = original;
+
+        String shortened = this.setCurrentTemplateAndGetShortenedName();
         Button templateButton = Button.builder(Component.literal(shortened), button -> {
                     this.currIndex++;
                     if (this.currIndex >= this.templates.size()) {
                         this.currIndex = 0;
                     }
 
-                    String orig = this.templates.get(this.currIndex);
-                    String s = TextHelper.shorten(this.font, orig, 110);
-                    this.enableTooltip = !s.equals(orig);
-                    this.currTemplate = orig;
+                    String s = this.setCurrentTemplateAndGetShortenedName();
                     button.setMessage(Component.literal(s));
                 })
                 .bounds(this.x(65), this.y(60), 122, 20)
@@ -101,6 +96,17 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
             }
         }).bounds(this.x(27), this.y(92), 60, 20).build());
         this.addRenderableWidget(Button.builder(ABORT, button -> this.onClose()).bounds(this.x(106), this.y(92), 60, 20).build());
+    }
+
+    private String setCurrentTemplateAndGetShortenedName() {
+        String orig = this.templates.get(this.currIndex);
+        String s = TextHelper.shorten(this.font, orig, 110);
+        //noinspection DataFlowIssue
+        String desc = TemplateLoader.getConfiguredTemplate(orig).getDescriptionComponent().getString();
+        this.enableTooltip = !s.equals(orig) || !desc.isBlank();
+        this.currTemplate = orig;
+
+        return s;
     }
 
     @Override

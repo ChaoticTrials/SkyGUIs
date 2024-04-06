@@ -92,7 +92,7 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
 
     public void updateButtons() {
         Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-        this.inviteButton.active = selectedIds.size() > 0;
+        this.inviteButton.active = !selectedIds.isEmpty();
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
     }

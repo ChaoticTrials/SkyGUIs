@@ -89,7 +89,7 @@ public class TeamPlayersScreen extends PlayerListScreen implements LoadingResult
 
     public void updateButtons() {
         Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
-        this.kickButton.active = selectedIds.size() > 0;
+        this.kickButton.active = !selectedIds.isEmpty();
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
     }

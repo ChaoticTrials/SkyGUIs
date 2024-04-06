@@ -107,7 +107,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         this.removeButton = this.addRenderableWidget(Button.builder(REMOVE, button -> {
                     BlockPos removePos = this.getPos();
                     if (this.posValid && removePos != null) {
-                        SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos, null);
+                        SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos, Direction.UP);
                         //noinspection ConstantConditions
                         this.getLoadingCircle().setActive(true);
                     }
