@@ -7,6 +7,8 @@
   "screen.skyguis.title.all_teams": "All Teams",
   "screen.skyguis.title.invitations": "Your Invitations",
 
+  "screen.skyguis.text.allowed": "allowed",
+  "screen.skyguis.text.disallowed": "disallowed",
   "screen.skyguis.text.name": "Name",
   "screen.skyguis.text.team_id": "Team ID",
   "screen.skyguis.text.members": "Members",
@@ -37,11 +39,16 @@
   "screen.skyguis.text.you_sure_ignore": "Do you really want to ignore invitation by \"%s\"?",
   "screen.skyguis.text.empty_templates": "No templates available",
   "screen.skyguis.text.missing_permissions": "You do not have permissions to perform this action",
+  "screen.skyguis.text.requests": "Requests",
+  "screen.skyguis.text.allow_visits": "Visits",
+  "screen.skyguis.text.allow_requests": "Join requests",
 
   "screen.skyguis.button.create": "Create",
   "screen.skyguis.button.confirm": "Confirm",
   "screen.skyguis.button.abort": "Abort",
   "screen.skyguis.button.ok": "OK",
+  "screen.skyguis.button.allow_visits": "Visits are",
+  "screen.skyguis.button.allow_requests": "Join requests are",
 
   "skyguis.key.all_teams_screen": "Open main screen"
 }

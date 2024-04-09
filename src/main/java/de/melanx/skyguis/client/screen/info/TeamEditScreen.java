@@ -14,13 +14,17 @@ import de.melanx.skyguis.network.handler.EditSpawns;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
+import de.melanx.skyguis.util.ToggleButtons;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nonnull;
@@ -33,11 +37,19 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
 
     private static final Component SPAWNS = ComponentBuilder.text("spawns");
     private static final Component MEMBERS = ComponentBuilder.text("members");
+    private static final Component REQUESTS = ComponentBuilder.text("requests");
     private static final Component INVALID = ComponentBuilder.text("invalid");
     private static final Component ADD = ComponentBuilder.text("add");
     private static final Component REMOVE = ComponentBuilder.text("remove");
     private static final Component SHOW = ComponentBuilder.text("show");
     private static final Component INVITE = ComponentBuilder.text("invite");
+    private static final Component ALLOW_VISITS = ComponentBuilder.text("allow_visits");
+    private static final Component ALLOW_REQUESTS = ComponentBuilder.text("allow_requests");
+    private static final MutableComponent VISIT_BASE = ComponentBuilder.button("allow_visits").append(Component.literal(" "));
+    private static final MutableComponent REQUEST_BASE = ComponentBuilder.button("allow_requests").append(Component.literal(" "));
+
+    private static final Component ALLOWED = ComponentBuilder.text("allowed").withStyle(ChatFormatting.GREEN);
+    private static final Component DISALLOWED = ComponentBuilder.text("disallowed").withStyle(ChatFormatting.RED);
 
     private final Team team;
     private final BaseScreen prev;
@@ -48,7 +60,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     private boolean posValid;
 
     public TeamEditScreen(Team team, BaseScreen prev) {
-        super(Component.literal(team.getName()), 245, 185);
+        super(Component.literal(team.getName()), 245, 231);
         this.team = team;
         this.prev = prev;
         this.random = new Random();
@@ -116,15 +128,25 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
                 .build());
 
         this.addRenderableWidget(Button.builder(SHOW, button -> Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this)))
-                .bounds(this.x(10), this.y(115), 70, 20)
+                .bounds(this.x(10), this.y(115), 90, 20)
                 .build());
 
         this.addRenderableWidget(Button.builder(INVITE, button -> Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this)))
-                .bounds(this.x(85), this.y(115), 70, 20)
+                .bounds(this.x(105), this.y(115), 90, 20)
+                .build());
+
+        this.addRenderableWidget(Button.builder(ALLOW_VISITS, button -> ToggleButtons.toggleState(this.team, button, VISIT_BASE, ToggleButtons.Type.VISITS))
+                .tooltip(Tooltip.create(VISIT_BASE.copy().append(this.team.allowsVisits() ? ALLOWED : DISALLOWED)))
+                .bounds(this.x(10), this.y(161), 90, 20)
+                .build());
+
+        this.addRenderableWidget(Button.builder(ALLOW_REQUESTS, button -> ToggleButtons.toggleState(this.team, button, REQUEST_BASE, ToggleButtons.Type.JOIN_REQUEST))
+                .tooltip(Tooltip.create(REQUEST_BASE.copy().append(this.team.allowsJoinRequests() ? ALLOWED : DISALLOWED)))
+                .bounds(this.x(105), this.y(161), 90, 20)
                 .build());
 
         this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
-                .bounds(this.x(10), this.y(155), 226, 20)
+                .bounds(this.x(10), this.y(201), 226, 20)
                 .build());
 
         if (!PermissionsConfig.selfManage || !PermissionsConfig.Spawns.modifySpawns) {
@@ -154,6 +176,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
 
         guiGraphics.drawString(this.font, SPAWNS, this.x(10), this.y(30), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.drawString(this.font, MEMBERS, this.x(10), this.y(100), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, REQUESTS, this.x(10), this.y(146), Color.DARK_GRAY.getRGB(), false);
 
         if (!this.posValid) {
             guiGraphics.pose().pushPose();

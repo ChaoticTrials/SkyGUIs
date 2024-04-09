@@ -1,8 +1,10 @@
 package de.melanx.skyguis.network;
 
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyguis.network.handler.*;
 import de.melanx.skyguis.util.LoadingResult;
+import de.melanx.skyguis.util.ToggleButtons;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -24,7 +26,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("4");
+        return Protocol.of("5");
     }
 
     @Override
@@ -36,6 +38,7 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new ToggleStateButtonClick.Serializer(), () -> ToggleStateButtonClick.Handler::new);
 
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new OpenGui.Serializer(), () -> OpenGui.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendLoadingResult.Serializer(), () -> SendLoadingResult.Handler::new);
@@ -72,5 +75,13 @@ public class EasyNetwork extends NetworkX {
 
     public void sendTemplateToClient(NetworkEvent.Context ctx, String name) {
         this.channel.reply(new SendTemplateToClient(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
+    }
+
+    public void toggleState(Team team, ToggleButtons.Type type) {
+        this.toggleState(team.getId(), type);
+    }
+
+    public void toggleState(UUID team, ToggleButtons.Type type) {
+        this.channel.sendToServer(new ToggleStateButtonClick(team, type));
     }
 }
