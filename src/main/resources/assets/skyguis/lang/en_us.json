@@ -42,6 +42,7 @@
   "screen.skyguis.text.requests": "Requests",
   "screen.skyguis.text.allow_visits": "Visits",
   "screen.skyguis.text.allow_requests": "Join requests",
+  "screen.skyguis.text.click_me": "Click me",
 
   "screen.skyguis.button.create": "Create",
   "screen.skyguis.button.confirm": "Confirm",

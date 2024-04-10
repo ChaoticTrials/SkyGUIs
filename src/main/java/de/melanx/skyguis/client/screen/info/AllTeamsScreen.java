@@ -12,6 +12,7 @@ import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -30,6 +31,7 @@ public class AllTeamsScreen extends BaseScreen {
     private static final Component TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
     private static final Component MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
     private static final Component YOUR_TEAM = ComponentBuilder.text("your_team");
+    private static final Component CLICK_ME = ComponentBuilder.text("click_me").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
     private final List<Team> teams;
     private final Team playerTeam;
     private ScrollbarWidget scrollbar;
@@ -107,7 +109,7 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     private void renderTeamTooltip(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, @Nonnull Team team) {
-        List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()));
+        List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()), CLICK_ME);
         List<Component> smallTextLines = Lists.newArrayList();
         if (this.minecraft != null && this.minecraft.options.advancedItemTooltips) {
             smallTextLines.add(ComponentBuilder.text("team_id").append(": " + team.getId().toString()));
