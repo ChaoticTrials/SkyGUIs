@@ -1,6 +1,7 @@
 package de.melanx.skyguis.client.screen.edit;
 
 import com.mojang.authlib.GameProfile;
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
@@ -9,7 +10,6 @@ import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
-import de.melanx.skyguis.client.widget.sizable.SizeableCheckbox;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;

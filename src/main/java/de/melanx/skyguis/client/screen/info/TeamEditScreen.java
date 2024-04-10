@@ -1,5 +1,6 @@
 package de.melanx.skyguis.client.screen.info;
 
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.config.common.TemplatesConfig;
 import de.melanx.skyblockbuilder.data.Team;
@@ -19,7 +20,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -51,6 +51,9 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     private static final Component ALLOWED = ComponentBuilder.text("allowed").withStyle(ChatFormatting.GREEN);
     private static final Component DISALLOWED = ComponentBuilder.text("disallowed").withStyle(ChatFormatting.RED);
 
+    private static final int LEFT_PADDING = 10;
+    private static final int CHECKBOX_X = LEFT_PADDING + Math.max(TextHelper.stringLength(ALLOW_VISITS), TextHelper.stringLength(ALLOW_REQUESTS));
+
     private final Team team;
     private final BaseScreen prev;
     private final Random random;
@@ -60,7 +63,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     private boolean posValid;
 
     public TeamEditScreen(Team team, BaseScreen prev) {
-        super(Component.literal(team.getName()), 245, 231);
+        super(Component.literal(team.getName()), 245, 220);
         this.team = team;
         this.prev = prev;
         this.random = new Random();
@@ -94,7 +97,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
                     }
                     this.onClose();
                 })
-                .bounds(this.x(10), this.y(45), 70, 20)
+                .bounds(this.x(LEFT_PADDING), this.y(45), 70, 20)
                 .build());
 
         this.addButton = this.addRenderableWidget(Button.builder(ADD, button -> {
@@ -111,7 +114,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
         String posStr = (int) pos.x + " " + (int) pos.y + " " + (int) pos.z;
-        this.posBox = new BlinkingEditBox(this.font, this.x(10), this.y(70), 145, 18, Component.literal(posStr));
+        this.posBox = new BlinkingEditBox(this.font, this.x(LEFT_PADDING), this.y(70), 145, 18, Component.literal(posStr));
         this.posBox.setValue(posStr);
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);
@@ -128,25 +131,31 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
                 .build());
 
         this.addRenderableWidget(Button.builder(SHOW, button -> Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this)))
-                .bounds(this.x(10), this.y(115), 90, 20)
+                .bounds(this.x(LEFT_PADDING), this.y(115), 90, 20)
                 .build());
 
         this.addRenderableWidget(Button.builder(INVITE, button -> Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this)))
                 .bounds(this.x(105), this.y(115), 90, 20)
                 .build());
 
-        this.addRenderableWidget(Button.builder(ALLOW_VISITS, button -> ToggleButtons.toggleState(this.team, button, VISIT_BASE, ToggleButtons.Type.VISITS))
-                .tooltip(Tooltip.create(VISIT_BASE.copy().append(this.team.allowsVisits() ? ALLOWED : DISALLOWED)))
-                .bounds(this.x(10), this.y(161), 90, 20)
-                .build());
+        this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X + 5), this.y(147), 10, this.team.allowsVisits(), VISIT_BASE.copy().append(this.team.allowsVisits() ? ALLOWED : DISALLOWED)) {
+            @Override
+            public void onPress() {
+                super.onPress();
+                ToggleButtons.toggleState(TeamEditScreen.this.team, this, VISIT_BASE, ToggleButtons.Type.VISITS);
+            }
+        });
 
-        this.addRenderableWidget(Button.builder(ALLOW_REQUESTS, button -> ToggleButtons.toggleState(this.team, button, REQUEST_BASE, ToggleButtons.Type.JOIN_REQUEST))
-                .tooltip(Tooltip.create(REQUEST_BASE.copy().append(this.team.allowsJoinRequests() ? ALLOWED : DISALLOWED)))
-                .bounds(this.x(105), this.y(161), 90, 20)
-                .build());
+        this.addRenderableWidget(new SizeableCheckbox(this.x(CHECKBOX_X + 5), this.y(162), 10, this.team.allowsJoinRequests(), REQUEST_BASE.copy().append(this.team.allowsJoinRequests() ? ALLOWED : DISALLOWED)) {
+            @Override
+            public void onPress() {
+                super.onPress();
+                ToggleButtons.toggleState(TeamEditScreen.this.team, this, REQUEST_BASE, ToggleButtons.Type.JOIN_REQUEST);
+            }
+        });
 
         this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
-                .bounds(this.x(10), this.y(201), 226, 20)
+                .bounds(this.x(LEFT_PADDING), this.y(this.ySize - 30), 226, 20)
                 .build());
 
         if (!PermissionsConfig.selfManage || !PermissionsConfig.Spawns.modifySpawns) {
@@ -174,9 +183,10 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTitle(guiGraphics);
 
-        guiGraphics.drawString(this.font, SPAWNS, this.x(10), this.y(30), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, MEMBERS, this.x(10), this.y(100), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, REQUESTS, this.x(10), this.y(146), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SPAWNS, this.x(LEFT_PADDING), this.y(30), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, MEMBERS, this.x(LEFT_PADDING), this.y(100), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, ALLOW_VISITS, this.x(LEFT_PADDING), this.y(149), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, ALLOW_REQUESTS, this.x(LEFT_PADDING), this.y(164), Color.DARK_GRAY.getRGB(), false);
 
         if (!this.posValid) {
             guiGraphics.pose().pushPose();
