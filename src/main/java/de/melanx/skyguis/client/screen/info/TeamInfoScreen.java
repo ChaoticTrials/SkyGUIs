@@ -43,7 +43,10 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
 
     @Override
     protected void init() {
-        Button joinButton = Button.builder(this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {})
+        Button joinButton = Button.builder(this.alreadySentJoinRequest() ? REQUESTED_TO_JOIN : REQUEST_TO_JOIN, button -> {
+                    SkyGUIs.getNetwork().requestToJoinTeam(this.team);
+                    this.getLoadingCircle().setActive(true);
+                })
                 .bounds(this.x(10), this.y(30), 110, 20)
                 .build();
         //noinspection DataFlowIssue
@@ -57,7 +60,10 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
         joinButton.active = PermissionsConfig.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
         this.addRenderableWidget(joinButton);
 
-        Button visitButton = Button.builder(VISIT_TEAM, button -> SkyGUIs.getNetwork().visitTeam(this.team))
+        Button visitButton = Button.builder(VISIT_TEAM, button -> {
+                    SkyGUIs.getNetwork().visitTeam(this.team);
+                    this.getLoadingCircle().setActive(true);
+                })
                 .bounds(this.x(125), this.y(30), 110, 20)
                 .build();
         //noinspection DataFlowIssue

@@ -38,6 +38,7 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestToJoinTeam.Serializer(), () -> RequestToJoinTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new ToggleStateButtonClick.Serializer(), () -> ToggleStateButtonClick.Handler::new);
 
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new OpenGui.Serializer(), () -> OpenGui.Handler::new);
@@ -83,6 +84,14 @@ public class EasyNetwork extends NetworkX {
 
     public void visitTeam(UUID team) {
         this.channel.sendToServer(new VisitTeam(team));
+    }
+
+    public void requestToJoinTeam(Team team) {
+        this.requestToJoinTeam(team.getId());
+    }
+
+    public void requestToJoinTeam(UUID team) {
+        this.channel.sendToServer(new RequestToJoinTeam(team));
     }
 
     public void toggleState(Team team, ToggleButtons.Type type) {
