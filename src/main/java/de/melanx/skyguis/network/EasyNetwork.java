@@ -77,6 +77,14 @@ public class EasyNetwork extends NetworkX {
         this.channel.reply(new SendTemplateToClient(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
     }
 
+    public void visitTeam(Team team) {
+        this.visitTeam(team.getId());
+    }
+
+    public void visitTeam(UUID team) {
+        this.channel.sendToServer(new VisitTeam(team));
+    }
+
     public void toggleState(Team team, ToggleButtons.Type type) {
         this.toggleState(team.getId(), type);
     }

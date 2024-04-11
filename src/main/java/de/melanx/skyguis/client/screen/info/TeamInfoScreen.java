@@ -3,6 +3,7 @@ package de.melanx.skyguis.client.screen.info;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
@@ -56,7 +57,7 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
         joinButton.active = PermissionsConfig.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
         this.addRenderableWidget(joinButton);
 
-        Button visitButton = Button.builder(VISIT_TEAM, button -> {})
+        Button visitButton = Button.builder(VISIT_TEAM, button -> SkyGUIs.getNetwork().visitTeam(this.team))
                 .bounds(this.x(125), this.y(30), 110, 20)
                 .build();
         //noinspection DataFlowIssue
