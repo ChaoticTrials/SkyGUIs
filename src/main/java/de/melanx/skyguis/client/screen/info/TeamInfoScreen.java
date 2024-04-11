@@ -1,8 +1,10 @@
 package de.melanx.skyguis.client.screen.info;
 
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
@@ -15,9 +17,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
 
@@ -34,6 +38,7 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
 
     private final Team team;
     private final BaseScreen prev;
+    private Button visitButton;
 
     public TeamInfoScreen(Team team, BaseScreen prev) {
         super(Component.literal(team.getName()), 245, 85);
@@ -57,10 +62,10 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
         } else if (!this.team.allowsJoinRequests()) {
             joinButton.setTooltip(Tooltip.create(TEAM_JOIN_REQUESTS));
         }
-        joinButton.active = PermissionsConfig.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest();
+        joinButton.active = PermissionsConfig.selfManage && this.team.allowsJoinRequests() && !this.alreadySentJoinRequest() && !SkyblockSavedData.get(Minecraft.getInstance().level).hasPlayerTeam(Minecraft.getInstance().player);
         this.addRenderableWidget(joinButton);
 
-        Button visitButton = Button.builder(VISIT_TEAM, button -> {
+        this.visitButton = Button.builder(VISIT_TEAM, button -> {
                     SkyGUIs.getNetwork().visitTeam(this.team);
                     this.getLoadingCircle().setActive(true);
                 })
@@ -69,13 +74,13 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
         //noinspection DataFlowIssue
         if (!this.minecraft.player.hasPermissions(1)) {
             if (!PermissionsConfig.Teleports.allowVisits) {
-                visitButton.setTooltip(Tooltip.create(CONFIG_ALLOW_VISITS));
+                this.visitButton.setTooltip(Tooltip.create(CONFIG_ALLOW_VISITS));
             } else if (!this.team.allowsVisits()) {
-                visitButton.setTooltip(Tooltip.create(TEAM_ALLOW_VISITS));
+                this.visitButton.setTooltip(Tooltip.create(TEAM_ALLOW_VISITS));
             }
         }
-        visitButton.active = this.minecraft.player.hasPermissions(1) || (PermissionsConfig.Teleports.allowVisits && this.team.allowsVisits());
-        this.addRenderableWidget(visitButton);
+        this.visitButton.active = this.minecraft.player.hasPermissions(1) || (PermissionsConfig.Teleports.allowVisits && this.team.allowsVisits());
+        this.addRenderableWidget(this.visitButton);
 
         this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
                 .bounds(this.x(10), this.y(55), 226, 20)
@@ -101,6 +106,31 @@ public class TeamInfoScreen extends BaseScreen implements LoadingResultHandler {
             case FAIL ->
                     minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
         }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        ClientLevel level = Minecraft.getInstance().level;
+        //noinspection DataFlowIssue
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        Player player = Minecraft.getInstance().player;
+
+        //noinspection DataFlowIssue
+        if (!(player.hasPermissions(1) || (PermissionsConfig.Teleports.allowVisits && this.team.allowsVisits()))) {
+            return;
+        }
+        SkyMeta metaInfo = data.getOrCreateMetaInfo(player);
+        if (metaInfo.canVisit(level.getGameTime())) {
+            this.visitButton.setTooltip(null);
+            this.visitButton.active = true;
+            return;
+        }
+
+        this.visitButton.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.command.error.cooldown",
+                RandomUtility.formattedCooldown(PermissionsConfig.Teleports.visitCooldown - (level.getGameTime() - metaInfo.getLastVisitTeleport())))));
+        this.visitButton.active = false;
     }
 
     private boolean alreadySentJoinRequest() {

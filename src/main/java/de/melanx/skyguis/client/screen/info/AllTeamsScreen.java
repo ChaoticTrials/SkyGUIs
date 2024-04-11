@@ -3,6 +3,7 @@ package de.melanx.skyguis.client.screen.info;
 import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
 import de.melanx.skyguis.client.widget.ClickableText;
@@ -49,6 +50,7 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     public static void open() {
+        SkyGUIs.getNetwork().updateSkyblockSavedData();
         Minecraft.getInstance().setScreen(new AllTeamsScreen());
     }
 

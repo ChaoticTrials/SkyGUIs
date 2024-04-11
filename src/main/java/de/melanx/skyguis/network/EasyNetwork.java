@@ -26,7 +26,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("5");
+        return Protocol.of("6");
     }
 
     @Override
@@ -40,6 +40,7 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestToJoinTeam.Serializer(), () -> RequestToJoinTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new ToggleStateButtonClick.Serializer(), () -> ToggleStateButtonClick.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateSkyblockSavedData.Serializer(), () -> UpdateSkyblockSavedData.Handler::new);
 
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new OpenGui.Serializer(), () -> OpenGui.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendLoadingResult.Serializer(), () -> SendLoadingResult.Handler::new);
@@ -100,5 +101,9 @@ public class EasyNetwork extends NetworkX {
 
     public void toggleState(UUID team, ToggleButtons.Type type) {
         this.channel.sendToServer(new ToggleStateButtonClick(team, type));
+    }
+
+    public void updateSkyblockSavedData() {
+        this.channel.sendToServer(new UpdateSkyblockSavedData());
     }
 }
