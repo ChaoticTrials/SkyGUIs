@@ -101,8 +101,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     private String setCurrentTemplateAndGetShortenedName() {
         String orig = this.templates.get(this.currIndex);
         String s = TextHelper.shorten(this.font, orig, 110);
-        //noinspection DataFlowIssue
-        String desc = TemplateLoader.getConfiguredTemplate(orig).getDescriptionComponent().getString();
+        ConfiguredTemplate configuredTemplate = TemplateLoader.getConfiguredTemplate(orig);
+        if (configuredTemplate == null) {
+            throw new IllegalStateException("Templates not synced between client and server: " + orig);
+        }
+
+        String desc = configuredTemplate.getDescriptionComponent().getString();
         this.enableTooltip = !s.equals(orig) || !desc.isBlank();
         this.currTemplate = orig;
 
