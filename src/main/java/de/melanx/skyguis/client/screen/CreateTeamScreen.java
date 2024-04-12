@@ -17,6 +17,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -63,21 +64,27 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
             return;
         }
 
-        String shortened = this.setCurrentTemplateAndGetShortenedName();
-        Button templateButton = Button.builder(Component.literal(shortened), button -> {
+        Component shortened = this.setCurrentTemplateAndGetShortenedName();
+        Button templateButton = Button.builder(shortened, button -> {
                     this.currIndex++;
                     if (this.currIndex >= this.templates.size()) {
                         this.currIndex = 0;
                     }
 
-                    String s = this.setCurrentTemplateAndGetShortenedName();
-                    button.setMessage(Component.literal(s));
+                    Component s = this.setCurrentTemplateAndGetShortenedName();
+                    button.setMessage(s);
                 })
                 .bounds(this.x(65), this.y(60), 122, 20)
-                .tooltip(Tooltip.create(Component.literal(this.currTemplate)))
                 .build();
         if (this.enableTooltip) {
-            templateButton.setTooltip(Tooltip.create(Component.literal(this.currTemplate)));
+            ConfiguredTemplate configuredTemplate = TemplateLoader.getConfiguredTemplate(this.currTemplate);
+            if (configuredTemplate == null) {
+                throw new IllegalStateException("Template does not exist: " + this.currTemplate);
+            }
+
+            MutableComponent nameComponent = configuredTemplate.getNameComponent().copy();
+            MutableComponent descComponent = configuredTemplate.getDescriptionComponent().copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+            templateButton.setTooltip(Tooltip.create(nameComponent.append("\n").append(descComponent)));
         }
         if (this.templates.size() == 1) {
             templateButton.active = false;
@@ -98,19 +105,20 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         this.addRenderableWidget(Button.builder(ABORT, button -> this.onClose()).bounds(this.x(106), this.y(92), 60, 20).build());
     }
 
-    private String setCurrentTemplateAndGetShortenedName() {
+    private Component setCurrentTemplateAndGetShortenedName() {
         String orig = this.templates.get(this.currIndex);
-        String s = TextHelper.shorten(this.font, orig, 110);
         ConfiguredTemplate configuredTemplate = TemplateLoader.getConfiguredTemplate(orig);
         if (configuredTemplate == null) {
             throw new IllegalStateException("Templates not synced between client and server: " + orig);
         }
 
+        Component nameComponent = configuredTemplate.getNameComponent();
+        String s = TextHelper.shorten(this.font, nameComponent.getString(), 110);
         String desc = configuredTemplate.getDescriptionComponent().getString();
-        this.enableTooltip = !s.equals(orig) || !desc.isBlank();
+        this.enableTooltip = !s.equals(nameComponent.getString()) || !desc.isBlank();
         this.currTemplate = orig;
 
-        return s;
+        return Component.literal(s).setStyle(nameComponent.getStyle());
     }
 
     @Override
