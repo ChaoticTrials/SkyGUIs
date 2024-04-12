@@ -40,6 +40,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     private EditBox name;
     private int currIndex = 0;
     private boolean enableTooltip;
+    private Button templateButton;
 
     public CreateTeamScreen() {
         super(TITLE, 200, 125);
@@ -65,7 +66,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         }
 
         Component shortened = this.setCurrentTemplateAndGetShortenedName();
-        Button templateButton = Button.builder(shortened, button -> {
+        this.templateButton = Button.builder(shortened, button -> {
                     this.currIndex++;
                     if (this.currIndex >= this.templates.size()) {
                         this.currIndex = 0;
@@ -73,24 +74,17 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
                     Component s = this.setCurrentTemplateAndGetShortenedName();
                     button.setMessage(s);
+                    this.updateTemplateButton();
                 })
                 .bounds(this.x(65), this.y(60), 122, 20)
                 .build();
-        if (this.enableTooltip) {
-            ConfiguredTemplate configuredTemplate = TemplateLoader.getConfiguredTemplate(this.currTemplate);
-            if (configuredTemplate == null) {
-                throw new IllegalStateException("Template does not exist: " + this.currTemplate);
-            }
 
-            MutableComponent nameComponent = configuredTemplate.getNameComponent().copy();
-            MutableComponent descComponent = configuredTemplate.getDescriptionComponent().copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
-            templateButton.setTooltip(Tooltip.create(nameComponent.append("\n").append(descComponent)));
-        }
+        this.updateTemplateButton();
         if (this.templates.size() == 1) {
-            templateButton.active = false;
+            this.templateButton.active = false;
         }
         this.currTemplate = this.templates.get(this.currIndex);
-        this.addRenderableWidget(templateButton);
+        this.addRenderableWidget(this.templateButton);
 
         this.addRenderableWidget(Button.builder(CREATE, button -> {
             if (this.name.getValue().isBlank()) {
@@ -158,5 +152,18 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
     public void addStructureToCache(String name, ConfiguredTemplate template) {
         this.structureCache.put(name, new TemplateRenderer(template.getTemplate(), 130));
+    }
+
+    public void updateTemplateButton() {
+        if (this.enableTooltip) {
+            ConfiguredTemplate configuredTemplate = TemplateLoader.getConfiguredTemplate(this.currTemplate);
+            if (configuredTemplate == null) {
+                throw new IllegalStateException("Template does not exist: " + this.currTemplate);
+            }
+
+            MutableComponent nameComponent = configuredTemplate.getNameComponent().copy();
+            MutableComponent descComponent = configuredTemplate.getDescriptionComponent().copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+            this.templateButton.setTooltip(Tooltip.create(nameComponent.append("\n").append(descComponent)));
+        }
     }
 }
