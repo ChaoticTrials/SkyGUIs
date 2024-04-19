@@ -91,7 +91,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 this.name.setFocused(true);
                 this.name.setValue(NameGenerator.randomName(new Random()));
             } else {
-                SkyGUIs.getNetwork().handleCreateTeam(this.name.getValue(), this.currTemplate);
+                SkyGUIs.getNetwork().handleCreateTeam(this.name.getValue().strip(), this.currTemplate);
                 //noinspection ConstantConditions
                 this.getLoadingCircle().setActive(true);
             }
