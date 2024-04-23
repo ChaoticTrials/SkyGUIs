@@ -56,6 +56,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, Component.empty());
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
+        this.name.setMaxLength(64);
         this.addRenderableWidget(this.name);
 
         if (this.templates.isEmpty()) {
