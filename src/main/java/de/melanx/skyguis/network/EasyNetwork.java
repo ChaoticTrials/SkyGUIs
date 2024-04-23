@@ -26,7 +26,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("6");
+        return Protocol.of("7");
     }
 
     @Override
@@ -34,6 +34,7 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new CreateTeamScreenClick.Serializer(), () -> CreateTeamScreenClick.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateTeam.Serializer(), () -> UpdateTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new EditSpawns.Serializer(), () -> EditSpawns.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RemoveSpawns.Serializer(), () -> RemoveSpawns.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new InvitePlayers.Serializer(), () -> InvitePlayers.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
@@ -65,6 +66,10 @@ public class EasyNetwork extends NetworkX {
 
     public void handleEditSpawns(EditSpawns.Type type, BlockPos pos, Direction direction) {
         this.channel.sendToServer(new EditSpawns(type, pos, direction));
+    }
+
+    public void handleRemoveSpawns(Set<BlockPos> positions) {
+        this.channel.sendToServer(new RemoveSpawns(positions));
     }
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {

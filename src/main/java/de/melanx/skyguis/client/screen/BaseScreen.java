@@ -6,6 +6,7 @@ import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.widget.LoadingCircle;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,6 +28,7 @@ public abstract class BaseScreen extends Screen {
     private static final ResourceLocation GENERIC = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = ComponentBuilder.text("previous_screen");
     public static final OnAbort DEFAULT_ABORT = () -> Minecraft.getInstance().popGuiLayer();
+    public static final MutableComponent OPEN_NEW_SCREEN = ComponentBuilder.text("new_screen").withStyle(ChatFormatting.ITALIC);
 
     protected final int xSize;
     protected final int ySize;

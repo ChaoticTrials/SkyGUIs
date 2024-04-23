@@ -17,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -58,8 +59,11 @@ public class AllTeamsScreen extends BaseScreen {
     protected void init() {
         if (this.playerTeam == null) {
             this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> {
-                Minecraft.getInstance().setScreen(new CreateTeamScreen());
-            }).bounds(this.x(10), this.y(199), 160, 20).build());
+                        Minecraft.getInstance().setScreen(new CreateTeamScreen());
+                    })
+                    .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
+                    .bounds(this.x(10), this.y(199), 160, 20)
+                    .build());
             this.yourTeamButton = null;
         } else {
             MutableComponent component = Component.literal(TextHelper.shorten(this.font, this.playerTeam.getName(), this.xSize - TextHelper.stringLength(YOUR_TEAM) - 40));

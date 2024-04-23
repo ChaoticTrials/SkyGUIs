@@ -7,6 +7,7 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
+import de.melanx.skyguis.client.screen.edit.EditSpawnsScreen;
 import de.melanx.skyguis.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.skyguis.client.screen.edit.TeamPlayersScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
@@ -20,6 +21,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -120,13 +122,9 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
         this.addRenderableWidget(this.posBox);
 
         this.removeButton = this.addRenderableWidget(Button.builder(REMOVE, button -> {
-                    BlockPos removePos = this.getPos();
-                    if (this.posValid && removePos != null) {
-                        SkyGUIs.getNetwork().handleEditSpawns(EditSpawns.Type.REMOVE, removePos, Direction.UP);
-                        //noinspection ConstantConditions
-                        this.getLoadingCircle().setActive(true);
-                    }
+                    Minecraft.getInstance().setScreen(new EditSpawnsScreen(this.team, this));
                 })
+                .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
                 .bounds(this.x(160), this.y(45), 70, 20)
                 .build());
 
