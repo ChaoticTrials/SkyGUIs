@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import org.moddingx.libx.annotation.meta.RemoveIn;
 import org.moddingx.libx.mod.ModX;
 import org.moddingx.libx.network.NetworkX;
 
@@ -26,7 +27,7 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected Protocol getProtocol() {
-        return Protocol.of("7");
+        return Protocol.of("8");
     }
 
     @Override
@@ -48,8 +49,14 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendTemplateToClient.Serializer(), () -> SendTemplateToClient.Handler::new);
     }
 
+    @Deprecated(forRemoval = true)
+    @RemoveIn(minecraft = "1.21")
     public void handleCreateTeam(String name, String shape) {
-        this.channel.sendToServer(new CreateTeamScreenClick(name, shape));
+        this.channel.sendToServer(new CreateTeamScreenClick(name, shape, false, false));
+    }
+
+    public void handleCreateTeam(String name, String shape, boolean allowVisits, boolean allowJoinRequests) {
+        this.channel.sendToServer(new CreateTeamScreenClick(name, shape, allowVisits, allowJoinRequests));
     }
 
     public void handleKickPlayers(String teamName, Set<UUID> players) {

@@ -1,5 +1,6 @@
 package de.melanx.skyguis.client.screen;
 
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.template.TemplateRenderer;
@@ -30,9 +31,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
     private static final Component NAME_COMPONENT = ComponentBuilder.text("name");
     private static final Component TEMPLATE_COMPONENT = ComponentBuilder.raw("template");
+    private static final Component SETTINGS_COMPONENT = ComponentBuilder.text("settings");
     private static final Component CREATE = ComponentBuilder.button("create");
     private static final Component ABORT = ComponentBuilder.button("abort");
     private static final Component TITLE = ComponentBuilder.title("create_team");
+    private static final Component ALLOW_VISITS = ComponentBuilder.text("allow_visits");
+    private static final Component ALLOW_REQUESTS = ComponentBuilder.text("allow_requests");
 
     private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
     private final List<String> templates;
@@ -41,9 +45,11 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     private int currIndex = 0;
     private boolean enableTooltip;
     private Button templateButton;
+    private SizeableCheckbox allowVisits;
+    private SizeableCheckbox allowJoinRequests;
 
     public CreateTeamScreen() {
-        super(TITLE, 200, 125);
+        super(TITLE, 200, 147);
         this.templates = TemplateLoader.getTemplateNames();
     }
 
@@ -80,6 +86,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 .bounds(this.x(65), this.y(60), 122, 20)
                 .build();
 
+        this.allowVisits = new SizeableCheckbox(this.x(65), this.y(85), 10, false);
+        this.allowJoinRequests = new SizeableCheckbox(this.x(65), this.y(100), 10, false);
+
+        this.addRenderableWidget(this.allowVisits);
+        this.addRenderableWidget(this.allowJoinRequests);
+
         this.updateTemplateButton();
         if (this.templates.size() == 1) {
             this.templateButton.active = false;
@@ -92,12 +104,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 this.name.setFocused(true);
                 this.name.setValue(NameGenerator.randomName(new Random()));
             } else {
-                SkyGUIs.getNetwork().handleCreateTeam(this.name.getValue().strip(), this.currTemplate);
+                SkyGUIs.getNetwork().handleCreateTeam(this.name.getValue().strip(), this.currTemplate, this.allowVisits.selected, this.allowJoinRequests.selected);
                 //noinspection ConstantConditions
                 this.getLoadingCircle().setActive(true);
             }
-        }).bounds(this.x(27), this.y(92), 60, 20).build());
-        this.addRenderableWidget(Button.builder(ABORT, button -> this.onClose()).bounds(this.x(106), this.y(92), 60, 20).build());
+        }).bounds(this.x(27), this.y(116), 60, 20).build());
+        this.addRenderableWidget(Button.builder(ABORT, button -> this.onClose()).bounds(this.x(106), this.y(116), 60, 20).build());
     }
 
     private Component setCurrentTemplateAndGetShortenedName() {
@@ -128,6 +140,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         this.renderTitle(guiGraphics);
         guiGraphics.drawString(this.font, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.drawString(this.font, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, SETTINGS_COMPONENT, this.x(10), this.y(92), Color.DARK_GRAY.getRGB(), false);
         if (!this.structureCache.containsKey(this.currTemplate)) {
             SkyGUIs.getNetwork().requestTemplateFromServer(this.currTemplate);
             this.structureCache.put(this.currTemplate, null);
@@ -138,6 +151,12 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
         if (renderer != null) {
             renderer.render(guiGraphics, this.width / 6, this.centeredY(0));
         }
+
+        float scale = 0.9f;
+        guiGraphics.pose().scale(scale, scale, scale);
+        guiGraphics.drawString(this.font, ALLOW_VISITS, (int) (this.x(82) / scale), (int) (this.y(87) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, ALLOW_REQUESTS, (int) (this.x(82) / scale), (int) (this.y(102) / scale), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.pose().scale(1 / 0.8f, 1 / 0.8f, 1 / 0.8f);
     }
 
     @Override

@@ -21,7 +21,7 @@ import org.moddingx.libx.network.PacketSerializer;
 
 import java.util.function.Supplier;
 
-public record CreateTeamScreenClick(String name, String shape) {
+public record CreateTeamScreenClick(String name, String shape, boolean allowVisits, boolean allowJoinRequests) {
 
     public static class Handler implements PacketHandler<CreateTeamScreenClick> {
 
@@ -65,6 +65,8 @@ public record CreateTeamScreenClick(String name, String shape) {
 
             team.addPlayer(player);
             WorldUtil.teleportToIsland(player, team);
+            team.setAllowVisit(msg.allowVisits);
+            team.setAllowJoinRequest(msg.allowJoinRequests);
             network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.create_team", team.getName()).withStyle(ChatFormatting.GREEN));
             return true;
         }
@@ -81,11 +83,13 @@ public record CreateTeamScreenClick(String name, String shape) {
         public void encode(CreateTeamScreenClick msg, FriendlyByteBuf buffer) {
             buffer.writeUtf(msg.name);
             buffer.writeUtf(msg.shape);
+            buffer.writeBoolean(msg.allowVisits);
+            buffer.writeBoolean(msg.allowJoinRequests);
         }
 
         @Override
         public CreateTeamScreenClick decode(FriendlyByteBuf buffer) {
-            return new CreateTeamScreenClick(buffer.readUtf(), buffer.readUtf());
+            return new CreateTeamScreenClick(buffer.readUtf(), buffer.readUtf(), buffer.readBoolean(), buffer.readBoolean());
         }
     }
 }
