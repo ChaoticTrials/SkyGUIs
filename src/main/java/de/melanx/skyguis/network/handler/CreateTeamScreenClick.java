@@ -63,7 +63,7 @@ public record CreateTeamScreenClick(String name, String shape, boolean allowVisi
                 return true;
             }
 
-            team.addPlayer(player);
+            data.addPlayerToTeam(team, player);
             WorldUtil.teleportToIsland(player, team);
             team.setAllowVisit(msg.allowVisits);
             team.setAllowJoinRequest(msg.allowJoinRequests);
