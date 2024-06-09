@@ -19,15 +19,19 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onPressKey(InputEvent.Key event) {
-        if (Minecraft.getInstance().screen == null && event.getKey() == Keybinds.ALL_TEAMS.getKey().getValue()) {
-            AllTeamsScreen.open();
+        if (Minecraft.getInstance().screen == null) {
+            while (Keybinds.ALL_TEAMS.consumeClick()) {
+                AllTeamsScreen.open();
+            }
         }
     }
 
     @SubscribeEvent
     public void onPressKey(InputEvent.MouseButton event) {
-        if (Minecraft.getInstance().screen == null && event.getButton() == Keybinds.ALL_TEAMS.getKey().getValue()) {
-            AllTeamsScreen.open();
+        if (Minecraft.getInstance().screen == null) {
+            while (Keybinds.ALL_TEAMS.consumeClick()) {
+                AllTeamsScreen.open();
+            }
         }
     }
 
