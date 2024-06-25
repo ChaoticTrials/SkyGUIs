@@ -16,6 +16,6 @@ public class InformationScreen extends NotificationScreen {
     protected void init() {
         this.addRenderableWidget(Button.builder(ComponentBuilder.button("ok"), button -> this.onConfirm.onConfirm())
                 .bounds(this.centeredX(60), this.y(60), 60, 20)
-                .build());
+                .build()).setFocused(true);
     }
 }

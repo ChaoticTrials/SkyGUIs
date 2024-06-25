@@ -39,7 +39,8 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new InvitePlayers.Serializer(), () -> InvitePlayers.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new); // todo 1.21 remove and use TeleportToTeam
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new TeleportToTeam.Serializer(), () -> TeleportToTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestToJoinTeam.Serializer(), () -> RequestToJoinTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new ToggleStateButtonClick.Serializer(), () -> ToggleStateButtonClick.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateSkyblockSavedData.Serializer(), () -> UpdateSkyblockSavedData.Handler::new);
@@ -97,6 +98,14 @@ public class EasyNetwork extends NetworkX {
 
     public void visitTeam(UUID team) {
         this.channel.sendToServer(new VisitTeam(team));
+    }
+
+    public void teleportToTeam(Team team) {
+        this.teleportToTeam(team.getId());
+    }
+
+    public void teleportToTeam(UUID team) {
+        this.channel.sendToServer(new TeleportToTeam(team));
     }
 
     public void requestToJoinTeam(Team team) {

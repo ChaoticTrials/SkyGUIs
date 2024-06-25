@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
 
@@ -33,6 +34,12 @@ public class NotificationScreen extends BaseScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == InputConstants.KEY_ESCAPE && this.minecraft != null) {
             this.onAbort.onAbort();
+            this.minecraft.setScreen(null);
+            return true;
+        }
+
+        if (keyCode == GLFW.GLFW_KEY_ENTER && this.minecraft != null) {
+            this.onConfirm.onConfirm();
             this.minecraft.setScreen(null);
             return true;
         }

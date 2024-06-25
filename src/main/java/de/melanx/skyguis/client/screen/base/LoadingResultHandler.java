@@ -10,5 +10,6 @@ public interface LoadingResultHandler {
         return new LoadingCircle(screen.centeredX(32), screen.centeredY(32), 32);
     }
 
+    // todo 1.21 simplify
     void onLoadingResult(LoadingResult result);
 }

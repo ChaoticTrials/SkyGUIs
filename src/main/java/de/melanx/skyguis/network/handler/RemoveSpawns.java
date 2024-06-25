@@ -74,7 +74,7 @@ public record RemoveSpawns(Set<BlockPos> positions) {
             }
 
             if (failedRemovals >= msg.positions.size()) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.literal("removed_spawns.failed"));
+                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("removed_spawns.failed"));
             }
 
             network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, ComponentBuilder.text("removed_spawns", msg.positions.size() - failedRemovals, msg.positions.size()));

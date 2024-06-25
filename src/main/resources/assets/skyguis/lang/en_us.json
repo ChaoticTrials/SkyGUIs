@@ -56,6 +56,11 @@
   "screen.skyguis.button.ok": "OK",
   "screen.skyguis.button.allow_visits": "Visits are",
   "screen.skyguis.button.allow_requests": "Join requests are",
+  "screen.skyguis.button.teleport_home": "Home Island",
+  "screen.skyguis.button.teleport_spawn": "World Spawn",
+  "screen.skyguis.button.teleport_spawn_long": "Teleport to World Spawn",
 
-  "skyguis.key.all_teams_screen": "Open main screen"
+  "skyguis.key.all_teams_screen": "Open main screen",
+
+  "skyguis.command.disabled.teleport_spawn": "You are not allowed to teleport to your home point."
 }

@@ -1,16 +1,22 @@
 package de.melanx.skyguis.client.screen.info;
 
 import com.google.common.collect.Lists;
+import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
+import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.util.RandomUtility;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
+import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
+import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.widget.ClickableText;
 import de.melanx.skyguis.client.widget.ScrollbarWidget;
 import de.melanx.skyguis.config.ClientConfig;
 import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import de.melanx.skyguis.util.ComponentBuilder;
+import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
@@ -18,36 +24,42 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AllTeamsScreen extends BaseScreen {
+public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
 
     public static final int ENTRIES = 13;
     private static final Component TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
     private static final Component MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
     private static final Component YOUR_TEAM = ComponentBuilder.text("your_team");
     private static final Component CLICK_ME = ComponentBuilder.text("click_me").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+    private final SkyblockSavedData data;
     private final List<Team> teams;
     private final Team playerTeam;
     private ScrollbarWidget scrollbar;
     private Button yourTeamButton;
+    private Button teleportHome;
+    private Button teleportSpawn;
 
     public AllTeamsScreen() {
         super(TEAMS_COMPONENT, 200, 230);
         //noinspection ConstantConditions
-        this.teams = SkyblockSavedData.get(Minecraft.getInstance().level).getTeams().stream()
+        this.data = SkyblockSavedData.get(Minecraft.getInstance().level);
+        this.teams = this.data.getTeams().stream()
                 .filter(team -> !team.getName().isEmpty())
                 .filter(team -> !team.isSpawn())
                 .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
                 .collect(Collectors.toList());
-        this.playerTeam = SkyblockSavedData.get(Minecraft.getInstance().level).getTeamFromPlayer(Minecraft.getInstance().player);
+        this.playerTeam = this.data.getTeamFromPlayer(Minecraft.getInstance().player);
     }
 
     public static void open() {
@@ -59,18 +71,48 @@ public class AllTeamsScreen extends BaseScreen {
     protected void init() {
         if (this.playerTeam == null) {
             this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> {
-                        Minecraft.getInstance().setScreen(new CreateTeamScreen());
+                        //noinspection DataFlowIssue
+                        this.minecraft.setScreen(new CreateTeamScreen());
                     })
                     .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
                     .bounds(this.x(10), this.y(199), 160, 20)
                     .build());
             this.yourTeamButton = null;
+
+            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn_long"), button -> {
+                        SkyGUIs.getNetwork().teleportToTeam(SkyblockSavedData.SPAWN_ID);
+                        //noinspection DataFlowIssue
+                        this.getLoadingCircle().setActive(true);
+                    })
+                    .bounds(this.x(10), this.y(this.ySize + 5), this.xSize - 20, 20)
+                    .build());
         } else {
             MutableComponent component = Component.literal(TextHelper.shorten(this.font, this.playerTeam.getName(), this.xSize - TextHelper.stringLength(YOUR_TEAM) - 40));
             this.yourTeamButton = this.addRenderableWidget(new ClickableText(this.x(15) + TextHelper.stringLength(YOUR_TEAM), this.y(207), TextHelper.DARK_GREEN.getRGB(), component, button -> {
-                Minecraft.getInstance().setScreen(new TeamEditScreen(this.playerTeam, this));
+                //noinspection DataFlowIssue
+                this.minecraft.setScreen(new TeamEditScreen(this.playerTeam, this));
             }));
+
+            this.teleportHome = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_home"), button -> {
+                        SkyGUIs.getNetwork().teleportToTeam(this.playerTeam);
+                        //noinspection DataFlowIssue
+                        this.getLoadingCircle().setActive(true);
+                    })
+                    .bounds(this.x(10), this.y(this.ySize + 5), this.xSize / 2 - 15, 20)
+                    .build());
+            //noinspection DataFlowIssue
+            this.teleportHome.active = this.minecraft.player.hasPermissions(1) || PermissionsConfig.Teleports.home;
+
+            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn"), button -> {
+                        SkyGUIs.getNetwork().teleportToTeam(SkyblockSavedData.SPAWN_ID);
+                        //noinspection DataFlowIssue
+                        this.getLoadingCircle().setActive(true);
+                    })
+                    .bounds(this.x(5 + this.xSize / 2), this.y(this.ySize + 5), this.xSize / 2 - 15, 20)
+                    .build());
         }
+        //noinspection DataFlowIssue
+        this.teleportSpawn.active = this.minecraft.player.hasPermissions(1) || PermissionsConfig.Teleports.spawn;
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateScrollbar();
     }
@@ -123,7 +165,7 @@ public class AllTeamsScreen extends BaseScreen {
         smallTextLines.add(ComponentBuilder.text("members").append(": " + team.getPlayers().size()));
         smallTextLines.add(ComponentBuilder.text("created_at").append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
         smallTextLines.add(ComponentBuilder.text("last_changed").append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
-        guiGraphics.renderTooltip(Minecraft.getInstance().font, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
+        guiGraphics.renderTooltip(this.minecraft.font, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
     }
 
     @Override
@@ -140,10 +182,11 @@ public class AllTeamsScreen extends BaseScreen {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
             if (Math2.isInBounds(10, 37, this.font.width(team.getName()), entries * 12, mouseX, mouseY)) {
-                if (team.hasPlayer(Minecraft.getInstance().player)) {
-                    Minecraft.getInstance().setScreen(new TeamEditScreen(team, this));
+                //noinspection DataFlowIssue
+                if (team.hasPlayer(this.minecraft.player)) {
+                    this.minecraft.setScreen(new TeamEditScreen(team, this));
                 } else {
-                    Minecraft.getInstance().setScreen(new TeamInfoScreen(team, this));
+                    this.minecraft.setScreen(new TeamInfoScreen(team, this));
                 }
             }
 
@@ -172,5 +215,53 @@ public class AllTeamsScreen extends BaseScreen {
     public void updateScrollbar() {
         this.scrollbar.setEnabled(this.teams.size() > ENTRIES);
         this.scrollbar.setMaxOffset(this.teams.size() - ENTRIES);
+    }
+
+    @Override
+    public void onLoadingResult(LoadingResult result) {
+        switch (result.status()) {
+            case SUCCESS -> this.onClose();
+            case FAIL -> {
+                //noinspection DataFlowIssue
+                this.minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, this.minecraft::popGuiLayer));
+            }
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        ClientLevel level = Minecraft.getInstance().level;
+        assert level != null;
+        Player player = Minecraft.getInstance().player;
+
+        //noinspection DataFlowIssue
+        if (player.hasPermissions(1)) {
+            return;
+        }
+
+        SkyMeta metaInfo = this.data.getOrCreateMetaInfo(player);
+        if (PermissionsConfig.Teleports.home && this.playerTeam != null) {
+            if (metaInfo.canTeleportHome(level.getGameTime())) {
+                this.teleportHome.setTooltip(null);
+                this.teleportHome.active = true;
+            } else {
+                this.teleportHome.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.command.error.cooldown",
+                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.homeCooldown - (level.getGameTime() - metaInfo.getLastHomeTeleport())))));
+                this.teleportHome.active = false;
+            }
+        }
+
+        if (PermissionsConfig.Teleports.spawn) {
+            if (metaInfo.canTeleportSpawn(level.getGameTime())) {
+                this.teleportSpawn.setTooltip(null);
+                this.teleportSpawn.active = true;
+            } else {
+                this.teleportSpawn.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.command.error.cooldown",
+                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - metaInfo.getLastSpawnTeleport())))));
+                this.teleportSpawn.active = false;
+            }
+        }
     }
 }
