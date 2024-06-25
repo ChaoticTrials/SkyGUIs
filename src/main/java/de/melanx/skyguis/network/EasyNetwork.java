@@ -8,6 +8,7 @@ import de.melanx.skyguis.util.ToggleButtons;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import org.moddingx.libx.annotation.meta.RemoveIn;
@@ -36,6 +37,7 @@ public class EasyNetwork extends NetworkX {
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateTeam.Serializer(), () -> UpdateTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new EditSpawns.Serializer(), () -> EditSpawns.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RemoveSpawns.Serializer(), () -> RemoveSpawns.Handler::new);
+        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new LeaveTeam.Serializer(), () -> LeaveTeam.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new InvitePlayers.Serializer(), () -> InvitePlayers.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
         this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
@@ -78,6 +80,14 @@ public class EasyNetwork extends NetworkX {
 
     public void handleRemoveSpawns(Set<BlockPos> positions) {
         this.channel.sendToServer(new RemoveSpawns(positions));
+    }
+
+    public void leaveTeam(Player player) {
+        this.leaveTeam(player.getGameProfile().getId());
+    }
+
+    public void leaveTeam(UUID player) {
+        this.channel.sendToServer(new LeaveTeam(player));
     }
 
     public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {

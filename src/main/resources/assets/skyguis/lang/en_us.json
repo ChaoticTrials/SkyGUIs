@@ -40,6 +40,8 @@
   "screen.skyguis.text.you_sure_invite": "Do you really want to invite these %s player(s)?",
   "screen.skyguis.text.you_sure_join": "Do you really want to join \"%s\"?",
   "screen.skyguis.text.you_sure_ignore": "Do you really want to ignore invitation by \"%s\"?",
+  "screen.skyguis.text.you_sure_leave0": "Are you sure that you want to leave your team?",
+  "screen.skyguis.text.you_sure_leave1": "You will lose everything.",
   "screen.skyguis.text.empty_templates": "No templates available",
   "screen.skyguis.text.missing_permissions": "You do not have permissions to perform this action",
   "screen.skyguis.text.requests": "Requests",
@@ -63,6 +65,7 @@
   "screen.skyguis.button.teleport_home": "Home Island",
   "screen.skyguis.button.teleport_spawn": "World Spawn",
   "screen.skyguis.button.teleport_spawn_long": "Teleport to World Spawn",
+  "screen.skyguis.button.leave_team": "Leave Team",
 
   "skyguis.key.all_teams_screen": "Open main screen",
 

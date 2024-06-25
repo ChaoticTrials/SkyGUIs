@@ -11,6 +11,7 @@ import de.melanx.skyguis.client.screen.edit.EditSpawnsScreen;
 import de.melanx.skyguis.client.screen.edit.InvitablePlayersScreen;
 import de.melanx.skyguis.client.screen.edit.TeamPlayersScreen;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
+import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.client.widget.BlinkingEditBox;
 import de.melanx.skyguis.network.handler.EditSpawns;
 import de.melanx.skyguis.util.ComponentBuilder;
@@ -33,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
@@ -151,6 +153,17 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
                 ToggleButtons.toggleState(TeamEditScreen.this.team, this, REQUEST_BASE, ToggleButtons.Type.JOIN_REQUEST);
             }
         });
+
+        this.addRenderableWidget(Button.builder(ComponentBuilder.button("leave_team"), button -> {
+                    Minecraft.getInstance().pushGuiLayer(
+                            new YouSureScreen(this, List.of(ComponentBuilder.text("you_sure_leave0"), ComponentBuilder.text("you_sure_leave1")), () -> {
+                                SkyGUIs.getNetwork().leaveTeam(Minecraft.getInstance().player);
+                                //noinspection DataFlowIssue
+                                this.getLoadingCircle().setActive(true);
+                            }));
+                })
+                .bounds(this.x(CHECKBOX_X + 25), this.y(150), 90, 20)
+                .build());
 
         this.addRenderableWidget(Button.builder(PREV_SCREEN_COMPONENT, button -> Minecraft.getInstance().setScreen(this.prev))
                 .bounds(this.x(LEFT_PADDING), this.y(this.ySize - 30), 226, 20)
