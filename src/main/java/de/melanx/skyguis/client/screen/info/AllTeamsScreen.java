@@ -142,7 +142,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
                 BaseScreen.GENERIC, 128, 64, 4, 125, 4, 60);
         super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
+        guiGraphics.drawString(this.font, Component.empty().append(TEAMS_COMPONENT).append(" (" + this.teams.size() + "/" + (this.data.getSpawnOption().isPresent() ? this.data.getTeams().size() - 1 : this.data.getTeams().size()) + ")"), this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
         guiGraphics.drawString(this.font, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB(), false);
 
