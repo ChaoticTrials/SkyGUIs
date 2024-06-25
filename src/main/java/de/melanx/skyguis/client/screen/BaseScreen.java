@@ -25,7 +25,7 @@ import java.awt.Color;
 
 public abstract class BaseScreen extends Screen {
 
-    private static final ResourceLocation GENERIC = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
+    protected static final ResourceLocation GENERIC = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = ComponentBuilder.text("previous_screen");
     public static final OnAbort DEFAULT_ABORT = () -> Minecraft.getInstance().popGuiLayer();
     public static final MutableComponent OPEN_NEW_SCREEN = ComponentBuilder.text("new_screen").withStyle(ChatFormatting.ITALIC);

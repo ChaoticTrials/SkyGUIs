@@ -49,6 +49,10 @@
   "screen.skyguis.text.remove_spawns": "Remove spawns",
   "screen.skyguis.text.removed_spawns": "Successfully removed %s/%s spawn positions.",
   "screen.skyguis.text.removed_spawns.failed": "Failed to remove any position.",
+  "screen.skyguis.text.filter": "Filter",
+  "screen.skyguis.text.filter.visits": "Show visit allowed",
+  "screen.skyguis.text.filter.join_requests": "Show join requests allowed",
+  "screen.skyguis.text.filter.empty_teams": "Hide empty teams",
 
   "screen.skyguis.button.create": "Create",
   "screen.skyguis.button.confirm": "Confirm",

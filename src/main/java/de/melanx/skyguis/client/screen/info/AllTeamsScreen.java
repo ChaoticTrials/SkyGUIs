@@ -1,6 +1,7 @@
 package de.melanx.skyguis.client.screen.info;
 
 import com.google.common.collect.Lists;
+import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
@@ -22,18 +23,21 @@ import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
+import org.moddingx.libx.render.RenderHelper;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
 
@@ -42,23 +46,28 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     private static final Component MEMBERS_COMPONENT = ComponentBuilder.text("members").setStyle(Style.EMPTY.withBold(true));
     private static final Component YOUR_TEAM = ComponentBuilder.text("your_team");
     private static final Component CLICK_ME = ComponentBuilder.text("click_me").withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
+    private static final Component FILTER = ComponentBuilder.text("filter");
+    private static final Component VISIT_FILTER = ComponentBuilder.text("filter.visits");
+    private static final Component JOIN_REQUEST_FILTER = ComponentBuilder.text("filter.join_requests");
+    private static final Component EMPTY_TEAMS_FILTER = ComponentBuilder.text("filter.empty_teams");
+    private static final int LONGEST_FILTER_TITLE_LENGTH = Math.max(TextHelper.stringLength(VISIT_FILTER),
+            Math.max(TextHelper.stringLength(JOIN_REQUEST_FILTER), TextHelper.stringLength(EMPTY_TEAMS_FILTER)));
     private final SkyblockSavedData data;
-    private final List<Team> teams;
+    private final List<Team> teams = new ArrayList<>();
     private final Team playerTeam;
     private ScrollbarWidget scrollbar;
     private Button yourTeamButton;
     private Button teleportHome;
     private Button teleportSpawn;
+    private FilteredCheckbox visitAllowedTeams;
+    private FilteredCheckbox joinRequestsAllowedTeams;
+    private FilteredCheckbox hideEmptyTeams;
+    private CollapsableText filterText;
 
     public AllTeamsScreen() {
         super(TEAMS_COMPONENT, 200, 230);
         //noinspection ConstantConditions
         this.data = SkyblockSavedData.get(Minecraft.getInstance().level);
-        this.teams = this.data.getTeams().stream()
-                .filter(team -> !team.getName().isEmpty())
-                .filter(team -> !team.isSpawn())
-                .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
-                .collect(Collectors.toList());
         this.playerTeam = this.data.getTeamFromPlayer(Minecraft.getInstance().player);
     }
 
@@ -113,17 +122,36 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         }
         //noinspection DataFlowIssue
         this.teleportSpawn.active = this.minecraft.player.hasPermissions(1) || PermissionsConfig.Teleports.spawn;
+
+        int filterSectionStart = this.xSize + 7;
+        this.filterText = this.addRenderableWidget(new CollapsableText(false, this.x(filterSectionStart), this.y(2), 18, FILTER));
+        this.visitAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(22), 10, this.visitAllowedTeams != null && this.visitAllowedTeams.selected));
+        this.joinRequestsAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(36), 10, this.joinRequestsAllowedTeams != null && this.joinRequestsAllowedTeams.selected));
+        this.hideEmptyTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(50), 10, this.hideEmptyTeams == null || this.hideEmptyTeams.selected));
+
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
+        this.updateTeams();
         this.updateScrollbar();
     }
 
     @Override
     public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        RenderHelper.renderGuiBackground(guiGraphics, this.x(this.xSize), this.y(0),
+                (this.filterText.isOpen() ? LONGEST_FILTER_TITLE_LENGTH + 15 : TextHelper.stringLength(this.filterText.getMessage())) + 14,
+                this.filterText.isOpen() ? 70 : 22,
+                BaseScreen.GENERIC, 128, 64, 4, 125, 4, 60);
         super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, TEAMS_COMPONENT, this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
         guiGraphics.drawString(this.font, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB(), false);
+
+        if (this.filterText.isOpen()) {
+            int filterSectionStart = this.x(this.xSize + 20);
+            guiGraphics.drawString(this.font, VISIT_FILTER, filterSectionStart, this.y(23), Color.DARK_GRAY.getRGB(), false);
+            guiGraphics.drawString(this.font, JOIN_REQUEST_FILTER, filterSectionStart, this.y(37), Color.DARK_GRAY.getRGB(), false);
+            guiGraphics.drawString(this.font, EMPTY_TEAMS_FILTER, filterSectionStart, this.y(51), Color.DARK_GRAY.getRGB(), false);
+        }
 
         if (this.playerTeam != null) {
             guiGraphics.hLine(this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
@@ -232,6 +260,12 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     public void tick() {
         super.tick();
 
+        if (this.visitAllowedTeams != null && this.joinRequestsAllowedTeams != null && this.hideEmptyTeams != null) {
+            this.visitAllowedTeams.visible = this.filterText.isOpen();
+            this.joinRequestsAllowedTeams.visible = this.filterText.isOpen();
+            this.hideEmptyTeams.visible = this.filterText.isOpen();
+        }
+
         ClientLevel level = Minecraft.getInstance().level;
         assert level != null;
         Player player = Minecraft.getInstance().player;
@@ -262,6 +296,121 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
                         RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - metaInfo.getLastSpawnTeleport())))));
                 this.teleportSpawn.active = false;
             }
+        }
+    }
+
+    private void updateTeams() {
+        this.teams.clear();
+        Predicate<Team> visitsAllowed = team -> {
+            if (this.visitAllowedTeams == null) {
+                return true;
+            }
+
+            return !this.visitAllowedTeams.selected || team.allowsVisits();
+        };
+
+        Predicate<Team> joinRequestsAllowed = team -> {
+            if (this.joinRequestsAllowedTeams == null) {
+                return true;
+            }
+
+            return !this.joinRequestsAllowedTeams.selected || team.allowsJoinRequests();
+        };
+
+        Predicate<Team> hideEmptyTeams = team -> {
+            if (this.hideEmptyTeams == null) {
+                return true;
+            }
+
+            return !this.hideEmptyTeams.selected || !team.isEmpty();
+        };
+
+        this.teams.addAll(this.data.getTeams().stream()
+                .filter(team -> !team.getName().isEmpty())
+                .filter(team -> !team.isSpawn())
+                .filter(visitsAllowed)
+                .filter(joinRequestsAllowed)
+                .filter(hideEmptyTeams)
+                .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
+                .toList());
+
+        this.updateScrollbar();
+        this.filterText.setAppendix("(" + this.countEnabledFilters() + ")");
+    }
+
+    public int countEnabledFilters() {
+        int i = 0;
+        if (this.visitAllowedTeams != null && this.visitAllowedTeams.selected) i++;
+        if (this.joinRequestsAllowedTeams != null && this.joinRequestsAllowedTeams.selected) i++;
+        if (this.hideEmptyTeams != null && this.hideEmptyTeams.selected) i++;
+
+        return i;
+    }
+
+    private class FilteredCheckbox extends SizeableCheckbox {
+
+        public FilteredCheckbox(int x, int y, int size, boolean selected) {
+            this(x, y, size, selected, Component.empty());
+        }
+
+        public FilteredCheckbox(int x, int y, int size, boolean selected, Component component) {
+            super(x, y, size, selected, component);
+        }
+
+        @Override
+        public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            if (this.visible) {
+                super.render(guiGraphics, mouseX, mouseY, partialTick);
+            }
+        }
+
+        @Override
+        public void onPress() {
+            super.onPress();
+            AllTeamsScreen.this.updateTeams();
+        }
+    }
+
+    private static class CollapsableText extends AbstractWidget {
+
+        private boolean enabled;
+        private Component appendix = Component.empty();
+
+        public CollapsableText(boolean open, int x, int y, int height, Component message) {
+            super(x, y, 0, height, message);
+            this.enabled = open;
+            this.width = TextHelper.stringLength(this.getMessage());
+        }
+
+        @Override
+        public void onClick(double mouseX, double mouseY) {
+            this.enabled = !this.enabled;
+        }
+
+        @Override
+        protected void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            RenderHelper.resetColor();
+            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY() + ((this.height - 8) / 2), Color.DARK_GRAY.getRGB(), false);
+        }
+
+        @Override
+        protected void updateWidgetNarration(@Nonnull NarrationElementOutput output) {
+            this.defaultButtonNarrationText(output);
+        }
+
+        @Nonnull
+        @Override
+        public Component getMessage() {
+            return (this.enabled ? Component.literal("⬇  ") : Component.literal("➡ ")).append(super.getMessage()).append(this.appendix);
+        }
+
+        public boolean isOpen() {
+            return this.enabled;
+        }
+
+        public void setAppendix(String appendix) {
+            this.appendix = Component.literal(" " + appendix);
+            this.width = TextHelper.stringLength(this.getMessage());
         }
     }
 }
