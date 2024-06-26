@@ -135,8 +135,8 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         this.sortOrderButton = this.addRenderableWidget(CycleButton.builder(SortOrder::getName)
                 .withValues(SortOrder.values())
                 .withInitialValue(SortOrder.ALPHABETICAL)
-                .create(this.x(filterSectionStart + 15), this.y(65), 120, 20, ComponentBuilder.text("filter.sort_by"), (button, value) -> this.updateTeams()));
-        this.invertSort = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(70), 10, false, ComponentBuilder.text("filter.invert")));
+                .create(this.x(filterSectionStart + 15), this.y(65), 120, 20, ComponentBuilder.button("filter.sort_by"), (button, value) -> this.updateTeams()));
+        this.invertSort = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(70), 10, false, ComponentBuilder.button("filter.invert")));
 
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateTeams();
