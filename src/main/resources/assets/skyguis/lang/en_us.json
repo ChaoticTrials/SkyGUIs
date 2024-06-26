@@ -71,7 +71,7 @@
   "screen.skyguis.button.filter.last_modified": "Last Modified",
   "screen.skyguis.button.filter.member_count": "Member Count",
   "screen.skyguis.button.filter.sort_by": "Sort by",
-  "screen.skyguis.button.filter.inverted": "Inverted",
+  "screen.skyguis.button.filter.invert": "Invert",
 
   "skyguis.key.all_teams_screen": "Open main screen",
 
