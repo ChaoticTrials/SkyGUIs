@@ -360,7 +360,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     }
 
     public enum SortOrder {
-        ALPHABETICAL(ComponentBuilder.button("filter.alphabetical"), Comparator.comparing(Team::getName)),
+        ALPHABETICAL(ComponentBuilder.button("filter.alphabetical"), Comparator.comparing(team -> team.getName().toLowerCase(Locale.ROOT))),
         CREATION_DATE(ComponentBuilder.button("filter.creation_date"), Comparator.comparing(Team::getCreatedAt)),
         LAST_MODIFIED(ComponentBuilder.button("filter.last_modified"), Comparator.comparing(Team::getLastChanged)),
         MEMBER_COUNT(ComponentBuilder.button("filter.member_count"), Comparator.comparing(team -> team.getPlayers().size()));
