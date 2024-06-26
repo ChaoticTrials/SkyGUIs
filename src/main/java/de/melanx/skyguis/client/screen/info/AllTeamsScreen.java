@@ -25,6 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -59,10 +60,13 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     private Button yourTeamButton;
     private Button teleportHome;
     private Button teleportSpawn;
+
     private FilteredCheckbox visitAllowedTeams;
     private FilteredCheckbox joinRequestsAllowedTeams;
     private FilteredCheckbox hideEmptyTeams;
     private CollapsableText filterText;
+    private CycleButton<SortOrder> sortOrderButton;
+    private SizeableCheckbox invertSort;
 
     public AllTeamsScreen() {
         super(TEAMS_COMPONENT, 200, 230);
@@ -128,6 +132,11 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         this.visitAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(22), 10, this.visitAllowedTeams != null && this.visitAllowedTeams.selected));
         this.joinRequestsAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(36), 10, this.joinRequestsAllowedTeams != null && this.joinRequestsAllowedTeams.selected));
         this.hideEmptyTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(50), 10, this.hideEmptyTeams == null || this.hideEmptyTeams.selected));
+        this.sortOrderButton = this.addRenderableWidget(CycleButton.builder(SortOrder::getName)
+                .withValues(SortOrder.values())
+                .withInitialValue(SortOrder.ALPHABETICAL)
+                .create(this.x(filterSectionStart + 15), this.y(65), 120, 20, ComponentBuilder.text("filter.sort_by"), (button, value) -> this.updateTeams()));
+        this.invertSort = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(70), 10, false, ComponentBuilder.text("filter.invert")));
 
         this.scrollbar = new ScrollbarWidget(this, this.xSize - 20, 33, 12, this.ySize - 45);
         this.updateTeams();
@@ -138,7 +147,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         RenderHelper.renderGuiBackground(guiGraphics, this.x(this.xSize), this.y(0),
                 (this.filterText.isOpen() ? LONGEST_FILTER_TITLE_LENGTH + 15 : TextHelper.stringLength(this.filterText.getMessage())) + 14,
-                this.filterText.isOpen() ? 70 : 22,
+                this.filterText.isOpen() ? 95 : 22,
                 BaseScreen.GENERIC, 128, 64, 4, 125, 4, 60);
         super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -260,10 +269,13 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     public void tick() {
         super.tick();
 
-        if (this.visitAllowedTeams != null && this.joinRequestsAllowedTeams != null && this.hideEmptyTeams != null) {
-            this.visitAllowedTeams.visible = this.filterText.isOpen();
-            this.joinRequestsAllowedTeams.visible = this.filterText.isOpen();
-            this.hideEmptyTeams.visible = this.filterText.isOpen();
+        if (this.visitAllowedTeams != null && this.joinRequestsAllowedTeams != null && this.hideEmptyTeams != null && this.sortOrderButton != null && this.invertSort != null) {
+            boolean showFilter = this.filterText.isOpen();
+            this.visitAllowedTeams.visible = showFilter;
+            this.joinRequestsAllowedTeams.visible = showFilter;
+            this.hideEmptyTeams.visible = showFilter;
+            this.sortOrderButton.visible = showFilter;
+            this.invertSort.visible = showFilter;
         }
 
         ClientLevel level = Minecraft.getInstance().level;
@@ -331,7 +343,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
                 .filter(visitsAllowed)
                 .filter(joinRequestsAllowed)
                 .filter(hideEmptyTeams)
-                .sorted(Comparator.comparing((team -> team.getName().toLowerCase(Locale.ROOT))))
+                .sorted(this.sortOrderButton.getValue().comparator(this.invertSort.selected))
                 .toList());
 
         this.updateScrollbar();
@@ -345,6 +357,33 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         if (this.hideEmptyTeams != null && this.hideEmptyTeams.selected) i++;
 
         return i;
+    }
+
+    public enum SortOrder {
+        ALPHABETICAL(ComponentBuilder.button("filter.alphabetical"), Comparator.comparing(Team::getName)),
+        CREATION_DATE(ComponentBuilder.button("filter.creation_date"), Comparator.comparing(Team::getCreatedAt)),
+        LAST_MODIFIED(ComponentBuilder.button("filter.last_modified"), Comparator.comparing(Team::getLastChanged)),
+        MEMBER_COUNT(ComponentBuilder.button("filter.member_count"), Comparator.comparing(team -> team.getPlayers().size()));
+
+        private final Component name;
+        private final Comparator<Team> comparator;
+
+        SortOrder(Component name, Comparator<Team> comparator) {
+            this.name = name;
+            this.comparator = comparator;
+        }
+
+        public Component getName() {
+            return this.name;
+        }
+
+        public Comparator<Team> comparator() {
+            return this.comparator(false);
+        }
+
+        public Comparator<Team> comparator(boolean invert) {
+            return invert ? this.comparator.reversed() : this.comparator;
+        }
     }
 
     private class FilteredCheckbox extends SizeableCheckbox {

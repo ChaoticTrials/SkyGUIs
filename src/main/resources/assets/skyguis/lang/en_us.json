@@ -66,6 +66,12 @@
   "screen.skyguis.button.teleport_spawn": "World Spawn",
   "screen.skyguis.button.teleport_spawn_long": "Teleport to World Spawn",
   "screen.skyguis.button.leave_team": "Leave Team",
+  "screen.skyguis.button.filter.alphabetical": "Alphabetical",
+  "screen.skyguis.button.filter.creation_date": "Creation Date",
+  "screen.skyguis.button.filter.last_modified": "Last Modified",
+  "screen.skyguis.button.filter.member_count": "Member Count",
+  "screen.skyguis.button.filter.sort_by": "Sort by",
+  "screen.skyguis.button.filter.inverted": "Inverted",
 
   "skyguis.key.all_teams_screen": "Open main screen",
 
