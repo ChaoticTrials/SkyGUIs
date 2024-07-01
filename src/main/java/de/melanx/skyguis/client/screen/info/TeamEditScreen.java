@@ -178,7 +178,7 @@ public class TeamEditScreen extends BaseScreen implements LoadingResultHandler {
     @Override
     public void onLoadingResult(LoadingResult result) {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
+        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, () -> minecraft.setScreen(null)));
     }
 
     @Override
