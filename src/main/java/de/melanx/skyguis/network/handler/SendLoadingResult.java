@@ -3,7 +3,6 @@ package de.melanx.skyguis.network.handler;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.util.LoadingResult;
-import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -34,7 +33,7 @@ public class SendLoadingResult extends PacketHandler<SendLoadingResult.Message> 
                 ctx.player().sendSystemMessage(msg.reason.copy().withStyle(ChatFormatting.GOLD));
             }
             case FAIL -> {
-                Minecraft.getInstance().pushGuiLayer(new InformationScreen(msg.reason, TextHelper.stringLength(msg.reason) + 30, 100, Minecraft.getInstance()::popGuiLayer));
+                InformationScreen.open(msg.reason);
             }
         }
     }
