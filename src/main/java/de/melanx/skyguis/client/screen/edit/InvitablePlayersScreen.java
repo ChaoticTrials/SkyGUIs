@@ -7,13 +7,9 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
-import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
-import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
-import de.melanx.skyguis.util.LoadingResult;
-import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -28,7 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class InvitablePlayersScreen extends PlayerListScreen implements LoadingResultHandler {
+public class InvitablePlayersScreen extends PlayerListScreen {
 
     private static final Component INVITE = ComponentBuilder.text("invite");
 
@@ -62,31 +58,15 @@ public class InvitablePlayersScreen extends PlayerListScreen implements LoadingR
                 .bounds(this.x(57), this.y(200), 115, 20)
                 .build());
 
-        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, this.allSelected() ? UNSELECT_ALL : SELECT_ALL) {
-            @Override
-            public void onPress() {
-                super.onPress();
-                if (this.selected) {
-                    InvitablePlayersScreen.this.selectAll();
-                } else {
-                    InvitablePlayersScreen.this.unselectAll();
-                }
-            }
-        });
+        this.selectAll = this.addRenderableWidget(new SizeableCheckbox(this.x(9), this.y(32), 14, false, this.allSelected() ? UNSELECT_ALL : SELECT_ALL, ((checkbox, value) -> this.selectAll(value))));
 
         super.init();
         this.updateButtons();
     }
 
     @Override
-    public void onLoadingResult(LoadingResult result) {
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
-    }
-
-    @Override
-    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 

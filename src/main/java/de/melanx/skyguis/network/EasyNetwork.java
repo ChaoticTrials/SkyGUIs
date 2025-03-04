@@ -1,17 +1,19 @@
 package de.melanx.skyguis.network;
 
+import de.melanx.skyblockbuilder.data.SkyMeta;
+import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyguis.network.handler.*;
 import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.ToggleButtons;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import org.moddingx.libx.annotation.meta.RemoveIn;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.moddingx.libx.mod.ModX;
 import org.moddingx.libx.network.NetworkX;
 
@@ -24,62 +26,54 @@ public class EasyNetwork extends NetworkX {
 
     public EasyNetwork(ModX mod) {
         super(mod);
+
+        // send to server
+        this.register(new AnswerInvitation());
+        this.register(new CreateTeamScreenClick());
+        this.register(new EditSpawns());
+        this.register(new InvitePlayers());
+        this.register(new LeaveTeam());
+        this.register(new RemoveSpawns());
+        this.register(new RequestTemplateFromServer());
+        this.register(new RequestToJoinTeam());
+        this.register(new TeleportToTeam());
+        this.register(new ToggleStateButtonClick());
+        this.register(new UpdateSkyblockSavedData());
+        this.register(new UpdateTeam());
+
+        // send to client
+        this.register(new OpenGui());
+        this.register(new SendLoadingResult());
+        this.register(new SendTemplateToClient());
     }
 
     @Override
-    protected Protocol getProtocol() {
-        return Protocol.of("9");
-    }
-
-    @Override
-    protected void registerPackets() {
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new CreateTeamScreenClick.Serializer(), () -> CreateTeamScreenClick.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateTeam.Serializer(), () -> UpdateTeam.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new EditSpawns.Serializer(), () -> EditSpawns.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RemoveSpawns.Serializer(), () -> RemoveSpawns.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new LeaveTeam.Serializer(), () -> LeaveTeam.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new InvitePlayers.Serializer(), () -> InvitePlayers.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new AnswerInvitation.Serializer(), () -> AnswerInvitation.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestTemplateFromServer.Serializer(), () -> RequestTemplateFromServer.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new VisitTeam.Serializer(), () -> VisitTeam.Handler::new); // todo 1.21 remove and use TeleportToTeam
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new TeleportToTeam.Serializer(), () -> TeleportToTeam.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new RequestToJoinTeam.Serializer(), () -> RequestToJoinTeam.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new ToggleStateButtonClick.Serializer(), () -> ToggleStateButtonClick.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_SERVER, new UpdateSkyblockSavedData.Serializer(), () -> UpdateSkyblockSavedData.Handler::new);
-
-        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new OpenGui.Serializer(), () -> OpenGui.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendLoadingResult.Serializer(), () -> SendLoadingResult.Handler::new);
-        this.registerGame(NetworkDirection.PLAY_TO_CLIENT, new SendTemplateToClient.Serializer(), () -> SendTemplateToClient.Handler::new);
-    }
-
-    @Deprecated(forRemoval = true)
-    @RemoveIn(minecraft = "1.21")
-    public void handleCreateTeam(String name, String shape) {
-        this.channel.sendToServer(new CreateTeamScreenClick(name, shape, false, false));
+    protected String getVersion() {
+        return "10";
     }
 
     public void handleCreateTeam(String name, String shape, boolean allowVisits, boolean allowJoinRequests) {
-        this.channel.sendToServer(new CreateTeamScreenClick(name, shape, allowVisits, allowJoinRequests));
+        PacketDistributor.sendToServer(new CreateTeamScreenClick.Message(name, shape, allowVisits, allowJoinRequests));
     }
 
     public void handleKickPlayers(String teamName, Set<UUID> players) {
-        this.channel.sendToServer(new UpdateTeam(teamName, players));
+        PacketDistributor.sendToServer(new UpdateTeam.Message(teamName, players));
     }
 
     public void handleInvitePlayers(String teamName, Set<UUID> players) {
-        this.channel.sendToServer(new InvitePlayers(teamName, players));
+        PacketDistributor.sendToServer(new InvitePlayers.Message(teamName, players));
     }
 
     public void handleInvitationAnswer(String teamName, AnswerInvitation.Type type) {
-        this.channel.sendToServer(new AnswerInvitation(teamName, type));
+        PacketDistributor.sendToServer(new AnswerInvitation.Message(teamName, type));
     }
 
-    public void handleEditSpawns(EditSpawns.Type type, BlockPos pos, Direction direction) {
-        this.channel.sendToServer(new EditSpawns(type, pos, direction));
+    public void handleEditSpawns(EditSpawns.Type type, BlockPos pos, WorldUtil.SpawnDirection direction) {
+        PacketDistributor.sendToServer(new EditSpawns.Message(type, pos, direction));
     }
 
     public void handleRemoveSpawns(Set<BlockPos> positions) {
-        this.channel.sendToServer(new RemoveSpawns(positions));
+        PacketDistributor.sendToServer(new RemoveSpawns.Message(positions));
     }
 
     public void leaveTeam(Player player) {
@@ -87,35 +81,31 @@ public class EasyNetwork extends NetworkX {
     }
 
     public void leaveTeam(UUID player) {
-        this.channel.sendToServer(new LeaveTeam(player));
+        PacketDistributor.sendToServer(new LeaveTeam.Message(player));
     }
 
-    public void handleLoadingResult(NetworkEvent.Context ctx, LoadingResult.Status result, Component reason) {
-        this.channel.reply(new SendLoadingResult(result, reason), ctx);
+    public void handleLoadingResult(IPayloadContext ctx, LoadingResult.Status result, Component reason) {
+        PacketDistributor.sendToPlayer((ServerPlayer) ctx.player(), new SendLoadingResult.Message(result, reason));
     }
 
     public void requestTemplateFromServer(String name) {
-        this.channel.sendToServer(new RequestTemplateFromServer(name));
+        PacketDistributor.sendToServer(new RequestTemplateFromServer.Message(name));
     }
 
-    public void sendTemplateToClient(NetworkEvent.Context ctx, String name) {
-        this.channel.reply(new SendTemplateToClient(name, TemplateLoader.getConfiguredTemplate(name)), ctx);
+    public void sendTemplateToClient(IPayloadContext ctx, String name) {
+        PacketDistributor.sendToPlayer((ServerPlayer) ctx.player(), new SendTemplateToClient.Message(name, TemplateLoader.getConfiguredTemplate(name)));
     }
 
-    public void visitTeam(Team team) {
-        this.visitTeam(team.getId());
+    public void teleportToSpawn() {
+        this.teleportToTeam(SkyblockSavedData.SPAWN_ID, SkyMeta.TeleportType.SPAWN);
     }
 
-    public void visitTeam(UUID team) {
-        this.channel.sendToServer(new VisitTeam(team));
+    public void teleportToTeam(Team team, SkyMeta.TeleportType teleportType) {
+        this.teleportToTeam(team.getId(), teleportType);
     }
 
-    public void teleportToTeam(Team team) {
-        this.teleportToTeam(team.getId());
-    }
-
-    public void teleportToTeam(UUID team) {
-        this.channel.sendToServer(new TeleportToTeam(team));
+    public void teleportToTeam(UUID team, SkyMeta.TeleportType teleportType) {
+        PacketDistributor.sendToServer(new TeleportToTeam.Message(team, teleportType));
     }
 
     public void requestToJoinTeam(Team team) {
@@ -123,7 +113,7 @@ public class EasyNetwork extends NetworkX {
     }
 
     public void requestToJoinTeam(UUID team) {
-        this.channel.sendToServer(new RequestToJoinTeam(team));
+        PacketDistributor.sendToServer(new RequestToJoinTeam.Message(team));
     }
 
     public void toggleState(Team team, ToggleButtons.Type type) {
@@ -131,10 +121,10 @@ public class EasyNetwork extends NetworkX {
     }
 
     public void toggleState(UUID team, ToggleButtons.Type type) {
-        this.channel.sendToServer(new ToggleStateButtonClick(team, type));
+        PacketDistributor.sendToServer(new ToggleStateButtonClick.Message(team, type));
     }
 
     public void updateSkyblockSavedData() {
-        this.channel.sendToServer(new UpdateSkyblockSavedData());
+        PacketDistributor.sendToServer(new UpdateSkyblockSavedData.Message());
     }
 }

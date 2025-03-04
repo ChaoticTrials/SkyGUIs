@@ -1,51 +1,49 @@
 package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record SendTemplateToClient(String name, ConfiguredTemplate template) {
+public class SendTemplateToClient extends PacketHandler<SendTemplateToClient.Message> {
 
-    public static class Handler implements PacketHandler<SendTemplateToClient> {
+    public static final CustomPacketPayload.Type<SendTemplateToClient.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("send_template_to_client"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
+    public SendTemplateToClient() {
+        super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
+    }
 
-        @Override
-        public boolean handle(SendTemplateToClient msg, Supplier<NetworkEvent.Context> ctx) {
-            if (Minecraft.getInstance().screen instanceof CreateTeamScreen screen) {
-                screen.addStructureToCache(msg.name, msg.template);
-            }
-            return true;
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        if (Minecraft.getInstance().screen instanceof CreateTeamScreen screen) {
+            screen.addStructureToCache(msg.name, msg.template);
         }
     }
 
-    public static class Serializer implements PacketSerializer<SendTemplateToClient> {
+    public record Message(String name, ConfiguredTemplate template) implements CustomPacketPayload {
 
-        @Override
-        public Class<SendTemplateToClient> messageClass() {
-            return SendTemplateToClient.class;
-        }
+        public static final StreamCodec<FriendlyByteBuf, Message> CODEC = StreamCodec.of(
+                (buffer, msg) -> {
+                    buffer.writeUtf(msg.name);
+                    buffer.writeNbt(msg.template.write(new CompoundTag()));
+                }, buffer -> new Message(buffer.readUtf(), ConfiguredTemplate.fromTag((CompoundTag) buffer.readNbt(NbtAccounter.unlimitedHeap())))
+        );
 
+        @Nonnull
         @Override
-        public void encode(SendTemplateToClient msg, FriendlyByteBuf buffer) {
-            buffer.writeUtf(msg.name);
-            buffer.writeNbt(msg.template.write(new CompoundTag()));
-        }
-
-        @Override
-        public SendTemplateToClient decode(FriendlyByteBuf buffer) {
-            return new SendTemplateToClient(buffer.readUtf(), ConfiguredTemplate.fromTag(Objects.requireNonNull(buffer.readAnySizeNbt())));
+        public Type<? extends CustomPacketPayload> type() {
+            return SendTemplateToClient.TYPE;
         }
     }
 }

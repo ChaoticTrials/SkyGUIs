@@ -4,17 +4,17 @@ import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
 import de.melanx.skyguis.tooltip.ClientSmallTextTooltip;
 import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 
 public class ClientEventHandler {
 
-    public ClientEventHandler() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerCustomTooltipComponents);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::registerKeys);
+    public ClientEventHandler(IEventBus modBus) {
+        modBus.addListener(this::registerCustomTooltipComponents);
+        modBus.addListener(this::registerKeys);
     }
 
     @SubscribeEvent
@@ -27,7 +27,7 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
-    public void onPressKey(InputEvent.MouseButton event) {
+    public void onPressKey(InputEvent.MouseButton.Pre event) {
         if (Minecraft.getInstance().screen == null) {
             while (Keybinds.ALL_TEAMS.consumeClick()) {
                 AllTeamsScreen.open();

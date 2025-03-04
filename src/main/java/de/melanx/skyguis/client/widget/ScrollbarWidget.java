@@ -15,7 +15,7 @@ import java.util.List;
 public class ScrollbarWidget implements GuiEventListener, Renderable {
 
     private static final int SCROLLER_HEIGHT = 15;
-    private static final ResourceLocation ICONS = new ResourceLocation(SkyGUIs.getInstance().modid, "textures/gui/icons.png");
+    private static final ResourceLocation ICONS = ResourceLocation.fromNamespaceAndPath(SkyGUIs.getInstance().modid, "textures/gui/icons.png");
 
     private final int x;
     private final int y;
@@ -106,9 +106,9 @@ public class ScrollbarWidget implements GuiEventListener, Renderable {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollDelta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (this.enabled) {
-            this.setOffset(this.offset + Math.max(Math.min(-(int) scrollDelta, 1), -1));
+            this.setOffset(this.offset + Math.max(Math.min(-(int) scrollY, 1), -1));
 
             return true;
         }

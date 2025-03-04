@@ -6,18 +6,18 @@ import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyMeta;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
-import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
-import de.melanx.skyguis.client.screen.notification.InformationScreen;
+import de.melanx.skyguis.client.screen.edit.HandleInvitationsScreen;
 import de.melanx.skyguis.client.widget.ClickableText;
 import de.melanx.skyguis.client.widget.ScrollbarWidget;
 import de.melanx.skyguis.config.ClientConfig;
 import de.melanx.skyguis.tooltip.SmallTextTooltip;
 import de.melanx.skyguis.util.ComponentBuilder;
-import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
@@ -32,6 +32,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.moddingx.libx.render.RenderHelper;
 
@@ -40,7 +41,7 @@ import java.awt.Color;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
+public class AllTeamsScreen extends BaseScreen {
 
     public static final int ENTRIES = 13;
     private static final Component TEAMS_COMPONENT = ComponentBuilder.text("teams").setStyle(Style.EMPTY.withBold(true));
@@ -53,9 +54,19 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     private static final Component EMPTY_TEAMS_FILTER = ComponentBuilder.text("filter.empty_teams");
     private static final int LONGEST_FILTER_TITLE_LENGTH = Math.max(TextHelper.stringLength(VISIT_FILTER),
             Math.max(TextHelper.stringLength(JOIN_REQUEST_FILTER), TextHelper.stringLength(EMPTY_TEAMS_FILTER)));
+    private static final ResourceLocation[] NOTIFICATION_ICONS = new ResourceLocation[]{
+            ResourceLocation.withDefaultNamespace("notification/1"),
+            ResourceLocation.withDefaultNamespace("notification/2"),
+            ResourceLocation.withDefaultNamespace("notification/3"),
+            ResourceLocation.withDefaultNamespace("notification/4"),
+            ResourceLocation.withDefaultNamespace("notification/5"),
+            ResourceLocation.withDefaultNamespace("notification/more")
+    };
+
     private final SkyblockSavedData data;
     private final List<Team> teams = new ArrayList<>();
     private final Team playerTeam;
+    private final boolean hasInvites;
     private ScrollbarWidget scrollbar;
     private Button yourTeamButton;
     private Button teleportHome;
@@ -73,6 +84,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         //noinspection ConstantConditions
         this.data = SkyblockSavedData.get(Minecraft.getInstance().level);
         this.playerTeam = this.data.getTeamFromPlayer(Minecraft.getInstance().player);
+        this.hasInvites = this.data.hasInvites(Minecraft.getInstance().player);
     }
 
     public static void open() {
@@ -82,50 +94,42 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
 
     @Override
     protected void init() {
+        Button.OnPress onSpawnButtonPress = button -> SkyGUIs.getNetwork().teleportToSpawn();
+
         if (this.playerTeam == null) {
-            this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> {
-                        //noinspection DataFlowIssue
-                        this.minecraft.setScreen(new CreateTeamScreen());
-                    })
+            this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> CreateTeamScreen.open())
                     .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
-                    .bounds(this.x(10), this.y(199), 160, 20)
+                    .bounds(this.x(10), this.y(199), this.hasInvites ? 78 : 160, 20)
                     .build());
+            if (this.hasInvites) {
+                this.addRenderableWidget(Button.builder(ComponentBuilder.button("review_invites"), button -> HandleInvitationsScreen.open())
+                        .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
+                        .bounds(this.x(93), this.y(199), 77, 20)
+                        .build());
+            }
             this.yourTeamButton = null;
 
-            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn_long"), button -> {
-                        SkyGUIs.getNetwork().teleportToTeam(SkyblockSavedData.SPAWN_ID);
-                        //noinspection DataFlowIssue
-                        this.getLoadingCircle().setActive(true);
-                    })
+            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn_long"), onSpawnButtonPress)
                     .bounds(this.x(10), this.y(this.ySize + 5), this.xSize - 20, 20)
                     .build());
         } else {
             MutableComponent component = Component.literal(TextHelper.shorten(this.font, this.playerTeam.getName(), this.xSize - TextHelper.stringLength(YOUR_TEAM) - 40));
             this.yourTeamButton = this.addRenderableWidget(new ClickableText(this.x(15) + TextHelper.stringLength(YOUR_TEAM), this.y(207), TextHelper.DARK_GREEN.getRGB(), component, button -> {
-                //noinspection DataFlowIssue
                 this.minecraft.setScreen(new TeamEditScreen(this.playerTeam, this));
             }));
 
             this.teleportHome = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_home"), button -> {
-                        SkyGUIs.getNetwork().teleportToTeam(this.playerTeam);
-                        //noinspection DataFlowIssue
-                        this.getLoadingCircle().setActive(true);
+                        SkyGUIs.getNetwork().teleportToTeam(this.playerTeam, SkyMeta.TeleportType.HOME);
                     })
                     .bounds(this.x(10), this.y(this.ySize + 5), this.xSize / 2 - 15, 20)
                     .build());
-            //noinspection DataFlowIssue
-            this.teleportHome.active = this.minecraft.player.hasPermissions(1) || PermissionsConfig.Teleports.home;
+            this.teleportHome.active = PermissionManager.INSTANCE.hasPermission(Minecraft.getInstance().player, PermissionManager.Permission.TELEPORT_HOME);
 
-            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn"), button -> {
-                        SkyGUIs.getNetwork().teleportToTeam(SkyblockSavedData.SPAWN_ID);
-                        //noinspection DataFlowIssue
-                        this.getLoadingCircle().setActive(true);
-                    })
+            this.teleportSpawn = this.addRenderableWidget(Button.builder(ComponentBuilder.button("teleport_spawn"), onSpawnButtonPress)
                     .bounds(this.x(5 + this.xSize / 2), this.y(this.ySize + 5), this.xSize / 2 - 15, 20)
                     .build());
         }
-        //noinspection DataFlowIssue
-        this.teleportSpawn.active = this.minecraft.player.hasPermissions(1) || PermissionsConfig.Teleports.spawn;
+        this.teleportSpawn.active = PermissionManager.INSTANCE.hasPermission(Minecraft.getInstance().player, PermissionManager.Permission.TELEPORT_TO_SPAWN);
 
         int filterSectionStart = this.xSize + 7;
         this.filterText = this.addRenderableWidget(new CollapsableText(false, this.x(filterSectionStart), this.y(2), 18, FILTER));
@@ -144,12 +148,12 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     }
 
     @Override
-    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         RenderHelper.renderGuiBackground(guiGraphics, this.x(this.xSize), this.y(0),
                 (this.filterText.isOpen() ? LONGEST_FILTER_TITLE_LENGTH + 15 : TextHelper.stringLength(this.filterText.getMessage())) + 14,
                 this.filterText.isOpen() ? 95 : 22,
                 BaseScreen.GENERIC, 128, 64, 4, 125, 4, 60);
-        super.render_(guiGraphics, mouseX, mouseY, partialTick);
         this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawString(this.font, Component.empty().append(TEAMS_COMPONENT).append(" (" + this.teams.size() + "/" + (this.data.getSpawnOption().isPresent() ? this.data.getTeams().size() - 1 : this.data.getTeams().size()) + ")"), this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
@@ -193,10 +197,20 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         }
     }
 
+    @Override
+    public void renderForeground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        if (!this.hasInvites) {
+            return;
+        }
+
+        int inviteCount = this.data.getInvites(this.minecraft.player).size();
+        guiGraphics.blitSprite(NOTIFICATION_ICONS[Math.min(inviteCount, 6) - 1], this.x(165), this.y(196), 8, 8);
+    }
+
     private void renderTeamTooltip(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, @Nonnull Team team) {
         List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()), CLICK_ME);
         List<Component> smallTextLines = Lists.newArrayList();
-        if (this.minecraft != null && this.minecraft.options.advancedItemTooltips) {
+        if (this.minecraft.options.advancedItemTooltips) {
             smallTextLines.add(ComponentBuilder.text("team_id").append(": " + team.getId().toString()));
         }
         smallTextLines.add(ComponentBuilder.text("members").append(": " + team.getPlayers().size()));
@@ -219,7 +233,6 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
             int index = (int) ((mouseY - 37) / 12) + this.scrollbar.getOffset();
             Team team = this.teams.get(index);
             if (Math2.isInBounds(10, 37, this.font.width(team.getName()), entries * 12, mouseX, mouseY)) {
-                //noinspection DataFlowIssue
                 if (team.hasPlayer(this.minecraft.player)) {
                     this.minecraft.setScreen(new TeamEditScreen(team, this));
                 } else {
@@ -245,24 +258,13 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        return this.scrollbar.mouseScrolled(mouseX, mouseY, delta) || super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.scrollbar.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     public void updateScrollbar() {
         this.scrollbar.setEnabled(this.teams.size() > ENTRIES);
         this.scrollbar.setMaxOffset(this.teams.size() - ENTRIES);
-    }
-
-    @Override
-    public void onLoadingResult(LoadingResult result) {
-        switch (result.status()) {
-            case SUCCESS -> this.onClose();
-            case FAIL -> {
-                //noinspection DataFlowIssue
-                this.minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, this.minecraft::popGuiLayer));
-            }
-        }
     }
 
     @Override
@@ -282,30 +284,31 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
         assert level != null;
         Player player = Minecraft.getInstance().player;
 
-        //noinspection DataFlowIssue
-        if (player.hasPermissions(1)) {
+        if (PermissionManager.INSTANCE.mayBypassLimitation(player)) {
             return;
         }
 
         SkyMeta metaInfo = this.data.getOrCreateMetaInfo(player);
-        if (PermissionsConfig.Teleports.home && this.playerTeam != null) {
-            if (metaInfo.canTeleportHome(level.getGameTime())) {
+        if (PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_HOME) && this.playerTeam != null) {
+            if (metaInfo.canTeleport(SkyMeta.TeleportType.HOME, level.getGameTime())) {
                 this.teleportHome.setTooltip(null);
                 this.teleportHome.active = true;
             } else {
-                this.teleportHome.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.command.error.cooldown",
-                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.homeCooldown - (level.getGameTime() - metaInfo.getLastHomeTeleport())))));
+                this.teleportHome.setTooltip(Tooltip.create(SkyComponents.ERROR_COOLDOWN.apply(
+                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.homeCooldown - (level.getGameTime() - metaInfo.getLastTeleport(SkyMeta.TeleportType.HOME)))
+                )));
                 this.teleportHome.active = false;
             }
         }
 
-        if (PermissionsConfig.Teleports.spawn) {
-            if (metaInfo.canTeleportSpawn(level.getGameTime())) {
+        if (PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TELEPORT_TO_SPAWN)) {
+            if (metaInfo.canTeleport(SkyMeta.TeleportType.SPAWN, level.getGameTime())) {
                 this.teleportSpawn.setTooltip(null);
                 this.teleportSpawn.active = true;
             } else {
-                this.teleportSpawn.setTooltip(Tooltip.create(Component.translatable("skyblockbuilder.command.error.cooldown",
-                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.spawnCooldown - (level.getGameTime() - metaInfo.getLastSpawnTeleport())))));
+                this.teleportSpawn.setTooltip(Tooltip.create(SkyComponents.ERROR_COOLDOWN.apply(
+                        RandomUtility.formattedCooldown(PermissionsConfig.Teleports.Cooldowns.spawnCooldown - (level.getGameTime() - metaInfo.getLastTeleport(SkyMeta.TeleportType.SPAWN)))
+                )));
                 this.teleportSpawn.active = false;
             }
         }
@@ -389,17 +392,25 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
     private class FilteredCheckbox extends SizeableCheckbox {
 
         public FilteredCheckbox(int x, int y, int size, boolean selected) {
-            this(x, y, size, selected, Component.empty());
+            this(x, y, size, selected, Component.empty(), (checkbox, value) -> {});
+        }
+
+        public FilteredCheckbox(int x, int y, int size, boolean selected, OnValueChange onValueChange) {
+            this(x, y, size, selected, Component.empty(), onValueChange);
         }
 
         public FilteredCheckbox(int x, int y, int size, boolean selected, Component component) {
-            super(x, y, size, selected, component);
+            this(x, y, size, selected, component, ((checkbox, value) -> {}));
+        }
+
+        public FilteredCheckbox(int x, int y, int size, boolean selected, Component component, OnValueChange onValueChange) {
+            super(x, y, size, selected, component, onValueChange);
         }
 
         @Override
-        public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             if (this.visible) {
-                super.render(guiGraphics, mouseX, mouseY, partialTick);
+                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
             }
         }
 
@@ -421,6 +432,7 @@ public class AllTeamsScreen extends BaseScreen implements LoadingResultHandler {
             this.width = TextHelper.stringLength(this.getMessage());
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public void onClick(double mouseX, double mouseY) {
             this.enabled = !this.enabled;

@@ -4,36 +4,36 @@ import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.network.handler.OpenGui;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.network.NetworkDirection;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.moddingx.libx.mod.ModXRegistration;
-import org.moddingx.libx.registration.RegistrationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Mod("skyguis")
+@Mod(SkyGUIs.MODID)
 public final class SkyGUIs extends ModXRegistration {
 
     private static SkyGUIs instance;
     private final EasyNetwork network;
     public final Logger logger;
+    public static final String MODID = "skyguis";
 
-    public SkyGUIs() {
+    public SkyGUIs(IEventBus modBus, Dist dist) {
         instance = this;
         this.network = new EasyNetwork(this);
         this.logger = LoggerFactory.getLogger(this.modid);
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-            MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
-        });
+        if (dist.isClient()) {
+            NeoForge.EVENT_BUS.register(new ClientEventHandler(modBus));
+        }
 
-        MinecraftForge.EVENT_BUS.addListener(SkyGUIs::registerClientCommands);
+        NeoForge.EVENT_BUS.addListener(SkyGUIs::registerClientCommands);
     }
 
     public static SkyGUIs getInstance() {
@@ -46,24 +46,19 @@ public final class SkyGUIs extends ModXRegistration {
 
     @Override
     protected void setup(FMLCommonSetupEvent event) {
-
+        // NO-OP
     }
 
     @Override
     protected void clientSetup(FMLClientSetupEvent event) {
-
-    }
-
-    @Override
-    protected void initRegistration(RegistrationBuilder builder) {
-
+        // NO-OP
     }
 
     public static void registerClientCommands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skyblock")
                 .then(Commands.literal("gui").executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
-                    SkyGUIs.getNetwork().channel.sendTo(new OpenGui(), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                    PacketDistributor.sendToPlayer(player, new OpenGui.Message());
                     return 1;
                 }))
         );

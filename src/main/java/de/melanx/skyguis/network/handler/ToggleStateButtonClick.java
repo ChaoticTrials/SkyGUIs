@@ -2,63 +2,54 @@ package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.util.ToggleButtons;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public record ToggleStateButtonClick(UUID team, ToggleButtons.Type type) {
+public class ToggleStateButtonClick extends PacketHandler<ToggleStateButtonClick.Message> {
 
-    public static class Handler implements PacketHandler<ToggleStateButtonClick> {
+    public static final CustomPacketPayload.Type<ToggleStateButtonClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("toggle_state_button_click"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
+    public ToggleStateButtonClick() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
+    }
 
-        @Override
-        public boolean handle(ToggleStateButtonClick msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        ServerPlayer player = (ServerPlayer) ctx.player();
+
+        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        Team team = data.getTeam(msg.team);
+        if (team != null) {
+            switch (msg.toggleButtonsType) {
+                case VISITS -> team.setAllowVisit(!team.allowsVisits());
+                case JOIN_REQUEST -> team.setAllowJoinRequest(!team.allowsJoinRequests());
             }
-
-            Level level = player.level();
-            SkyblockSavedData data = SkyblockSavedData.get(level);
-            Team team = data.getTeam(msg.team);
-            if (team != null) {
-                switch (msg.type) {
-                    case VISITS -> team.setAllowVisit(!team.allowsVisits());
-                    case JOIN_REQUEST -> team.setAllowJoinRequest(!team.allowsJoinRequests());
-                }
-            }
-
-            return true;
         }
     }
 
-    public static class Serializer implements PacketSerializer<ToggleStateButtonClick> {
+    public record Message(UUID team, ToggleButtons.Type toggleButtonsType) implements CustomPacketPayload {
 
-        @Override
-        public Class<ToggleStateButtonClick> messageClass() {
-            return ToggleStateButtonClick.class;
-        }
+        public static final StreamCodec<RegistryFriendlyByteBuf, ToggleStateButtonClick.Message> CODEC = StreamCodec.of(
+                ((buffer, msg) -> {
+                    buffer.writeUUID(msg.team);
+                    buffer.writeEnum(msg.toggleButtonsType);
+                }), buffer -> new ToggleStateButtonClick.Message(buffer.readUUID(), buffer.readEnum(ToggleButtons.Type.class)));
 
+        @Nonnull
         @Override
-        public void encode(ToggleStateButtonClick msg, FriendlyByteBuf buffer) {
-            buffer.writeUUID(msg.team);
-            buffer.writeEnum(msg.type);
-        }
-
-        @Override
-        public ToggleStateButtonClick decode(FriendlyByteBuf buffer) {
-            return new ToggleStateButtonClick(buffer.readUUID(), buffer.readEnum(ToggleButtons.Type.class));
+        public Type<? extends CustomPacketPayload> type() {
+            return ToggleStateButtonClick.TYPE;
         }
     }
 }

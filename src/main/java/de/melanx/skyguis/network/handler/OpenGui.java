@@ -1,44 +1,42 @@
 package de.melanx.skyguis.network.handler;
 
+import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record OpenGui() {
+public class OpenGui extends PacketHandler<OpenGui.Message> {
 
-    public static class Handler implements PacketHandler<OpenGui> {
+    public static final CustomPacketPayload.Type<OpenGui.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("open_gui"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
-
-        @Override
-        public boolean handle(OpenGui msg, Supplier<NetworkEvent.Context> ctx) {
-            AllTeamsScreen.open();
-            return true;
-        }
+    public OpenGui() {
+        super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
-    public static class Serializer implements PacketSerializer<OpenGui> {
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        AllTeamsScreen.open();
+    }
 
+    public record Message() implements CustomPacketPayload {
+
+        public static final StreamCodec<FriendlyByteBuf, Message> CODEC = StreamCodec.of(
+                (buffer, value) -> {
+                },
+                buffer -> new Message()
+        );
+
+        @Nonnull
         @Override
-        public Class<OpenGui> messageClass() {
-            return OpenGui.class;
-        }
-
-        @Override
-        public void encode(OpenGui msg, FriendlyByteBuf buffer) {
-
-        }
-
-        @Override
-        public OpenGui decode(FriendlyByteBuf buffer) {
-            return new OpenGui();
+        public Type<? extends CustomPacketPayload> type() {
+            return OpenGui.TYPE;
         }
     }
 }

@@ -64,11 +64,12 @@ public abstract class ListScreen<T> extends BaseScreen {
         this.widgets.clear();
         this.scrollbar = new ScrollbarWidget(this, this.scrollbarInfo.x, this.scrollbarInfo.y, 12, this.scrollbarInfo.height);
         this.renderArea = this.addWidget(new RenderArea(this.x(this.renderAreaInfo.x), this.y(this.renderAreaInfo.y), this.renderAreaInfo.width, this.entriesPerPage() * ENTRY_HEIGHT, this.xSize - 20, this.values.size() * ENTRY_HEIGHT, ENTRY_HEIGHT) {
+
             @Override
-            public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+            public void renderWidgetContent(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
                 ListScreen.this.isCapturingTooltips = true;
                 guiGraphics.pose().pushPose();
-                super.render(new TooltipCapturingGuiGraphics(guiGraphics), mouseX, mouseY, partialTick);
+                super.renderWidgetContent(new TooltipCapturingGuiGraphics(guiGraphics), mouseX, mouseY, partialTick);
                 guiGraphics.pose().popPose();
                 ListScreen.this.isCapturingTooltips = false;
                 ListScreen.this.capturedTooltips.forEach(pair -> {
@@ -78,11 +79,12 @@ public abstract class ListScreen<T> extends BaseScreen {
                             && y > 0 && y < this.getRenderHeight()) {
                         guiGraphics.pose().pushPose();
                         guiGraphics.pose().setIdentity();
-                        guiGraphics.pose().mulPoseMatrix(pair.getLeft());
+                        guiGraphics.pose().mulPose(pair.getLeft());
                         pair.getRight().accept(guiGraphics);
                         guiGraphics.pose().popPose();
                     }
                 });
+
                 ListScreen.this.capturedTooltips.clear();
             }
         });
@@ -113,15 +115,9 @@ public abstract class ListScreen<T> extends BaseScreen {
         return true;
     }
 
-    public void selectAll() {
+    public void selectAll(boolean select) {
         for (CheckboxTextWidget widget : this.widgets) {
-            widget.checkbox.selected = true;
-        }
-    }
-
-    public void unselectAll() {
-        for (CheckboxTextWidget widget : this.widgets) {
-            widget.checkbox.selected = false;
+            widget.checkbox.selected = select;
         }
     }
 
@@ -137,9 +133,8 @@ public abstract class ListScreen<T> extends BaseScreen {
     }
 
     @Override
-    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
-        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTitle(guiGraphics);
         this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
         this.renderArea.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -162,8 +157,8 @@ public abstract class ListScreen<T> extends BaseScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        return this.scrollbar.mouseScrolled(mouseX, mouseY, delta) || super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        return this.scrollbar.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     public void updateScrollbar() {

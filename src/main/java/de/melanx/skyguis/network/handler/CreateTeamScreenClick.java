@@ -5,91 +5,89 @@ import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record CreateTeamScreenClick(String name, String shape, boolean allowVisits, boolean allowJoinRequests) {
+public class CreateTeamScreenClick extends PacketHandler<CreateTeamScreenClick.Message> {
 
-    public static class Handler implements PacketHandler<CreateTeamScreenClick> {
+    public static final CustomPacketPayload.Type<CreateTeamScreenClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("create_team_screen_click"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
-
-        @Override
-        public boolean handle(CreateTeamScreenClick msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
-            }
-
-            EasyNetwork network = SkyGUIs.getNetwork();
-            if (SkyblockHooks.onCreateTeam(msg.name)) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.create_team").withStyle(ChatFormatting.RED));
-                return true;
-            }
-
-            ServerLevel level = (ServerLevel) player.level();
-            ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate(msg.shape);
-            if (template == null) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("shape_does_not_exist").withStyle(ChatFormatting.RED));
-                return true;
-            }
-
-            SkyblockSavedData data = SkyblockSavedData.get(level);
-
-            if (data.hasPlayerTeam(player)) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED));
-                return true;
-            }
-
-            Team team = data.createTeam(msg.name, template);
-            if (team == null) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_already_exist", msg.name).withStyle(ChatFormatting.RED));
-                return true;
-            }
-
-            data.addPlayerToTeam(team, player);
-            WorldUtil.teleportToIsland(player, team);
-            team.setAllowVisit(msg.allowVisits);
-            team.setAllowJoinRequest(msg.allowJoinRequests);
-            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.create_team", team.getName()).withStyle(ChatFormatting.GREEN));
-            return true;
-        }
+    public CreateTeamScreenClick() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
-    public static class Serializer implements PacketSerializer<CreateTeamScreenClick> {
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        ServerPlayer player = (ServerPlayer) ctx.player();
 
-        @Override
-        public Class<CreateTeamScreenClick> messageClass() {
-            return CreateTeamScreenClick.class;
+        EasyNetwork network = SkyGUIs.getNetwork();
+        if (SkyblockHooks.onCreateTeam(msg.name)) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DENIED_CREATE_TEAM);
+            return;
         }
 
-        @Override
-        public void encode(CreateTeamScreenClick msg, FriendlyByteBuf buffer) {
-            buffer.writeUtf(msg.name);
-            buffer.writeUtf(msg.shape);
-            buffer.writeBoolean(msg.allowVisits);
-            buffer.writeBoolean(msg.allowJoinRequests);
+        ServerLevel level = (ServerLevel) player.level();
+        ConfiguredTemplate template = TemplateLoader.getConfiguredTemplate(msg.shape);
+        if (template == null) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("shape_does_not_exist").withStyle(ChatFormatting.RED));
+            return;
         }
 
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+
+        if (data.hasPlayerTeam(player)) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_USER_HAS_TEAM);
+            return;
+        }
+
+        Team team = data.createTeam(msg.name, template);
+        if (team == null) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_TEAM_ALREADY_EXIST.apply(msg.name));
+            return;
+        }
+
+        data.addPlayerToTeam(team, player);
+        WorldUtil.teleportToIsland(player, team);
+        team.setAllowVisit(msg.allowVisits);
+        team.setAllowJoinRequest(msg.allowJoinRequests);
+        network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_CREATE_TEAM.apply(team.getName()).withStyle(ChatFormatting.GREEN));
+    }
+
+    public record Message(String name, String shape, boolean allowVisits, boolean allowJoinRequests) implements CustomPacketPayload {
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, CreateTeamScreenClick.Message> CODEC = StreamCodec.of(
+                ((buffer, msg) -> {
+                    buffer.writeUtf(msg.name);
+                    buffer.writeUtf(msg.shape);
+                    buffer.writeBoolean(msg.allowVisits);
+                    buffer.writeBoolean(msg.allowJoinRequests);
+                }), buffer -> new CreateTeamScreenClick.Message(
+                        buffer.readUtf(),
+                        buffer.readUtf(),
+                        buffer.readBoolean(),
+                        buffer.readBoolean()
+                ));
+
+        @Nonnull
         @Override
-        public CreateTeamScreenClick decode(FriendlyByteBuf buffer) {
-            return new CreateTeamScreenClick(buffer.readUtf(), buffer.readUtf(), buffer.readBoolean(), buffer.readBoolean());
+        public Type<? extends CustomPacketPayload> type() {
+            return CreateTeamScreenClick.TYPE;
         }
     }
 }

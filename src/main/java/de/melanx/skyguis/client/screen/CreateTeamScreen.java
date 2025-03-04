@@ -6,10 +6,7 @@ import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.template.TemplateRenderer;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyguis.SkyGUIs;
-import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
-import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
-import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -27,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler {
+public class CreateTeamScreen extends BaseScreen {
 
     private static final Component NAME_COMPONENT = ComponentBuilder.text("name");
     private static final Component TEMPLATE_COMPONENT = ComponentBuilder.raw("template");
@@ -59,6 +56,7 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
     @Override
     protected void init() {
+        this.structureCache.clear();
         this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, Component.empty());
         this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
@@ -105,8 +103,6 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
                 this.name.setValue(NameGenerator.randomName(new Random()));
             } else {
                 SkyGUIs.getNetwork().handleCreateTeam(this.name.getValue().strip(), this.currTemplate, this.allowVisits.selected, this.allowJoinRequests.selected);
-                //noinspection ConstantConditions
-                this.getLoadingCircle().setActive(true);
             }
         }).bounds(this.x(27), this.y(116), 60, 20).build());
         this.addRenderableWidget(Button.builder(ABORT, button -> this.onClose()).bounds(this.x(106), this.y(116), 60, 20).build());
@@ -129,14 +125,8 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
     }
 
     @Override
-    public void tick() {
-        this.name.tick();
-        super.tick();
-    }
-
-    @Override
-    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTitle(guiGraphics);
         guiGraphics.drawString(this.font, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.drawString(this.font, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB(), false);
@@ -149,29 +139,20 @@ public class CreateTeamScreen extends BaseScreen implements LoadingResultHandler
 
         TemplateRenderer renderer = this.structureCache.get(this.currTemplate);
         if (renderer != null) {
-            renderer.render(guiGraphics, this.width / 6, this.centeredY(0));
+            renderer.render(guiGraphics, this.x(0) / 2, this.centeredY(0));
         }
 
         float scale = 0.9f;
+        guiGraphics.pose().pushPose();
         guiGraphics.pose().scale(scale, scale, scale);
         guiGraphics.drawString(this.font, ALLOW_VISITS, (int) (this.x(82) / scale), (int) (this.y(87) / scale), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.drawString(this.font, ALLOW_REQUESTS, (int) (this.x(82) / scale), (int) (this.y(102) / scale), Color.DARK_GRAY.getRGB(), false);
         guiGraphics.pose().scale(1 / 0.8f, 1 / 0.8f, 1 / 0.8f);
-    }
-
-    @Override
-    public void onLoadingResult(LoadingResult result) {
-        switch (result.status()) {
-            case SUCCESS -> this.onClose();
-            case FAIL -> {
-                Minecraft minecraft = Minecraft.getInstance();
-                minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
-            }
-        }
+        guiGraphics.pose().popPose();
     }
 
     public void addStructureToCache(String name, ConfiguredTemplate template) {
-        this.structureCache.put(name, new TemplateRenderer(template.getTemplate(), 130));
+        this.structureCache.put(name, new TemplateRenderer(template.getTemplate(), Math.min((float) (this.x(0) * 0.9), this.height)));
     }
 
     public void updateTemplateButton() {

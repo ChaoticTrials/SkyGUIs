@@ -4,15 +4,12 @@ import com.google.common.collect.Lists;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyguis.SkyGUIs;
-import de.melanx.skyguis.client.screen.base.LoadingResultHandler;
 import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.base.list.TeamListScreen;
-import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.client.widget.sizable.SizableButton;
 import de.melanx.skyguis.network.handler.AnswerInvitation;
 import de.melanx.skyguis.util.ComponentBuilder;
-import de.melanx.skyguis.util.LoadingResult;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,7 +22,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class HandleInvitationsScreen extends TeamListScreen implements LoadingResultHandler {
+public class HandleInvitationsScreen extends TeamListScreen {
 
     public static final Component TITLE = ComponentBuilder.title("invitations");
 
@@ -37,15 +34,6 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
 
     public static void open() {
         Minecraft.getInstance().setScreen(new HandleInvitationsScreen());
-    }
-
-    @Override
-    public void onLoadingResult(LoadingResult result) {
-        if (result.status() == LoadingResult.Status.SUCCESS) {
-            Minecraft.getInstance().setScreen(null);
-        }
-        Minecraft minecraft = Minecraft.getInstance();
-        minecraft.pushGuiLayer(new InformationScreen(result.reason(), TextHelper.stringLength(result.reason()) + 30, 100, minecraft::popGuiLayer));
     }
 
     @Override
@@ -88,10 +76,10 @@ public class HandleInvitationsScreen extends TeamListScreen implements LoadingRe
 
         public JoinTeamWidget(Team team, Screen screen, int x, int y, int width, int height, Consumer<Team> onJoin, Consumer<Team> onIgnore) {
             super(x, y, width, height);
-            this.addRenderableWidget(SizableButton.builder(Component.literal("Join"), button -> onJoin.accept(team))
+            this.addRenderableWidget(SizableButton.builder(ComponentBuilder.button("join"), button -> onJoin.accept(team))
                     .bounds(0, 0, 30, height)
                     .build());
-            this.addRenderableWidget(SizableButton.builder(Component.literal("Ignore"), button -> onIgnore.accept(team))
+            this.addRenderableWidget(SizableButton.builder(ComponentBuilder.button("ignore"), button -> onIgnore.accept(team))
                     .bounds(33, 0, 30, height)
                     .build());
             this.addRenderableOnly(new TextWidget(66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));

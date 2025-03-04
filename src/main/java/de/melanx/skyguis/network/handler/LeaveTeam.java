@@ -1,92 +1,83 @@
 package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyblockbuilder.config.common.InventoryConfig;
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.LoadingResult;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public record LeaveTeam(UUID player) {
+public class LeaveTeam extends PacketHandler<LeaveTeam.Message> {
 
-    public static class Handler implements PacketHandler<LeaveTeam> {
+    public static final CustomPacketPayload.Type<LeaveTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("leave_team"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
-
-        @Override
-        public boolean handle(LeaveTeam msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
-            }
-
-            EasyNetwork network = SkyGUIs.getNetwork();
-            SkyblockSavedData data = SkyblockSavedData.get(player.level());
-            Team team = data.getTeamFromPlayer(player);
-
-            if (team == null) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team").withStyle(ChatFormatting.RED));
-                return true;
-            }
-
-            switch (SkyblockHooks.onLeave(player, team)) {
-                case DENY:
-                    network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.leave_team").withStyle(ChatFormatting.RED));
-                    return true;
-                case DEFAULT:
-                    if (!PermissionsConfig.selfManage && !player.hasPermissions(2)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.manage_teams").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-                    break;
-                case ALLOW:
-                    break;
-            }
-
-            if (InventoryConfig.dropItems) {
-                RandomUtility.dropInventories(player);
-            }
-
-            data.removePlayerFromTeam(msg.player);
-            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.left_team"));
-            RandomUtility.deleteTeamIfEmpty(data, team);
-            WorldUtil.teleportToIsland(player, data.getSpawn());
-            return true;
-        }
+    public LeaveTeam() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
-    public static class Serializer implements PacketSerializer<LeaveTeam> {
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        ServerPlayer player = (ServerPlayer) ctx.player();
 
-        @Override
-        public Class<LeaveTeam> messageClass() {
-            return LeaveTeam.class;
+        EasyNetwork network = SkyGUIs.getNetwork();
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
+        Team team = data.getTeamFromPlayer(player);
+
+        if (team == null) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_USER_HAS_NO_TEAM);
+            return;
         }
 
-        @Override
-        public void encode(LeaveTeam msg, FriendlyByteBuf buffer) {
-            buffer.writeUUID(msg.player);
+        switch (SkyblockHooks.onLeave(player, team)) {
+            case DENY -> {
+                network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DENIED_LEAVE_TEAM);
+                return;
+            }
+            case DEFAULT -> {
+                if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_LEAVE)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DISABLED_MANAGE_TEAMS);
+                    return;
+                }
+            }
         }
 
+        if (InventoryConfig.dropItems) {
+            RandomUtility.dropInventories(player);
+        }
+
+        data.removePlayerFromTeam(msg.player());
+        network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_LEFT_TEAM);
+        RandomUtility.deleteTeamIfEmpty(data, team);
+        WorldUtil.teleportToIsland(player, data.getSpawn());
+    }
+
+    public record Message(UUID player) implements CustomPacketPayload {
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, LeaveTeam.Message> CODEC = StreamCodec.of(
+                ((buffer, msg) -> buffer.writeUUID(msg.player)),
+                buffer -> new LeaveTeam.Message(buffer.readUUID())
+        );
+
+        @Nonnull
         @Override
-        public LeaveTeam decode(FriendlyByteBuf buffer) {
-            return new LeaveTeam(buffer.readUUID());
+        public Type<? extends CustomPacketPayload> type() {
+            return LeaveTeam.TYPE;
         }
     }
 }

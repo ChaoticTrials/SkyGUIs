@@ -6,112 +6,106 @@ import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
 import de.melanx.skyblockbuilder.util.RandomUtility;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyblockbuilder.util.WorldUtil;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.LoadingResult;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.apache.commons.lang3.tuple.Pair;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public record UpdateTeam(String teamName, Set<UUID> players) {
+public class UpdateTeam extends PacketHandler<UpdateTeam.Message> {
 
-    public static class Handler implements PacketHandler<UpdateTeam> {
+    public static final CustomPacketPayload.Type<UpdateTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("update_team"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
-
-        @Override
-        public boolean handle(UpdateTeam msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
-            }
-
-            EasyNetwork network = SkyGUIs.getNetwork();
-            if (!player.hasPermissions(2)) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
-                return true;
-            }
-
-            ServerLevel level = (ServerLevel) player.level();
-            SkyblockSavedData data = SkyblockSavedData.get(level);
-            Team team = data.getTeamFromPlayer(player);
-            if (team == null) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_no_team"));
-                return true;
-            }
-
-            PlayerList playerList = level.getServer().getPlayerList();
-            Pair<Boolean, Set<ServerPlayer>> result = SkyblockHooks.onManageRemoveFromTeam(null, team, msg.players.stream().map(playerList::getPlayer).collect(Collectors.toList()));
-            if (result.getLeft()) {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.remove_players_from_team"));
-                return true;
-            }
-
-            if (team.getName().equalsIgnoreCase(msg.teamName)) {
-                for (UUID id : msg.players) {
-                    if (team.hasPlayer(id)) {
-                        data.removePlayerFromTeam(id);
-                        ServerPlayer toRemove = playerList.getPlayer(id);
-                        if (toRemove != null) {
-                            if (InventoryConfig.dropItems) {
-                                RandomUtility.dropInventories(toRemove);
-                            }
-                            WorldUtil.teleportToIsland(toRemove, data.getSpawn());
-                        }
-                    }
-                }
-            } else {
-                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
-                return true;
-            }
-
-            network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.remove_multiple_players", msg.players.size(), team.getName()));
-            return true;
-        }
+    public UpdateTeam() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
-    public static class Serializer implements PacketSerializer<UpdateTeam> {
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        ServerPlayer player = (ServerPlayer) ctx.player();
+        EasyNetwork network = SkyGUIs.getNetwork();
 
-        @Override
-        public Class<UpdateTeam> messageClass() {
-            return UpdateTeam.class;
+        if (!player.hasPermissions(2)) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
+            return;
         }
 
-        @Override
-        public void encode(UpdateTeam msg, FriendlyByteBuf buffer) {
-            buffer.writeUtf(msg.teamName);
-            buffer.writeVarInt(msg.players.size());
+        ServerLevel level = (ServerLevel) player.level();
+        SkyblockSavedData data = SkyblockSavedData.get(level);
+        Team team = data.getTeamFromPlayer(player);
+        if (team == null) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_USER_HAS_NO_TEAM);
+            return;
+        }
+
+        PlayerList playerList = level.getServer().getPlayerList();
+        Pair<Boolean, Set<ServerPlayer>> result = SkyblockHooks.onManageRemoveFromTeam(null, team, msg.players.stream().map(playerList::getPlayer).collect(Collectors.toList()));
+        if (result.getLeft()) {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DENIED_REMOVE_PLAYERS_FROM_TEAM);
+            return;
+        }
+
+        if (team.getName().equalsIgnoreCase(msg.teamName)) {
             for (UUID id : msg.players) {
-                buffer.writeUUID(id);
+                if (team.hasPlayer(id)) {
+                    data.removePlayerFromTeam(id);
+                    ServerPlayer toRemove = playerList.getPlayer(id);
+                    if (toRemove != null) {
+                        if (InventoryConfig.dropItems) {
+                            RandomUtility.dropInventories(toRemove);
+                        }
+                        WorldUtil.teleportToIsland(toRemove, data.getSpawn());
+                    }
+                }
             }
+        } else {
+            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("player_not_in_team"));
+            return;
         }
 
-        @Override
-        public UpdateTeam decode(FriendlyByteBuf buffer) {
-            String teamName = buffer.readUtf();
-            int size = buffer.readVarInt();
-            Set<UUID> ids = Sets.newHashSet();
-            for (int i = 0; i < size; i++) {
-                ids.add(buffer.readUUID());
-            }
+        network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_REMOVE_MULTIPLE_PLAYERS.apply(msg.players.size(), team.getName()));
+    }
 
-            return new UpdateTeam(teamName, ids);
+    public record Message(String teamName, Set<UUID> players) implements CustomPacketPayload {
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, Message> CODEC = StreamCodec.of(
+                ((buffer, msg) -> {
+                    buffer.writeUtf(msg.teamName);
+                    buffer.writeVarInt(msg.players.size());
+                    for (UUID id : msg.players) {
+                        buffer.writeUUID(id);
+                    }
+                }), buffer -> {
+                    String teamName = buffer.readUtf();
+                    int size = buffer.readVarInt();
+                    Set<UUID> ids = Sets.newHashSet();
+                    for (int i = 0; i < size; i++) {
+                        ids.add(buffer.readUUID());
+                    }
+                    return new Message(teamName, ids);
+                });
+
+        @Nonnull
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return UpdateTeam.TYPE;
         }
     }
 }

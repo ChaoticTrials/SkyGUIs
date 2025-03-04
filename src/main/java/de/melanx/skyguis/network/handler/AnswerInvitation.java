@@ -1,132 +1,124 @@
 package de.melanx.skyguis.network.handler;
 
-import de.melanx.skyblockbuilder.config.common.PermissionsConfig;
 import de.melanx.skyblockbuilder.data.SkyblockSavedData;
 import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.events.SkyblockHooks;
+import de.melanx.skyblockbuilder.permissions.PermissionManager;
+import de.melanx.skyblockbuilder.util.SkyComponents;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.util.LoadingResult;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record AnswerInvitation(String teamName, Type type) {
+public class AnswerInvitation extends PacketHandler<AnswerInvitation.Message> {
 
-    public static class Handler implements PacketHandler<AnswerInvitation> {
+    public static final CustomPacketPayload.Type<AnswerInvitation.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("answer_invitation"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
+    public AnswerInvitation() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
+    }
 
-        @Override
-        public boolean handle(AnswerInvitation msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
-            }
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        ServerPlayer player = (ServerPlayer) ctx.player();
 
-            SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
-            Team team = data.getTeam(msg.teamName);
-            EasyNetwork network = SkyGUIs.getNetwork();
+        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        Team team = data.getTeam(msg.teamName);
+        EasyNetwork network = SkyGUIs.getNetwork();
 
-            switch (msg.type) {
-                case ACCEPT -> {
-                    if (team == null) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    if (data.hasPlayerTeam(player)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.user_has_team").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    if (!data.hasInvites(player)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    switch (SkyblockHooks.onAccept(player, team)) {
-                        case DENY -> {
-                            network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.accept_invitations").withStyle(ChatFormatting.RED));
-                            return true;
-                        }
-                        case DEFAULT -> {
-                            if (!PermissionsConfig.selfManage && !player.hasPermissions(2)) {
-                                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.accept_invitations").withStyle(ChatFormatting.RED));
-                                return true;
-                            }
-                        }
-                    }
-
-                    if (!data.acceptInvite(team, player)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.accept_invitations").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.joined_team").withStyle(ChatFormatting.GOLD));
+        switch (msg.answerType) {
+            case ACCEPT -> {
+                if (team == null) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_TEAM_NOT_EXIST);
+                    return;
                 }
 
-                case IGNORE -> {
-                    if (team == null) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.team_not_exist").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    if (!data.hasInvites(player)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.no_invitations").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    switch (SkyblockHooks.onDecline(player, team)) {
-                        case DENY -> {
-                            network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.denied.decline_invitations").withStyle(ChatFormatting.RED));
-                            return true;
-                        }
-                        case DEFAULT -> {
-                            if (!PermissionsConfig.selfManage && !player.hasPermissions(2)) {
-                                network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.disabled.decline_invitations").withStyle(ChatFormatting.RED));
-                                return true;
-                            }
-                        }
-                    }
-
-                    if (!data.declineInvite(team, player)) {
-                        network.handleLoadingResult(ctx.get(), LoadingResult.Status.FAIL, Component.translatable("skyblockbuilder.command.error.decline_invitations").withStyle(ChatFormatting.RED));
-                        return true;
-                    }
-
-                    network.handleLoadingResult(ctx.get(), LoadingResult.Status.SUCCESS, Component.translatable("skyblockbuilder.command.success.declined_invitation", team.getName()).withStyle(ChatFormatting.GOLD));
+                if (data.hasPlayerTeam(player)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_USER_HAS_TEAM);
+                    return;
                 }
+
+                if (!data.hasInvites(player)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_NO_INVITATIONS);
+                    return;
+                }
+
+                switch (SkyblockHooks.onAccept(player, team)) {
+                    case DENY -> {
+                        network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DENIED_ACCEPT_INVITATIONS);
+                        return;
+                    }
+                    case DEFAULT -> {
+                        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
+                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DISABLED_ACCEPT_INVITATIONS);
+                            return;
+                        }
+                    }
+                }
+
+                if (!data.acceptInvite(team, player)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_ACCEPT_INVITATIONS);
+                    return;
+                }
+
+                network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_JOINED_TEAM.apply(team.getName()));
             }
-            return true;
+
+            case IGNORE -> {
+                if (team == null) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_TEAM_NOT_EXIST);
+                    return;
+                }
+
+                if (!data.hasInvites(player)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_NO_INVITATIONS);
+                    return;
+                }
+
+                switch (SkyblockHooks.onDecline(player, team)) {
+                    case DENY -> {
+                        network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DENIED_DECLINE_INVITATIONS);
+                        return;
+                    }
+                    case DEFAULT -> {
+                        if (!PermissionManager.INSTANCE.hasPermission(player, PermissionManager.Permission.TEAM_HANDLE_INVITES)) {
+                            network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.DISABLED_DECLINE_INVITATIONS);
+                            return;
+                        }
+                    }
+                }
+
+                if (!data.declineInvite(team, player)) {
+                    network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_DECLINE_INVITATIONS);
+                    return;
+                }
+
+                network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_DECLINED_INVITATION.apply(team.getName()));
+            }
         }
     }
 
-    public static class Serializer implements PacketSerializer<AnswerInvitation> {
+    public record Message(String teamName, AnswerInvitation.Type answerType) implements CustomPacketPayload {
 
-        @Override
-        public Class<AnswerInvitation> messageClass() {
-            return AnswerInvitation.class;
-        }
+        public static final StreamCodec<RegistryFriendlyByteBuf, AnswerInvitation.Message> CODEC = StreamCodec.of(
+                ((buffer, msg) -> {
+                    buffer.writeUtf(msg.teamName);
+                    buffer.writeEnum(msg.answerType);
+                }), buffer -> new AnswerInvitation.Message(buffer.readUtf(), buffer.readEnum(AnswerInvitation.Type.class)));
 
+        @Nonnull
         @Override
-        public void encode(AnswerInvitation msg, FriendlyByteBuf buffer) {
-            buffer.writeUtf(msg.teamName);
-            buffer.writeEnum(msg.type);
-        }
-
-        @Override
-        public AnswerInvitation decode(FriendlyByteBuf buffer) {
-            return new AnswerInvitation(buffer.readUtf(), buffer.readEnum(Type.class));
+        public Type<? extends CustomPacketPayload> type() {
+            return AnswerInvitation.TYPE;
         }
     }
 

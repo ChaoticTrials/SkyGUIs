@@ -3,6 +3,7 @@ package de.melanx.skyguis.config;
 import com.google.gson.JsonPrimitive;
 import org.moddingx.libx.annotation.config.RegisterMapper;
 import org.moddingx.libx.config.gui.ConfigEditor;
+import org.moddingx.libx.config.gui.InputProperties;
 import org.moddingx.libx.config.mapper.ValueMapper;
 import org.moddingx.libx.config.validator.ValidatorInfo;
 
@@ -33,6 +34,17 @@ public class SimpleDateFormatMapper implements ValueMapper<SimpleDateFormat, Jso
 
     @Override
     public ConfigEditor<SimpleDateFormat> createEditor(ValidatorInfo<?> validator) {
-        return ConfigEditor.unsupported(new SimpleDateFormat("dd.MM.yyyy HH:mm"));
+        return ConfigEditor.input(new InputProperties<>() {
+
+            @Override
+            public SimpleDateFormat defaultValue() {
+                return new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            }
+
+            @Override
+            public SimpleDateFormat valueOf(String str) {
+                return new SimpleDateFormat(str);
+            }
+        });
     }
 }

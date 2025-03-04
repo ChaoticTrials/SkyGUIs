@@ -24,9 +24,8 @@ public class NotificationScreen extends BaseScreen {
     }
 
     @Override
-    public void render_(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
-        super.render_(guiGraphics, mouseX, mouseY, partialTick);
+    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         this.renderTitle(guiGraphics);
     }
 

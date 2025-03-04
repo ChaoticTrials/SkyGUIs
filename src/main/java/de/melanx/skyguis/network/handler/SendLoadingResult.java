@@ -1,50 +1,57 @@
 package de.melanx.skyguis.network.handler;
 
-import de.melanx.skyguis.client.screen.BaseScreen;
+import de.melanx.skyguis.SkyGUIs;
+import de.melanx.skyguis.client.screen.notification.InformationScreen;
 import de.melanx.skyguis.util.LoadingResult;
+import de.melanx.skyguis.util.TextHelper;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record SendLoadingResult(LoadingResult.Status status, Component reason) {
+public class SendLoadingResult extends PacketHandler<SendLoadingResult.Message> {
 
-    public static class Handler implements PacketHandler<SendLoadingResult> {
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("send_loading_result"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
+    public SendLoadingResult() {
+        super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
+    }
 
-        @Override
-        public boolean handle(SendLoadingResult msg, Supplier<NetworkEvent.Context> ctx) {
-            if (Minecraft.getInstance().screen instanceof BaseScreen screen) {
-                screen.setResult(new LoadingResult(msg.status, msg.reason));
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        switch (msg.status) {
+            case SUCCESS -> {
+                Minecraft.getInstance().popGuiLayer();
+                ctx.player().sendSystemMessage(msg.reason.copy().withStyle(ChatFormatting.GOLD));
             }
-            return true;
+            case FAIL -> {
+                Minecraft.getInstance().pushGuiLayer(new InformationScreen(msg.reason, TextHelper.stringLength(msg.reason) + 30, 100, Minecraft.getInstance()::popGuiLayer));
+            }
         }
     }
 
-    public static class Serializer implements PacketSerializer<SendLoadingResult> {
+    public record Message(LoadingResult.Status status, Component reason) implements CustomPacketPayload {
 
-        @Override
-        public Class<SendLoadingResult> messageClass() {
-            return SendLoadingResult.class;
-        }
+        public static final StreamCodec<RegistryFriendlyByteBuf, Message> CODEC = StreamCodec.of(
+                (buffer, msg) -> {
+                    buffer.writeEnum(msg.status);
+                    ComponentSerialization.TRUSTED_STREAM_CODEC.encode(buffer, msg.reason);
+                }, buffer -> new SendLoadingResult.Message(buffer.readEnum(LoadingResult.Status.class), ComponentSerialization.TRUSTED_STREAM_CODEC.decode(buffer))
+        );
 
+        @Nonnull
         @Override
-        public void encode(SendLoadingResult msg, FriendlyByteBuf buffer) {
-            buffer.writeEnum(msg.status);
-            buffer.writeComponent(msg.reason);
-        }
-
-        @Override
-        public SendLoadingResult decode(FriendlyByteBuf buffer) {
-            return new SendLoadingResult(buffer.readEnum(LoadingResult.Status.class), buffer.readComponent());
+        public Type<? extends CustomPacketPayload> type() {
+            return SendLoadingResult.TYPE;
         }
     }
 }

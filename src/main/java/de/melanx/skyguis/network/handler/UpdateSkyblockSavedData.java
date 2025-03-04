@@ -1,51 +1,44 @@
 package de.melanx.skyguis.network.handler;
 
 import de.melanx.skyblockbuilder.SkyblockBuilder;
-import de.melanx.skyblockbuilder.data.SkyblockSavedData;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import de.melanx.skyguis.SkyGUIs;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
-import org.moddingx.libx.network.PacketSerializer;
 
-import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 
-public record UpdateSkyblockSavedData() {
+public class UpdateSkyblockSavedData extends PacketHandler<UpdateSkyblockSavedData.Message> {
 
-    public static class Handler implements PacketHandler<UpdateSkyblockSavedData> {
+    public static final CustomPacketPayload.Type<UpdateSkyblockSavedData.Message> TYPE =
+            new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("update_skyblock_saved_data"));
 
-        @Override
-        public Target target() {
-            return Target.MAIN_THREAD;
-        }
-
-        @Override
-        public boolean handle(UpdateSkyblockSavedData msg, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
-            if (player == null) {
-                return true;
-            }
-
-            SkyblockBuilder.getNetwork().updateData(player, SkyblockSavedData.get(player.level()));
-            return true;
-        }
+    public UpdateSkyblockSavedData() {
+        super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
     }
 
-    public static class Serializer implements PacketSerializer<UpdateSkyblockSavedData> {
+    @Override
+    public void handle(Message msg, IPayloadContext ctx) {
+        SkyblockBuilder.getNetwork().updateData(ctx.player(), null);
+    }
 
+    public record Message() implements CustomPacketPayload {
+
+        public static final StreamCodec<RegistryFriendlyByteBuf, Message> CODEC = StreamCodec.of(
+                (buffer, msg) -> {
+                    // No data to encode
+                },
+                buffer -> new Message() // No data to decode
+        );
+
+        @Nonnull
         @Override
-        public Class<UpdateSkyblockSavedData> messageClass() {
-            return UpdateSkyblockSavedData.class;
-        }
-
-        @Override
-        public void encode(UpdateSkyblockSavedData msg, FriendlyByteBuf buffer) {
-
-        }
-
-        @Override
-        public UpdateSkyblockSavedData decode(FriendlyByteBuf buffer) {
-            return new UpdateSkyblockSavedData();
+        public Type<? extends CustomPacketPayload> type() {
+            return UpdateSkyblockSavedData.TYPE;
         }
     }
 }
