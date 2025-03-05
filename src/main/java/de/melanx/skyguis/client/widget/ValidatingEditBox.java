@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.awt.Color;
 
 public class ValidatingEditBox extends EditBox {
@@ -49,8 +48,8 @@ public class ValidatingEditBox extends EditBox {
     }
 
     @Override
-    public void onValueChange(@Nullable String suggestion) {
-        super.setSuggestion(suggestion);
+    public void onValueChange(@Nonnull String suggestion) {
+        super.onValueChange(suggestion);
         this.onTextChanged.run();
     }
 }

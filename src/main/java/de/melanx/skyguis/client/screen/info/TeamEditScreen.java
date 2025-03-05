@@ -127,6 +127,13 @@ public class TeamEditScreen extends BaseScreen {
                 .bounds(this.x(85), this.y(45), 70, 20)
                 .build());
 
+        this.removeButton = this.addRenderableWidget(Button.builder(REMOVE, button -> Minecraft.getInstance().setScreen(new EditSpawnsScreen(this.team, this)))
+                .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
+                .bounds(this.x(160), this.y(45), 70, 20)
+                .build());
+
+        // The pos box needs to be initialized after the other widgets
+        // Otherwise, it will crash since EditBox#setValue will result in a call of TeamEditScreen#updatePositionValidation which requires the widgets being not null
         //noinspection ConstantConditions
         Vec3 pos = Minecraft.getInstance().player.position();
         String posStr = (int) pos.x + " " + (int) pos.y + " " + (int) pos.z;
@@ -134,11 +141,6 @@ public class TeamEditScreen extends BaseScreen {
         this.posBox.setValue(posStr);
         this.posBox.setMaxLength(Short.MAX_VALUE);
         this.addRenderableWidget(this.posBox);
-
-        this.removeButton = this.addRenderableWidget(Button.builder(REMOVE, button -> Minecraft.getInstance().setScreen(new EditSpawnsScreen(this.team, this)))
-                .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
-                .bounds(this.x(160), this.y(45), 70, 20)
-                .build());
 
         this.addRenderableWidget(Button.builder(SHOW, button -> Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this)))
                 .bounds(this.x(LEFT_PADDING), this.y(115), 90, 20)
