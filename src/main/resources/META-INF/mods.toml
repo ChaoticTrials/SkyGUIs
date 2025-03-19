@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/MelanX/SkyGUIs/issues"
 
 [[mods]]
 modId="skyguis"
-version="${file.jarVersion}"
+version = "${version}"
 displayName="Sky GUIs"
 updateJSONURL="https://assets.melanx.de/updates/sky-guis.json"
 displayURL="www.curseforge.com/members/melanx/"
