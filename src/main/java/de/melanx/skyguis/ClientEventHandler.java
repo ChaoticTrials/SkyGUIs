@@ -9,8 +9,10 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void onPressKey(InputEvent.KeyInputEvent event) {
-        if (Minecraft.getInstance().screen == null && event.getKey() == Keybinds.ALL_TEAMS.getKey().getValue()) {
-            AllTeamsScreen.open();
+        if (Minecraft.getInstance().screen == null) {
+            while (Keybinds.ALL_TEAMS.consumeClick()) {
+                AllTeamsScreen.open();
+            }
         }
     }
 }
