@@ -48,7 +48,7 @@ public class RemoveSpawns extends PacketHandler<RemoveSpawns.Message> {
             return;
         }
 
-        if (level != level.getServer().getLevel(SpawnConfig.spawmDimension)) {
+        if (level != level.getServer().getLevel(SpawnConfig.spawnDimension)) {
             network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_WRONG_POSITION);
             return;
         }

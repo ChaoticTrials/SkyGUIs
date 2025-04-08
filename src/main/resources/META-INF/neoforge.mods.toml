@@ -31,13 +31,13 @@ side = "BOTH"
 [[dependencies.${ mod.modid }]]
 modId = "skyblockbuilder"
 type = "required"
-versionRange = "[21.1.4,)"
+versionRange = "[21.1.10,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${ mod.modid }]]
 modId = "libx"
 type = "required"
-versionRange = "[1.21.1-6.0.0,)"
+versionRange = "[1.21.1-6.0.5,)"
 ordering = "AFTER"
 side = "BOTH"

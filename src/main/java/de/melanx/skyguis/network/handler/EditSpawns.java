@@ -90,7 +90,7 @@ public class EditSpawns extends PacketHandler<EditSpawns.Message> {
 
             // handle removing spawns
             case REMOVE -> {
-                if (level != level.getServer().getLevel(SpawnConfig.spawmDimension)) {
+                if (level != level.getServer().getLevel(SpawnConfig.spawnDimension)) {
                     network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_WRONG_POSITION);
                     return;
                 }
