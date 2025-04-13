@@ -16,6 +16,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 
 import javax.annotation.Nonnull;
 import java.awt.Color;
@@ -72,10 +73,7 @@ public class CreateTeamScreen extends BaseScreen {
 
         Component shortened = this.setCurrentTemplateAndGetShortenedName();
         this.templateButton = Button.builder(shortened, button -> {
-                    this.currIndex++;
-                    if (this.currIndex >= this.templates.size()) {
-                        this.currIndex = 0;
-                    }
+                    this.currIndex = Mth.positiveModulo(this.currIndex + (Screen.hasShiftDown() ? -1 : 1), this.templates.size());
 
                     Component s = this.setCurrentTemplateAndGetShortenedName();
                     button.setMessage(s);
