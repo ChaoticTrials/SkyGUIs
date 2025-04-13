@@ -3,7 +3,8 @@ package de.melanx.skyguis.client.screen;
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
-import de.melanx.skyblockbuilder.template.TemplateRenderer;
+import de.melanx.skyblockbuilder.template.TemplatePreview;
+import de.melanx.skyblockbuilder.template.TemplatePreviewRenderer;
 import de.melanx.skyblockbuilder.util.NameGenerator;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.util.ComponentBuilder;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -36,7 +38,7 @@ public class CreateTeamScreen extends BaseScreen {
     private static final Component ALLOW_VISITS = ComponentBuilder.text("allow_visits");
     private static final Component ALLOW_REQUESTS = ComponentBuilder.text("allow_requests");
 
-    private transient final Map<String, TemplateRenderer> structureCache = new HashMap<>();
+    private transient final Map<String, TemplatePreviewRenderer> structureCache = new HashMap<>();
     private final List<String> templates;
     private String currTemplate;
     private EditBox name;
@@ -135,9 +137,9 @@ public class CreateTeamScreen extends BaseScreen {
             return;
         }
 
-        TemplateRenderer renderer = this.structureCache.get(this.currTemplate);
+        TemplatePreviewRenderer renderer = this.structureCache.get(this.currTemplate);
         if (renderer != null) {
-            renderer.render(guiGraphics, this.x(0) / 2, this.centeredY(0));
+            renderer.render(guiGraphics);
         }
 
         float scale = 0.9f;
@@ -150,7 +152,7 @@ public class CreateTeamScreen extends BaseScreen {
     }
 
     public void addStructureToCache(String name, ConfiguredTemplate template) {
-        this.structureCache.put(name, new TemplateRenderer(template.getTemplate(), Math.min((float) (this.x(0) * 0.9), this.height)));
+        this.structureCache.put(name, new TemplatePreviewRenderer(new TemplatePreview(template), new TemplatePreviewRenderer.Area((int) (this.x(0) * 0.05), 0, (int) (this.x(0) * 0.9), this.height)));
     }
 
     public void updateTemplateButton() {
