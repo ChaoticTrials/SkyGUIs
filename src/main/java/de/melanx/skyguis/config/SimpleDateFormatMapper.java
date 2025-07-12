@@ -45,6 +45,21 @@ public class SimpleDateFormatMapper implements ValueMapper<SimpleDateFormat, Jso
             public SimpleDateFormat valueOf(String str) {
                 return new SimpleDateFormat(str);
             }
+
+            @Override
+            public String toString(SimpleDateFormat simpleDateFormat) {
+                return simpleDateFormat.toPattern();
+            }
+
+            @Override
+            public boolean isValid(String str) {
+                try {
+                    new SimpleDateFormat(str);
+                    return true;
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            }
         });
     }
 }
