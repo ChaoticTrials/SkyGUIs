@@ -1,6 +1,7 @@
 package de.melanx.skyguis.client.screen;
 
 import de.melanx.skyblockbuilder.client.SizeableCheckbox;
+import de.melanx.skyblockbuilder.data.Team;
 import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyblockbuilder.template.TemplateLoader;
 import de.melanx.skyblockbuilder.template.TemplatePreview;
@@ -61,9 +62,8 @@ public class CreateTeamScreen extends BaseScreen {
     protected void init() {
         this.structureCache.clear();
         this.name = new EditBox(this.font, this.x(66), this.y(30), 120, 20, Component.empty());
-        this.name.setMaxLength(Short.MAX_VALUE);
         this.name.setValue(this.name.getValue());
-        this.name.setMaxLength(64);
+        this.name.setMaxLength(Team.MAX_NAME_LENGTH);
         this.addRenderableWidget(this.name);
 
         if (this.templates.isEmpty()) {

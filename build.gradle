@@ -12,7 +12,7 @@ var dev = System.getenv('IS_DEV')?.toBoolean() ?: false
 var baseVersion = '21.1'
 var libxVersion = '1.21.1-6.0.5'
 var jeiVersion = '19.21.0.247'
-var skyblockbuilderVersion = '21.1.13'
+var skyblockbuilderVersion = '21.1.18'
 
 mod.configure {
     modid 'skyguis'

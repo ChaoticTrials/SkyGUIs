@@ -1,7 +1,10 @@
 package de.melanx.skyguis;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import de.melanx.skyguis.network.EasyNetwork;
 import de.melanx.skyguis.network.handler.OpenGui;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
@@ -55,12 +58,15 @@ public final class SkyGUIs extends ModXRegistration {
     }
 
     public static void registerClientCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("skyblock")
-                .then(Commands.literal("gui").executes(context -> {
-                    ServerPlayer player = context.getSource().getPlayerOrException();
-                    PacketDistributor.sendToPlayer(player, new OpenGui.Message());
-                    return 1;
-                }))
-        );
+        LiteralArgumentBuilder<CommandSourceStack> guiCommand = Commands.literal("gui").executes(context -> {
+            ServerPlayer player = context.getSource().getPlayerOrException();
+            PacketDistributor.sendToPlayer(player, new OpenGui.Message());
+            return 1;
+        });
+
+        CommandDispatcher<CommandSourceStack> commandDispatcher = event.getDispatcher();
+
+        commandDispatcher.register(Commands.literal("skyblock").then(guiCommand));
+        commandDispatcher.register(Commands.literal("sky").then(guiCommand));
     }
 }
