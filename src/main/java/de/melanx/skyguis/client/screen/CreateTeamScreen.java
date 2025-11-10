@@ -165,6 +165,8 @@ public class CreateTeamScreen extends BaseScreen {
             MutableComponent nameComponent = configuredTemplate.getNameComponent().copy();
             MutableComponent descComponent = configuredTemplate.getDescriptionComponent().copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.GRAY);
             this.templateButton.setTooltip(Tooltip.create(nameComponent.append("\n").append(descComponent)));
+        } else {
+            this.templateButton.setTooltip(null);
         }
     }
 }
