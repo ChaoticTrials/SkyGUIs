@@ -150,7 +150,15 @@ public class TeleportToTeam extends PacketHandler<TeleportToTeam.Message> {
         }
 
         WorldUtil.teleportToIsland(player, team);
-        network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, Component.empty());
+        network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, this.getSuccessMessage(team, msg.teleportType));
+    }
+
+    private Component getSuccessMessage(Team team, SkyMeta.TeleportType teleportType) {
+        return switch(teleportType) {
+            case SPAWN -> SkyComponents.SUCCESS_TELEPORT_TO_SPAWN;
+            case HOME -> SkyComponents.SUCCESS_TELEPORT_HOME;
+            case VISIT -> SkyComponents.SUCCESS_VISIT_TEAM.apply(team.getName());
+        };
     }
 
     public record Message(UUID team, SkyMeta.TeleportType teleportType) implements CustomPacketPayload {
