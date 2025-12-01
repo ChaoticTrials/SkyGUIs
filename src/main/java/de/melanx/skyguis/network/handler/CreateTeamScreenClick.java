@@ -23,6 +23,7 @@ import net.neoforged.neoforge.network.registration.HandlerThread;
 import org.moddingx.libx.network.PacketHandler;
 
 import javax.annotation.Nonnull;
+import java.util.Optional;
 
 public class CreateTeamScreenClick extends PacketHandler<CreateTeamScreenClick.Message> {
 
@@ -56,6 +57,10 @@ public class CreateTeamScreenClick extends PacketHandler<CreateTeamScreenClick.M
             return;
         }
 
+        if (msg.paletteIndex.isPresent()) {
+            template = template.onlyWithPalette(msg.paletteIndex.get());
+        }
+
         Team team = data.createTeam(msg.name, template);
         if (team == null) {
             network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_TEAM_ALREADY_EXIST.apply(msg.name));
@@ -69,17 +74,20 @@ public class CreateTeamScreenClick extends PacketHandler<CreateTeamScreenClick.M
         network.handleLoadingResult(ctx, LoadingResult.Status.SUCCESS, SkyComponents.SUCCESS_CREATE_TEAM.apply(team.getName()).withStyle(ChatFormatting.GREEN));
     }
 
-    public record Message(String name, String shape, boolean allowVisits, boolean allowJoinRequests) implements CustomPacketPayload {
+    public record Message(String name, String shape, Optional<Integer> paletteIndex, boolean allowVisits, boolean allowJoinRequests) implements CustomPacketPayload {
 
         public static final StreamCodec<RegistryFriendlyByteBuf, CreateTeamScreenClick.Message> CODEC = StreamCodec.of(
                 ((buffer, msg) -> {
                     buffer.writeUtf(msg.name);
                     buffer.writeUtf(msg.shape);
+                    buffer.writeBoolean(msg.paletteIndex.isPresent());
+                    msg.paletteIndex.ifPresent(buffer::writeVarInt);
                     buffer.writeBoolean(msg.allowVisits);
                     buffer.writeBoolean(msg.allowJoinRequests);
                 }), buffer -> new CreateTeamScreenClick.Message(
                         buffer.readUtf(),
                         buffer.readUtf(),
+                        buffer.readBoolean() ? Optional.of(buffer.readVarInt()) : Optional.empty(),
                         buffer.readBoolean(),
                         buffer.readBoolean()
                 ));

@@ -18,6 +18,7 @@ import org.moddingx.libx.mod.ModX;
 import org.moddingx.libx.network.NetworkX;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,11 +50,11 @@ public class EasyNetwork extends NetworkX {
 
     @Override
     protected String getVersion() {
-        return "10";
+        return "11";
     }
 
-    public void handleCreateTeam(String name, String shape, boolean allowVisits, boolean allowJoinRequests) {
-        PacketDistributor.sendToServer(new CreateTeamScreenClick.Message(name, shape, allowVisits, allowJoinRequests));
+    public void handleCreateTeam(String name, String shape, Optional<Integer> paletteIndex, boolean allowVisits, boolean allowJoinRequests) {
+        PacketDistributor.sendToServer(new CreateTeamScreenClick.Message(name, shape, paletteIndex, allowVisits, allowJoinRequests));
     }
 
     public void handleKickPlayers(String teamName, Set<UUID> players) {
