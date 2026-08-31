@@ -64,7 +64,7 @@ public class HandleInvitationsScreen extends TeamListScreen {
         //noinspection ConstantConditions
         SkyblockSavedData data = SkyblockSavedData.get(minecraft.level);
         //noinspection ConstantConditions
-        List<UUID> invites = data.getInvites(minecraft.player.getGameProfile().getId());
+        List<UUID> invites = data.getInvites(minecraft.player.getGameProfile().id());
         if (invites == null) {
             return Lists.newArrayList();
         }
@@ -77,12 +77,12 @@ public class HandleInvitationsScreen extends TeamListScreen {
         public JoinTeamWidget(Team team, Screen screen, int x, int y, int width, int height, Consumer<Team> onJoin, Consumer<Team> onIgnore) {
             super(x, y, width, height);
             this.addRenderableWidget(SizableButton.builder(ComponentBuilder.button("join"), button -> onJoin.accept(team))
-                    .bounds(0, 0, 30, height)
-                    .build());
+                    .bounds(0, 0, 40, height)
+                    .build(SizableButton::new));
             this.addRenderableWidget(SizableButton.builder(ComponentBuilder.button("ignore"), button -> onIgnore.accept(team))
-                    .bounds(33, 0, 30, height)
-                    .build());
-            this.addRenderableOnly(new TextWidget(66, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));
+                    .bounds(43, 0, 40, height)
+                    .build(SizableButton::new));
+            this.addRenderableOnly(new TextWidget(86, 0, Math.min(width, TextHelper.stringLength(team.getName())), height, Component.literal(team.getName()), Lists.newArrayList()));
         }
     }
 }

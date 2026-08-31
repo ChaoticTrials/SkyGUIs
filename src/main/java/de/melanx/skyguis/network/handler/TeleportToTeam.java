@@ -28,7 +28,7 @@ import java.util.UUID;
 
 public class TeleportToTeam extends PacketHandler<TeleportToTeam.Message> {
 
-    public static final CustomPacketPayload.Type<TeleportToTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("teleport_to_team"));
+    public static final CustomPacketPayload.Type<TeleportToTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("teleport_to_team"));
 
     public TeleportToTeam() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -47,7 +47,7 @@ public class TeleportToTeam extends PacketHandler<TeleportToTeam.Message> {
             return;
         }
 
-        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().location())) {
+        if (!PermissionManager.INSTANCE.mayBypassLimitation(player) && !PermissionsConfig.Teleports.teleportationDimensions.test(level.dimension().identifier())) {
             network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, SkyComponents.ERROR_TELEPORTATION_NOT_ALLOWED_DIMENSION);
             return;
         }

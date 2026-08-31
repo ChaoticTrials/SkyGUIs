@@ -43,26 +43,26 @@ public class PlayerListScreen extends ListScreen<GameProfile> {
         }
 
         return tempProfiles.stream()
-                .sorted(Comparator.comparing(profile -> profile.getName().toLowerCase(Locale.ROOT)))
+                .sorted(Comparator.comparing(profile -> profile.name().toLowerCase(Locale.ROOT)))
                 .collect(Collectors.toList());
     }
 
     protected class PlayerWidget extends CheckboxTextWidget {
 
         public PlayerWidget(GameProfile profile, Screen screen, int x, int y, int width, int height) {
-            super(profile, screen, x, y, width, height, PlayerWidget.buildTooltip(profile), Component.literal(profile.getName()));
+            super(profile, screen, x, y, width, height, PlayerWidget.buildTooltip(profile), Component.literal(profile.name()));
         }
 
         public UUID getId() {
-            return this.value.getId();
+            return this.value.id();
         }
 
         private static List<Component> buildTooltip(GameProfile profile) {
             List<Component> tooltip = Lists.newArrayList(
-                    Component.literal(profile.getName())
+                    Component.literal(profile.name())
             );
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                tooltip.add(Component.literal(profile.getId().toString()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.literal(profile.id().toString()).withStyle(ChatFormatting.GRAY));
             }
 
             return tooltip;

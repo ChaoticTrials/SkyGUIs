@@ -2,7 +2,7 @@ package de.melanx.skyguis.client.widget;
 
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -18,7 +18,7 @@ public class ClickableText extends Button {
     }
 
     @Override
-    public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.x, this.y, this.color, false);
+    protected void extractContents(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        graphics.text(Minecraft.getInstance().font, this.getMessage(), this.x, this.y, this.color, false);
     }
 }

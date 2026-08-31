@@ -10,14 +10,15 @@ import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
@@ -73,9 +74,9 @@ public class EditSpawnsScreen extends ListScreen<BlockPos> {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        graphics.text(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 
     public void updateButtons() {
@@ -86,9 +87,10 @@ public class EditSpawnsScreen extends ListScreen<BlockPos> {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean ret = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        boolean ret = super.mouseClicked(event, doubleClick);
         this.updateButtons();
+
         return ret;
     }
 

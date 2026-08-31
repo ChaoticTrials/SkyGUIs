@@ -4,8 +4,8 @@ import de.melanx.skyblockbuilder.template.ConfiguredTemplate;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.CreateTeamScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 
 public class SendTemplateToClient extends PacketHandler<SendTemplateToClient.Message> {
 
-    public static final CustomPacketPayload.Type<SendTemplateToClient.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("send_template_to_client"));
+    public static final CustomPacketPayload.Type<SendTemplateToClient.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("send_template_to_client"));
 
     public SendTemplateToClient() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -36,8 +36,8 @@ public class SendTemplateToClient extends PacketHandler<SendTemplateToClient.Mes
         public static final StreamCodec<FriendlyByteBuf, Message> CODEC = StreamCodec.of(
                 (buffer, msg) -> {
                     buffer.writeUtf(msg.name);
-                    buffer.writeNbt(msg.template.write(new CompoundTag()));
-                }, buffer -> new Message(buffer.readUtf(), ConfiguredTemplate.fromTag((CompoundTag) buffer.readNbt(NbtAccounter.unlimitedHeap())))
+                    buffer.writeNbt(ConfiguredTemplate.CODEC.encodeStart(NbtOps.INSTANCE, msg.template).getOrThrow());
+                }, buffer -> new Message(buffer.readUtf(), ConfiguredTemplate.CODEC.parse(NbtOps.INSTANCE, buffer.readNbt(NbtAccounter.unlimitedHeap())).getOrThrow())
         );
 
         @Nonnull

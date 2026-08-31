@@ -38,7 +38,7 @@ public class TeamListScreen extends ListScreen<Team> {
                     Component.literal(team.getName())
             );
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                tooltip.add(Component.literal(team.getId().toString()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.literal(team.id().toString()).withStyle(ChatFormatting.GRAY));
             }
 
             return tooltip;

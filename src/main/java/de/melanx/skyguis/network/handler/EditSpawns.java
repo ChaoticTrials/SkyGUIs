@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 
 public class EditSpawns extends PacketHandler<EditSpawns.Message> {
 
-    public static final CustomPacketPayload.Type<EditSpawns.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("edit_spawns"));
+    public static final CustomPacketPayload.Type<EditSpawns.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("edit_spawns"));
 
     public EditSpawns() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -42,7 +42,7 @@ public class EditSpawns extends PacketHandler<EditSpawns.Message> {
         ServerPlayer player = (ServerPlayer) ctx.player();
 
         EasyNetwork network = SkyGUIs.getNetwork();
-        ServerLevel level = (ServerLevel) player.getCommandSenderWorld();
+        ServerLevel level = (ServerLevel) player.level();
         SkyblockSavedData data = SkyblockSavedData.get(level);
         Team team = data.getTeamFromPlayer(player);
 

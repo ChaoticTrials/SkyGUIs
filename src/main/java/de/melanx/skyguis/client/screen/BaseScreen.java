@@ -5,12 +5,14 @@ import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.moddingx.libx.render.RenderHelper;
@@ -20,7 +22,7 @@ import java.awt.Color;
 
 public abstract class BaseScreen extends Screen {
 
-    protected static final ResourceLocation GENERIC = ResourceLocation.fromNamespaceAndPath(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
+    protected static final Identifier GENERIC = Identifier.fromNamespaceAndPath(SkyGUIs.getInstance().modid, "textures/gui/generic.png");
     protected static final MutableComponent PREV_SCREEN_COMPONENT = ComponentBuilder.text("previous_screen");
     public static final OnAbort DEFAULT_ABORT = () -> Minecraft.getInstance().popGuiLayer();
     public static final MutableComponent OPEN_NEW_SCREEN = ComponentBuilder.text("new_screen").withStyle(ChatFormatting.ITALIC);
@@ -45,23 +47,33 @@ public abstract class BaseScreen extends Screen {
     }
 
     @Override
-    public final void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
 
-        this.renderForeground(guiGraphics, mouseX, mouseY, partialTick);
+        this.extractForeground(graphics, mouseX, mouseY, a);
     }
 
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        RenderHelper.renderGuiBackground(guiGraphics, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
+    @Override
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        RenderHelper.renderGuiBackground(RenderPipelines.GUI_TEXTURED, graphics, this.relX, this.relY, this.xSize, this.ySize, GENERIC, 128, 64, 4, 125, 4, 60);
     }
 
-    public void renderForeground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    @Override
+    protected void extractBlurredBackground(@Nonnull GuiGraphicsExtractor graphics) {
+        if (Minecraft.getInstance().screen != this) {
+            return;
+        }
+
+        super.extractBlurredBackground(graphics);
+    }
+
+    public void extractForeground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         //
     }
 
-    public void renderTitle(@Nonnull GuiGraphics guiGraphics) {
-        guiGraphics.drawString(this.font, this.title, this.centeredX(this.font.width(this.title.getVisualOrderText())), this.y(10), Color.DARK_GRAY.getRGB(), false);
+    public void renderTitle(@Nonnull GuiGraphicsExtractor graphics) {
+        graphics.text(this.font, this.title, this.centeredX(this.font.width(this.title.getVisualOrderText())), this.y(10), Color.DARK_GRAY.getRGB(), false);
     }
 
     public float centeredX(float width) {
@@ -112,16 +124,15 @@ public abstract class BaseScreen extends Screen {
         return this.relY + y;
     }
 
-
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        InputConstants.Key mapping = InputConstants.getKey(keyCode, scanCode);
+    public boolean keyPressed(@Nonnull KeyEvent event) {
+        InputConstants.Key mapping = InputConstants.getKey(event);
         if (this.minecraft.options.keyInventory.isActiveAndMatches(mapping) && !(this.getFocused() instanceof EditBox)) {
             this.onClose();
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

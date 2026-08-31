@@ -2,7 +2,8 @@ package de.melanx.skyguis.client.screen.base;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import de.melanx.skyguis.client.screen.BaseScreen;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,25 +25,27 @@ public class NotificationScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTitle(guiGraphics);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        this.renderTitle(graphics);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_ESCAPE && this.minecraft != null) {
+    public boolean keyPressed(@Nonnull KeyEvent event) {
+        int keyCode = event.key();
+
+        if (keyCode == InputConstants.KEY_ESCAPE) {
             this.onAbort.onAbort();
             this.minecraft.setScreen(null);
             return true;
         }
 
-        if (keyCode == GLFW.GLFW_KEY_ENTER && this.minecraft != null) {
+        if (keyCode == GLFW.GLFW_KEY_ENTER) {
             this.onConfirm.onConfirm();
             this.minecraft.setScreen(null);
             return true;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 }

@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class ToggleStateButtonClick extends PacketHandler<ToggleStateButtonClick.Message> {
 
-    public static final CustomPacketPayload.Type<ToggleStateButtonClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("toggle_state_button_click"));
+    public static final CustomPacketPayload.Type<ToggleStateButtonClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("toggle_state_button_click"));
 
     public ToggleStateButtonClick() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -28,7 +28,7 @@ public class ToggleStateButtonClick extends PacketHandler<ToggleStateButtonClick
     public void handle(Message msg, IPayloadContext ctx) {
         ServerPlayer player = (ServerPlayer) ctx.player();
 
-        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
         Team team = data.getTeam(msg.team);
         if (team != null) {
             switch (msg.toggleButtonsType) {

@@ -18,6 +18,7 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.server.players.PlayerList;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.HandlerThread;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 
 public class UpdateTeam extends PacketHandler<UpdateTeam.Message> {
 
-    public static final CustomPacketPayload.Type<UpdateTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("update_team"));
+    public static final CustomPacketPayload.Type<UpdateTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("update_team"));
 
     public UpdateTeam() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -42,7 +43,7 @@ public class UpdateTeam extends PacketHandler<UpdateTeam.Message> {
         ServerPlayer player = (ServerPlayer) ctx.player();
         EasyNetwork network = SkyGUIs.getNetwork();
 
-        if (!player.hasPermissions(2)) {
+        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             network.handleLoadingResult(ctx, LoadingResult.Status.FAIL, ComponentBuilder.text("missing_permissions"));
             return;
         }

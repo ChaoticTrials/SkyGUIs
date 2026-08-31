@@ -30,7 +30,7 @@ import java.util.UUID;
 
 public class InvitePlayers extends PacketHandler<InvitePlayers.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("invite_players"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("invite_players"));
 
     public InvitePlayers() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -39,7 +39,7 @@ public class InvitePlayers extends PacketHandler<InvitePlayers.Message> {
     @Override
     public void handle(Message msg, IPayloadContext ctx) {
         ServerPlayer player = (ServerPlayer) ctx.player();
-        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
         Team team = data.getTeam(msg.teamName);
 
         EasyNetwork network = SkyGUIs.getNetwork();
@@ -49,7 +49,7 @@ public class InvitePlayers extends PacketHandler<InvitePlayers.Message> {
         }
 
         //noinspection ConstantConditions
-        PlayerList playerList = player.getServer().getPlayerList();
+        PlayerList playerList = player.level().getServer().getPlayerList();
         int i = 0;
         for (UUID id : msg.players) {
             if (data.hasInvites(id) && data.hasInviteFrom(team, id)) {
@@ -62,7 +62,7 @@ public class InvitePlayers extends PacketHandler<InvitePlayers.Message> {
                 MutableComponent invite = SkyComponents.INFO_INVITED_TO_TEAM0.apply(player.getDisplayName().getString(), team.getName()).withStyle(ChatFormatting.GOLD);
                 invite.append(Component.literal("/skyblock accept \"" + team.getName() + "\"").setStyle(Style.EMPTY
                         .withHoverEvent(InviteCommand.COPY_TEXT)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/skyblock accept \"" + team.getName() + "\""))
+                        .withClickEvent(new ClickEvent.SuggestCommand("/skyblock accept \"" + team.getName() + "\""))
                         .applyFormat(ChatFormatting.UNDERLINE).applyFormat(ChatFormatting.GOLD)));
                 invite.append(SkyComponents.INFO_INVITED_TO_TEAM1.withStyle(ChatFormatting.GOLD));
                 toInvite.sendSystemMessage(invite);

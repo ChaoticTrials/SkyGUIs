@@ -1,11 +1,10 @@
 package de.melanx.skyguis.client.widget;
 
 import de.melanx.skyguis.util.Math2;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.input.MouseButtonEvent;
 import org.moddingx.libx.screen.Panel;
 
 import javax.annotation.Nonnull;
@@ -41,17 +40,19 @@ public class RenderArea extends Panel implements ScrollbarWidgetListener {
     }
 
     @Override
-    public void renderWidgetContent(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        double guiScale = Minecraft.getInstance().getWindow().getGuiScale();
-        GL11.glScissor((int) (this.initX * guiScale), Minecraft.getInstance().getWindow().getHeight() - (int) ((this.initY + this.renderHeight) * guiScale), (int) (this.renderWidth * guiScale), (int) (this.renderHeight * guiScale));
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+    protected void extractChildren(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        int x = this.initX - this.getX();
+        int y = this.initY - this.getY();
+
+        graphics.enableScissor(x, y, x + this.renderWidth, y + this.renderHeight);
+        super.extractChildren(new ScreenSpaceGuiGraphicsExtractor(graphics), mouseX, mouseY, partialTicks);
+        graphics.disableScissor();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (Math2.isInBounds(this.initX, this.initY, this.renderWidth, this.renderHeight, mouseX, mouseY)) {
-            return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean isDoubleClick) {
+        if (Math2.isInBounds(this.initX, this.initY, this.renderWidth, this.renderHeight, event.x(), event.y())) {
+            return super.mouseClicked(event, isDoubleClick);
         }
 
         return false;

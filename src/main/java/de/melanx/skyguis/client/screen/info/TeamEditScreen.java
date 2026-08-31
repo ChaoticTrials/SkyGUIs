@@ -20,7 +20,7 @@ import de.melanx.skyguis.util.TextHelper;
 import de.melanx.skyguis.util.ToggleButtons;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -98,7 +98,7 @@ public class TeamEditScreen extends BaseScreen {
                             double speedZ = this.random.nextGaussian() * 10;
 
                             //noinspection ConstantConditions
-                            this.minecraft.level.addParticle(ParticleTypes.HAPPY_VILLAGER, false,
+                            this.minecraft.level.addParticle(ParticleTypes.HAPPY_VILLAGER, true, true,
                                     posX + offsetX,
                                     posY + offsetY,
                                     posZ + offsetZ,
@@ -112,9 +112,8 @@ public class TeamEditScreen extends BaseScreen {
                 .bounds(this.x(LEFT_PADDING), this.y(45), 70, 20)
                 .build());
 
-        CycleButton<WorldUtil.SpawnDirection> directionButton = this.addRenderableWidget(CycleButton.builder(TeamEditScreen::componentFromDirection)
+        CycleButton<WorldUtil.SpawnDirection> directionButton = this.addRenderableWidget(CycleButton.builder(TeamEditScreen::componentFromDirection, WorldUtil.SpawnDirection.SOUTH)
                 .withValues(WorldUtil.SpawnDirection.values())
-                .withInitialValue(WorldUtil.SpawnDirection.SOUTH)
                 .displayOnlyValue()
                 .create(this.x(160), this.y(70), 70, 20, Component.empty()));
 
@@ -174,7 +173,7 @@ public class TeamEditScreen extends BaseScreen {
     }
 
     private static Component componentFromDirection(WorldUtil.SpawnDirection direction) {
-        return switch (direction) {
+        return switch(direction) {
             case NORTH -> ComponentBuilder.text("north");
             case SOUTH -> ComponentBuilder.text("south");
             case EAST -> ComponentBuilder.text("east");
@@ -183,14 +182,14 @@ public class TeamEditScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTitle(guiGraphics);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        this.renderTitle(graphics);
 
-        guiGraphics.drawString(this.font, SPAWNS, this.x(LEFT_PADDING), this.y(30), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, MEMBERS, this.x(LEFT_PADDING), this.y(100), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, ALLOW_VISITS, this.x(LEFT_PADDING), this.y(149), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, ALLOW_REQUESTS, this.x(LEFT_PADDING), this.y(164), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, SPAWNS, this.x(LEFT_PADDING), this.y(30), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, MEMBERS, this.x(LEFT_PADDING), this.y(100), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, ALLOW_VISITS, this.x(LEFT_PADDING), this.y(149), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, ALLOW_REQUESTS, this.x(LEFT_PADDING), this.y(164), Color.DARK_GRAY.getRGB(), false);
 
         this.posBox.updateOutlineRendering(this.addButton.isHovered);
     }
@@ -208,8 +207,8 @@ public class TeamEditScreen extends BaseScreen {
             }
             return true;
         })
-                && Integer.parseInt(args[1]) >= Minecraft.getInstance().level.getMinBuildHeight()
-                && Integer.parseInt(args[1]) <= Minecraft.getInstance().level.getMaxBuildHeight()
+                && Integer.parseInt(args[1]) >= Minecraft.getInstance().level.getMinY()
+                && Integer.parseInt(args[1]) <= Minecraft.getInstance().level.getMaxY()
                 && !this.team.getPossibleSpawns().stream().map(TemplatesConfig.Spawn::pos).collect(Collectors.toSet()).contains(new BlockPos(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2])));
 
         if (this.posValid) {

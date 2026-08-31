@@ -14,15 +14,17 @@ import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import javax.annotation.Nonnull;
@@ -31,7 +33,7 @@ import java.util.*;
 
 public class CreateTeamScreen extends BaseScreen {
 
-    private static final ResourceLocation SELECT_PALETTE = ResourceLocation.withDefaultNamespace("textures/gui/sprites/widget/page_forward.png");
+    private static final Identifier SELECT_PALETTE = Identifier.withDefaultNamespace("textures/gui/sprites/widget/page_forward.png");
     private static final Component NAME_COMPONENT = ComponentBuilder.text("name");
     private static final Component TEMPLATE_COMPONENT = ComponentBuilder.raw("template");
     private static final Component SETTINGS_COMPONENT = ComponentBuilder.text("settings");
@@ -81,15 +83,20 @@ public class CreateTeamScreen extends BaseScreen {
         }
 
         Component shortened = this.setCurrentTemplateAndGetShortenedName();
-        this.templateButton = Button.builder(shortened, button -> {
-                    this.currIndex = Mth.positiveModulo(this.currIndex + (Screen.hasShiftDown() ? -1 : 1), this.templates.size());
-
-                    Component s = this.setCurrentTemplateAndGetShortenedName();
-                    button.setMessage(s);
-                    this.updateTemplateButton();
-                })
+        this.templateButton = Button.builder(shortened, button -> {})
                 .bounds(this.x(65), this.y(60), TEMPLATE_BUTTON_WIDTH, 20)
-                .build();
+                .build(builder -> new Button.Plain(builder) {
+
+                    @Override
+                    public void onPress(@Nonnull InputWithModifiers input) {
+                        CreateTeamScreen self = CreateTeamScreen.this;
+                        self.currIndex = Mth.positiveModulo(self.currIndex + (input.hasShiftDown() ? -1 : 1), self.templates.size());
+
+                        CreateTeamScreen.this.resetPaletteIndex();
+                        this.setMessage(self.setCurrentTemplateAndGetShortenedName());
+                        self.updateTemplateButton();
+                    }
+                });
 
         this.allowVisits = new SizeableCheckbox(this.x(65), this.y(85), 10, false);
         this.allowJoinRequests = new SizeableCheckbox(this.x(65), this.y(100), 10, false);
@@ -132,12 +139,12 @@ public class CreateTeamScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTitle(guiGraphics);
-        guiGraphics.drawString(this.font, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, SETTINGS_COMPONENT, this.x(10), this.y(92), Color.DARK_GRAY.getRGB(), false);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        this.renderTitle(graphics);
+        graphics.text(this.font, NAME_COMPONENT, this.x(10), this.y(37), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, TEMPLATE_COMPONENT, this.x(10), this.y(67), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, SETTINGS_COMPONENT, this.x(10), this.y(92), Color.DARK_GRAY.getRGB(), false);
         if (!this.renderStructureCache.containsKey(this.currTemplate)) {
             SkyGUIs.getNetwork().requestTemplateFromServer(this.currTemplate);
             this.renderStructureCache.put(this.currTemplate, null);
@@ -146,37 +153,37 @@ public class CreateTeamScreen extends BaseScreen {
 
         TemplatePreviewRenderer renderer = this.renderStructureCache.get(this.currTemplate);
         if (renderer != null) {
-            renderer.render(guiGraphics);
+            renderer.render(graphics);
         }
 
         float scale = 0.9f;
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scale, scale, scale);
-        guiGraphics.drawString(this.font, ALLOW_VISITS, (int) (this.x(82) / scale), (int) (this.y(87) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.drawString(this.font, ALLOW_REQUESTS, (int) (this.x(82) / scale), (int) (this.y(102) / scale), Color.DARK_GRAY.getRGB(), false);
-        guiGraphics.pose().scale(1 / 0.8f, 1 / 0.8f, 1 / 0.8f);
-        guiGraphics.pose().popPose();
+        graphics.pose().pushMatrix();
+        graphics.pose().scale(scale, scale);
+        graphics.text(this.font, ALLOW_VISITS, (int) (this.x(82) / scale), (int) (this.y(87) / scale), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, ALLOW_REQUESTS, (int) (this.x(82) / scale), (int) (this.y(102) / scale), Color.DARK_GRAY.getRGB(), false);
+        graphics.pose().scale(1 / 0.8f, 1 / 0.8f);
+        graphics.pose().popMatrix();
 
         ConfiguredTemplate configuredTemplate = this.structureCache.get(this.currTemplate);
         if (configuredTemplate != null && configuredTemplate.canSelectPalette()) {
             int textureX = this.templateButton.x + this.templateButton.getWidth();
             int textureY = this.templateButton.y + 3;
 
-            guiGraphics.blit(SELECT_PALETTE, textureX, textureY, 0, 0, 23, 13, 23, 13);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, SELECT_PALETTE, textureX, textureY, 0, 0, 23, 13, 23, 13);
 
             if (this.isMouseOverPaletteSelection(configuredTemplate, textureX, textureY, mouseX, mouseY)) {
-                guiGraphics.renderTooltip(this.font, SkyComponents.SCREEN_SELECT_PALETTE, mouseX, mouseY);
+                graphics.setTooltipForNextFrame(this.font, SkyComponents.SCREEN_SELECT_PALETTE, mouseX, mouseY);
             }
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean ret = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        boolean ret = super.mouseClicked(event, doubleClick);
 
         if (!ret) {
             ConfiguredTemplate configuredTemplate = this.structureCache.get(this.currTemplate);
-            if (configuredTemplate != null && this.isMouseOverPaletteSelection(configuredTemplate, this.templateButton.x + this.templateButton.getWidth() + 5, this.templateButton.y, mouseX, mouseY)) {
+            if (configuredTemplate != null && this.isMouseOverPaletteSelection(configuredTemplate, this.templateButton.x + this.templateButton.getWidth() + 5, this.templateButton.y, event.x(), event.y())) {
                 Minecraft.getInstance().pushGuiLayer(
                         new ChoosePaletteScreen(configuredTemplate, this.registryAccess, index -> this.setPaletteIndex(configuredTemplate, index), this::resetPaletteIndex)
                 );

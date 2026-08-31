@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class RequestToJoinTeam extends PacketHandler<RequestToJoinTeam.Message> {
 
-    public static final CustomPacketPayload.Type<RequestToJoinTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("request_to_join_team"));
+    public static final CustomPacketPayload.Type<RequestToJoinTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("request_to_join_team"));
 
     public RequestToJoinTeam() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -37,7 +37,7 @@ public class RequestToJoinTeam extends PacketHandler<RequestToJoinTeam.Message> 
             return;
         }
 
-        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
         Team team = data.getTeam(msg.team);
         if (team == null) {
             // should never be the case

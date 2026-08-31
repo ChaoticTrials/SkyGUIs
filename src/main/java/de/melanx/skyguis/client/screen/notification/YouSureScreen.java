@@ -5,7 +5,7 @@ import de.melanx.skyguis.client.screen.base.NotificationScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -53,10 +53,10 @@ public class YouSureScreen extends NotificationScreen {
     }
 
     @Override
-    public void renderForeground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractForeground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         for (int i = 1; i < this.components.size(); i++) {
             Component component = this.components.get(i);
-            guiGraphics.drawString(this.font, component, this.centeredX(this.font.width(component.getVisualOrderText())), this.y((i + 1) * 16), Color.DARK_GRAY.getRGB(), false);
+            graphics.text(this.font, component, this.centeredX(this.font.width(component.getVisualOrderText())), this.y((i + 1) * 16), Color.DARK_GRAY.getRGB(), false);
         }
     }
 

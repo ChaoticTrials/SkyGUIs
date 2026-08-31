@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 public class RequestTemplateFromServer extends PacketHandler<RequestTemplateFromServer.Message> {
 
     public static final CustomPacketPayload.Type<RequestTemplateFromServer.Message> TYPE =
-            new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("request_template_from_server"));
+            new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("request_template_from_server"));
 
     public RequestTemplateFromServer() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

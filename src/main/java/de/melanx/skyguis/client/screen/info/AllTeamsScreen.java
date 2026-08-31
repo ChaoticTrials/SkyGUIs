@@ -22,17 +22,20 @@ import de.melanx.skyguis.util.Math2;
 import de.melanx.skyguis.util.TextHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.moddingx.libx.render.RenderHelper;
 
@@ -54,13 +57,13 @@ public class AllTeamsScreen extends BaseScreen {
     private static final Component EMPTY_TEAMS_FILTER = ComponentBuilder.text("filter.empty_teams");
     private static final int LONGEST_FILTER_TITLE_LENGTH = Math.max(TextHelper.stringLength(VISIT_FILTER),
             Math.max(TextHelper.stringLength(JOIN_REQUEST_FILTER), TextHelper.stringLength(EMPTY_TEAMS_FILTER)));
-    private static final ResourceLocation[] NOTIFICATION_ICONS = new ResourceLocation[]{
-            ResourceLocation.withDefaultNamespace("notification/1"),
-            ResourceLocation.withDefaultNamespace("notification/2"),
-            ResourceLocation.withDefaultNamespace("notification/3"),
-            ResourceLocation.withDefaultNamespace("notification/4"),
-            ResourceLocation.withDefaultNamespace("notification/5"),
-            ResourceLocation.withDefaultNamespace("notification/more")
+    private static final Identifier[] NOTIFICATION_ICONS = new Identifier[]{
+            Identifier.withDefaultNamespace("notification/1"),
+            Identifier.withDefaultNamespace("notification/2"),
+            Identifier.withDefaultNamespace("notification/3"),
+            Identifier.withDefaultNamespace("notification/4"),
+            Identifier.withDefaultNamespace("notification/5"),
+            Identifier.withDefaultNamespace("notification/more")
     };
 
     private final SkyblockSavedData data;
@@ -84,7 +87,7 @@ public class AllTeamsScreen extends BaseScreen {
         //noinspection ConstantConditions
         this.data = SkyblockSavedData.get(Minecraft.getInstance().level);
         this.playerTeam = this.data.getTeamFromPlayer(Minecraft.getInstance().player);
-        this.hasInvites = this.data.hasInvites(Minecraft.getInstance().player);
+        this.hasInvites = this.playerTeam == null && this.data.hasInvites(Minecraft.getInstance().player);
     }
 
     public static void open() {
@@ -99,12 +102,12 @@ public class AllTeamsScreen extends BaseScreen {
         if (this.playerTeam == null) {
             this.addRenderableWidget(Button.builder(ComponentBuilder.title("create_team"), button -> CreateTeamScreen.open())
                     .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
-                    .bounds(this.x(10), this.y(199), this.hasInvites ? 78 : 160, 20)
+                    .bounds(this.x(10), this.y(199), this.hasInvites ? 87 : 160, 20)
                     .build());
             if (this.hasInvites) {
                 this.addRenderableWidget(Button.builder(ComponentBuilder.button("review_invites"), button -> HandleInvitationsScreen.open())
                         .tooltip(Tooltip.create(BaseScreen.OPEN_NEW_SCREEN))
-                        .bounds(this.x(93), this.y(199), 77, 20)
+                        .bounds(this.x(102), this.y(199), 87, 20)
                         .build());
             }
             this.yourTeamButton = null;
@@ -136,9 +139,8 @@ public class AllTeamsScreen extends BaseScreen {
         this.visitAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(22), 10, this.visitAllowedTeams != null && this.visitAllowedTeams.selected));
         this.joinRequestsAllowedTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(36), 10, this.joinRequestsAllowedTeams != null && this.joinRequestsAllowedTeams.selected));
         this.hideEmptyTeams = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(50), 10, this.hideEmptyTeams == null || this.hideEmptyTeams.selected));
-        this.sortOrderButton = this.addRenderableWidget(CycleButton.builder(SortOrder::getName)
+        this.sortOrderButton = this.addRenderableWidget(CycleButton.builder(SortOrder::getName, SortOrder.ALPHABETICAL)
                 .withValues(SortOrder.values())
-                .withInitialValue(SortOrder.ALPHABETICAL)
                 .create(this.x(filterSectionStart + 15), this.y(65), 120, 20, ComponentBuilder.button("filter.sort_by"), (button, value) -> this.updateTeams()));
         this.invertSort = this.addRenderableWidget(new FilteredCheckbox(this.x(filterSectionStart), this.y(70), 10, false, ComponentBuilder.button("filter.invert")));
 
@@ -148,31 +150,31 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        RenderHelper.renderGuiBackground(guiGraphics, this.x(this.xSize), this.y(0),
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        RenderHelper.renderGuiBackground(RenderPipelines.GUI_TEXTURED, graphics, this.x(this.xSize), this.y(0),
                 (this.filterText.isOpen() ? LONGEST_FILTER_TITLE_LENGTH + 15 : TextHelper.stringLength(this.filterText.getMessage())) + 14,
                 this.filterText.isOpen() ? 95 : 22,
                 BaseScreen.GENERIC, 128, 64, 4, 125, 4, 60);
-        this.scrollbar.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, Component.empty().append(TEAMS_COMPONENT).append(" (" + this.teams.size() + "/" + (this.data.getSpawnOption().isPresent() ? this.data.getTeams().size() - 1 : this.data.getTeams().size()) + ")"), this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
+        this.scrollbar.extractRenderState(graphics, mouseX, mouseY, a);
+        graphics.text(this.font, Component.empty().append(TEAMS_COMPONENT).append(" (" + this.teams.size() + "/" + (this.data.getSpawnOption().isPresent() ? this.data.getTeams().size() - 1 : this.data.getTeams().size()) + ")"), this.x(10), this.y(13), Color.DARK_GRAY.getRGB(), false);
         int memberLength = this.font.width(MEMBERS_COMPONENT.getVisualOrderText());
-        guiGraphics.drawString(this.font, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB(), false);
+        graphics.text(this.font, MEMBERS_COMPONENT, this.x(179) - memberLength, this.y(13), Color.DARK_GRAY.getRGB(), false);
 
         if (this.filterText.isOpen()) {
             int filterSectionStart = this.x(this.xSize + 20);
-            guiGraphics.drawString(this.font, VISIT_FILTER, filterSectionStart, this.y(23), Color.DARK_GRAY.getRGB(), false);
-            guiGraphics.drawString(this.font, JOIN_REQUEST_FILTER, filterSectionStart, this.y(37), Color.DARK_GRAY.getRGB(), false);
-            guiGraphics.drawString(this.font, EMPTY_TEAMS_FILTER, filterSectionStart, this.y(51), Color.DARK_GRAY.getRGB(), false);
+            graphics.text(this.font, VISIT_FILTER, filterSectionStart, this.y(23), Color.DARK_GRAY.getRGB(), false);
+            graphics.text(this.font, JOIN_REQUEST_FILTER, filterSectionStart, this.y(37), Color.DARK_GRAY.getRGB(), false);
+            graphics.text(this.font, EMPTY_TEAMS_FILTER, filterSectionStart, this.y(51), Color.DARK_GRAY.getRGB(), false);
         }
 
         if (this.playerTeam != null) {
-            guiGraphics.hLine(this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
-            guiGraphics.drawString(this.font, YOUR_TEAM, (this.x(10)), this.y(207), Color.DARK_GRAY.getRGB(), false);
+            graphics.horizontalLine(this.x(8), this.x(this.xSize - 26), this.y(ENTRIES * 12 + 41), Color.GRAY.getRGB());
+            graphics.text(this.font, YOUR_TEAM, (this.x(10)), this.y(207), Color.DARK_GRAY.getRGB(), false);
 
             // need to render tooltip here to be on top of scrollbar
             if (this.yourTeamButton.isHovered) {
-                this.renderTeamTooltip(guiGraphics, mouseX, mouseY, this.playerTeam);
+                this.renderTeamTooltip(graphics, mouseX, mouseY, this.playerTeam);
             }
         }
 
@@ -187,46 +189,46 @@ public class AllTeamsScreen extends BaseScreen {
             Component teamNameComponent = Component.literal(s);
             float x = this.x(179 - (float) memberLength / 2 - (float) this.font.width(playerSizeComponent) / 2);
             int y = this.y(37 + j * 12);
-            guiGraphics.drawString(this.font, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB(), false);
-            guiGraphics.drawString(this.font, playerSizeComponent, x, y, Color.DARK_GRAY.getRGB(), false);
+            graphics.text(this.font, teamNameComponent, this.x(10), y, team.isEmpty() ? TextHelper.LIGHT_RED.getRGB() : TextHelper.DARK_GREEN.getRGB(), false);
+            graphics.text(this.font, playerSizeComponent, (int) x, y, Color.DARK_GRAY.getRGB(), false);
             boolean inBounds = Math2.isInBounds(this.x(10), y, this.font.width(teamNameComponent.getVisualOrderText()), 11, mouseX, mouseY);
             if (inBounds) {
-                this.renderTeamTooltip(guiGraphics, mouseX, mouseY, team);
+                this.renderTeamTooltip(graphics, mouseX, mouseY, team);
             }
             j++;
         }
     }
 
     @Override
-    public void renderForeground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void extractForeground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         if (!this.hasInvites) {
             return;
         }
 
         int inviteCount = this.data.getInvites(this.minecraft.player).size();
-        guiGraphics.blitSprite(NOTIFICATION_ICONS[Math.min(inviteCount, 6) - 1], this.x(165), this.y(196), 8, 8);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, NOTIFICATION_ICONS[Math.min(inviteCount, 6) - 1], this.x(185), this.y(196), 8, 8);
     }
 
-    private void renderTeamTooltip(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, @Nonnull Team team) {
+    private void renderTeamTooltip(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, @Nonnull Team team) {
         List<Component> textLines = Lists.newArrayList(Component.literal(team.getName()), CLICK_ME);
         List<Component> smallTextLines = Lists.newArrayList();
         if (this.minecraft.options.advancedItemTooltips) {
-            smallTextLines.add(ComponentBuilder.text("team_id").append(": " + team.getId().toString()));
+            smallTextLines.add(ComponentBuilder.text("team_id").append(": " + team.id().toString()));
         }
         smallTextLines.add(ComponentBuilder.text("members").append(": " + team.getPlayers().size()));
         smallTextLines.add(ComponentBuilder.text("created_at").append(": " + ClientConfig.date.format(new Date(team.getCreatedAt()))));
         smallTextLines.add(ComponentBuilder.text("last_changed").append(": " + ClientConfig.date.format(new Date(team.getLastChanged()))));
-        guiGraphics.renderTooltip(this.minecraft.font, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
+        graphics.setTooltipForNextFrame(this.minecraft.font, textLines, Optional.of(new SmallTextTooltip(smallTextLines, Color.GRAY)), mouseX, mouseY);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.scrollbar.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        if (this.scrollbar.mouseClicked(event, doubleClick)) {
             return true;
         }
 
-        mouseX -= this.relX;
-        mouseY -= this.relY;
+        double mouseX = event.x() - this.relX;
+        double mouseY = event.y() - this.relY;
 
         int entries = Math.min(ENTRIES, this.teams.size());
         if (Math2.isInBounds(10, 37, 175, entries * 12, mouseX, mouseY)) {
@@ -243,7 +245,7 @@ public class AllTeamsScreen extends BaseScreen {
             return true;
         }
 
-        return super.mouseClicked(mouseX + this.relX, mouseY + this.relY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
@@ -253,13 +255,13 @@ public class AllTeamsScreen extends BaseScreen {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.scrollbar.mouseReleased(mouseX, mouseY, button) || super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(@Nonnull MouseButtonEvent event) {
+        return this.scrollbar.mouseReleased(event) || super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        return this.scrollbar.mouseScrolled(mouseX, mouseY, scrollX, scrollY) || super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    public boolean mouseScrolled(double x, double y, double scrollX, double scrollY) {
+        return this.scrollbar.mouseScrolled(x, y, scrollX, scrollY) || super.mouseScrolled(x, y, scrollX, scrollY);
     }
 
     public void updateScrollbar() {
@@ -408,15 +410,8 @@ public class AllTeamsScreen extends BaseScreen {
         }
 
         @Override
-        public void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            if (this.visible) {
-                super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-            }
-        }
-
-        @Override
-        public void onPress() {
-            super.onPress();
+        public void onPress(@Nonnull InputWithModifiers input) {
+            super.onPress(input);
             AllTeamsScreen.this.updateTeams();
         }
     }
@@ -432,16 +427,15 @@ public class AllTeamsScreen extends BaseScreen {
             this.width = TextHelper.stringLength(this.getMessage());
         }
 
-        @SuppressWarnings("deprecation")
         @Override
-        public void onClick(double mouseX, double mouseY) {
+        public void onClick(@Nonnull MouseButtonEvent event, boolean doubleClick) {
             this.enabled = !this.enabled;
         }
 
         @Override
-        protected void renderWidget(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractWidgetRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
             RenderHelper.resetColor();
-            guiGraphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY() + ((this.height - 8) / 2), Color.DARK_GRAY.getRGB(), false);
+            graphics.text(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY() + ((this.height - 8) / 2), Color.DARK_GRAY.getRGB(), false);
         }
 
         @Override

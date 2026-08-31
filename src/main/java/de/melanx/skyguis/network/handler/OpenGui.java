@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 
 public class OpenGui extends PacketHandler<OpenGui.Message> {
 
-    public static final CustomPacketPayload.Type<OpenGui.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("open_gui"));
+    public static final CustomPacketPayload.Type<OpenGui.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("open_gui"));
 
     public OpenGui() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);

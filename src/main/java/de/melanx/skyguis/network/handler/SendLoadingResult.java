@@ -19,7 +19,7 @@ import javax.annotation.Nonnull;
 
 public class SendLoadingResult extends PacketHandler<SendLoadingResult.Message> {
 
-    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("send_loading_result"));
+    public static final CustomPacketPayload.Type<Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("send_loading_result"));
 
     public SendLoadingResult() {
         super(TYPE, PacketFlow.CLIENTBOUND, Message.CODEC, HandlerThread.MAIN);

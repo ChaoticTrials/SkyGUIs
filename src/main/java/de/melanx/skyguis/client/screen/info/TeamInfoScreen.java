@@ -12,13 +12,14 @@ import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nonnull;
@@ -65,7 +66,7 @@ public class TeamInfoScreen extends BaseScreen {
                 .bounds(this.x(125), this.y(30), 110, 20)
                 .build();
         //noinspection DataFlowIssue
-        if (!this.minecraft.player.hasPermissions(1)) {
+        if (!this.minecraft.player.permissions().hasPermission(Permissions.COMMANDS_MODERATOR)) {
             if (!PermissionManager.INSTANCE.hasPermission(this.minecraft.player, PermissionManager.Permission.TELEPORT_TO_VISITING_ISLAND)) {
                 this.visitButton.setTooltip(Tooltip.create(CONFIG_ALLOW_VISITS));
             } else if (!this.team.allowsVisits()) {
@@ -81,9 +82,9 @@ public class TeamInfoScreen extends BaseScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        this.renderTitle(guiGraphics);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        this.renderTitle(graphics);
     }
 
     @Override

@@ -27,7 +27,7 @@ import java.util.Optional;
 
 public class CreateTeamScreenClick extends PacketHandler<CreateTeamScreenClick.Message> {
 
-    public static final CustomPacketPayload.Type<CreateTeamScreenClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("create_team_screen_click"));
+    public static final CustomPacketPayload.Type<CreateTeamScreenClick.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("create_team_screen_click"));
 
     public CreateTeamScreenClick() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

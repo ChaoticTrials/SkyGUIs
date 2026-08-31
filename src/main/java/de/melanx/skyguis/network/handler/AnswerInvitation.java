@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 
 public class AnswerInvitation extends PacketHandler<AnswerInvitation.Message> {
 
-    public static final CustomPacketPayload.Type<AnswerInvitation.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("answer_invitation"));
+    public static final CustomPacketPayload.Type<AnswerInvitation.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("answer_invitation"));
 
     public AnswerInvitation() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -31,7 +31,7 @@ public class AnswerInvitation extends PacketHandler<AnswerInvitation.Message> {
     public void handle(Message msg, IPayloadContext ctx) {
         ServerPlayer player = (ServerPlayer) ctx.player();
 
-        SkyblockSavedData data = SkyblockSavedData.get(player.getCommandSenderWorld());
+        SkyblockSavedData data = SkyblockSavedData.get(player.level());
         Team team = data.getTeam(msg.teamName);
         EasyNetwork network = SkyGUIs.getNetwork();
 

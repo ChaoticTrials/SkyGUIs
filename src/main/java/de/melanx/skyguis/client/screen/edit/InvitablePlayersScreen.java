@@ -11,9 +11,10 @@ import de.melanx.skyguis.client.screen.base.list.PlayerListScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -45,7 +46,7 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.inviteButton = this.addRenderableWidget(Button.builder(INVITE, (button -> {
-                    Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+                    Set<UUID> inviteIds = this.getSelectedValues().stream().map(GameProfile::id).collect(Collectors.toSet());
                     Minecraft.getInstance().pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_invite", inviteIds.size()), () -> {
                         SkyGUIs.getNetwork().handleInvitePlayers(this.team.getName(), inviteIds);
                         Minecraft.getInstance().setScreen(new InvitablePlayersScreen(this.team, this.prev));
@@ -65,22 +66,23 @@ public class InvitablePlayersScreen extends PlayerListScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        graphics.text(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 
     public void updateButtons() {
-        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::id).collect(Collectors.toSet());
         this.inviteButton.active = !selectedIds.isEmpty();
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean ret = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        boolean ret = super.mouseClicked(event, doubleClick);
         this.updateButtons();
+
         return ret;
     }
 

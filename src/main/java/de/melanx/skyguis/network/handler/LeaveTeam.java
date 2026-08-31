@@ -25,7 +25,7 @@ import java.util.UUID;
 
 public class LeaveTeam extends PacketHandler<LeaveTeam.Message> {
 
-    public static final CustomPacketPayload.Type<LeaveTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("leave_team"));
+    public static final CustomPacketPayload.Type<LeaveTeam.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("leave_team"));
 
     public LeaveTeam() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

@@ -3,10 +3,12 @@ package de.melanx.skyguis.client.widget;
 import de.melanx.skyguis.SkyGUIs;
 import de.melanx.skyguis.client.screen.BaseScreen;
 import de.melanx.skyguis.util.Math2;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nonnull;
 import java.util.LinkedList;
@@ -15,7 +17,7 @@ import java.util.List;
 public class ScrollbarWidget implements GuiEventListener, Renderable {
 
     private static final int SCROLLER_HEIGHT = 15;
-    private static final ResourceLocation ICONS = ResourceLocation.fromNamespaceAndPath(SkyGUIs.getInstance().modid, "textures/gui/icons.png");
+    private static final Identifier ICONS = Identifier.fromNamespaceAndPath(SkyGUIs.getInstance().modid, "textures/gui/icons.png");
 
     private final int x;
     private final int y;
@@ -61,11 +63,11 @@ public class ScrollbarWidget implements GuiEventListener, Renderable {
     }
 
     @Override
-    public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y - 1, this.width + 2, 1, 0, 15, 14, 1, 256, 256);
-        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, this.width + 2, this.height, 0, 17, 14, 12, 256, 256);
-        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y + this.height, this.width + 2, 1, 0, 31, 14, 1, 256, 256);
-        guiGraphics.blit(ICONS, this.screen.getRelX() + this.x, this.screen.getRelY() + this.y + (int) Math.min(this.height - SCROLLER_HEIGHT, (float) this.offset / (float) this.maxOffset * (float) (this.height - SCROLLER_HEIGHT)), this.enabled ? 0 : 12, 0, 12, 15);
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y - 1, 0, 15, this.width + 2, 1, 14, 1, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y, 0, 17, this.width + 2, this.height, 14, 12, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, this.screen.getRelX() + this.x - 1, this.screen.getRelY() + this.y + this.height, 0, 31, this.width + 2, 1, 14, 1, 256, 256);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, ICONS, this.screen.getRelX() + this.x, this.screen.getRelY() + this.y + (int) Math.min(this.height - SCROLLER_HEIGHT, (float) this.offset / (float) this.maxOffset * (float) (this.height - SCROLLER_HEIGHT)), this.enabled ? 0 : 12, 0, 12, 15, 256, 256);
     }
 
     @Override
@@ -79,11 +81,11 @@ public class ScrollbarWidget implements GuiEventListener, Renderable {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        mouseX -= this.screen.getRelX();
-        mouseY -= this.screen.getRelY();
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x() - this.screen.getRelX();
+        double mouseY = event.y() - this.screen.getRelY();
 
-        if (button == 0 && Math2.isInBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
+        if (event.button() == 0 && Math2.isInBounds(this.x, this.y, this.width, this.height, mouseX, mouseY)) {
             this.updateOffset(mouseY);
 
             this.clicked = true;
@@ -95,7 +97,7 @@ public class ScrollbarWidget implements GuiEventListener, Renderable {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(@Nonnull MouseButtonEvent event) {
         if (this.clicked) {
             this.clicked = false;
 
@@ -108,7 +110,7 @@ public class ScrollbarWidget implements GuiEventListener, Renderable {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (this.enabled) {
-            this.setOffset(this.offset + Math.max(Math.min(-(int) scrollY, 1), -1));
+            this.setOffset(this.offset + Math.clamp(-(int) scrollY, -1, 1));
 
             return true;
         }

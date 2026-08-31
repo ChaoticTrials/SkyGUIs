@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 public class UpdateSkyblockSavedData extends PacketHandler<UpdateSkyblockSavedData.Message> {
 
     public static final CustomPacketPayload.Type<UpdateSkyblockSavedData.Message> TYPE =
-            new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("update_skyblock_saved_data"));
+            new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("update_skyblock_saved_data"));
 
     public UpdateSkyblockSavedData() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);

@@ -10,9 +10,10 @@ import de.melanx.skyguis.client.screen.info.AllTeamsScreen;
 import de.melanx.skyguis.client.screen.notification.YouSureScreen;
 import de.melanx.skyguis.util.ComponentBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import javax.annotation.Nonnull;
@@ -40,11 +41,11 @@ public class TeamPlayersScreen extends PlayerListScreen {
     @Override
     protected void init() {
         this.kickButton = this.addRenderableWidget(Button.builder(ComponentBuilder.text("kick"), (button -> {
-                    Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+                    Set<UUID> removalIds = this.getSelectedValues().stream().map(GameProfile::id).collect(Collectors.toSet());
                     Minecraft.getInstance().pushGuiLayer(new YouSureScreen(this, ComponentBuilder.text("you_sure_kick", removalIds.size()), () -> {
                         SkyGUIs.getNetwork().handleKickPlayers(this.team.getName(), removalIds);
                         //noinspection DataFlowIssue
-                        if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().getId())) {
+                        if (removalIds.contains(Minecraft.getInstance().player.getGameProfile().id())) {
                             Minecraft.getInstance().setScreen(new AllTeamsScreen());
                         } else {
                             Minecraft.getInstance().setScreen(new TeamPlayersScreen(this.team, this.prev));
@@ -65,22 +66,23 @@ public class TeamPlayersScreen extends PlayerListScreen {
     }
 
     @Override
-    public void renderBackground(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawString(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
+    public void extractBackground(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractBackground(graphics, mouseX, mouseY, a);
+        graphics.text(this.font, ComponentBuilder.text("selected_amount", this.selectedAmount), this.x(28), this.y(35), Color.DARK_GRAY.getRGB(), false);
     }
 
     public void updateButtons() {
-        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::getId).collect(Collectors.toSet());
+        Set<UUID> selectedIds = this.getSelectedValues().stream().map(GameProfile::id).collect(Collectors.toSet());
         this.kickButton.active = !selectedIds.isEmpty();
         this.selectAll.selected = this.allSelected();
         this.selectedAmount = selectedIds.size();
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean ret = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@Nonnull MouseButtonEvent event, boolean doubleClick) {
+        boolean ret = super.mouseClicked(event, doubleClick);
         this.updateButtons();
+
         return ret;
     }
 }

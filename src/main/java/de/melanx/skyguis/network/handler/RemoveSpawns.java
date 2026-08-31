@@ -28,7 +28,7 @@ import java.util.Set;
 
 public class RemoveSpawns extends PacketHandler<RemoveSpawns.Message> {
 
-    public static final CustomPacketPayload.Type<RemoveSpawns.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().resource("remove_spawns"));
+    public static final CustomPacketPayload.Type<RemoveSpawns.Message> TYPE = new CustomPacketPayload.Type<>(SkyGUIs.getInstance().id("remove_spawns"));
 
     public RemoveSpawns() {
         super(TYPE, PacketFlow.SERVERBOUND, Message.CODEC, HandlerThread.MAIN);
@@ -39,7 +39,7 @@ public class RemoveSpawns extends PacketHandler<RemoveSpawns.Message> {
         ServerPlayer player = (ServerPlayer) ctx.player();
 
         EasyNetwork network = SkyGUIs.getNetwork();
-        ServerLevel level = (ServerLevel) player.getCommandSenderWorld();
+        ServerLevel level = (ServerLevel) player.level();
         SkyblockSavedData data = SkyblockSavedData.get(level);
         Team team = data.getTeamFromPlayer(player);
 
