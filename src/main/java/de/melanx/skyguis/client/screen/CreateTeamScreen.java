@@ -84,6 +84,7 @@ public class CreateTeamScreen extends BaseScreen {
         this.templateButton = Button.builder(shortened, button -> {
                     this.currIndex = Mth.positiveModulo(this.currIndex + (Screen.hasShiftDown() ? -1 : 1), this.templates.size());
 
+                    this.resetPaletteIndex();
                     Component s = this.setCurrentTemplateAndGetShortenedName();
                     button.setMessage(s);
                     this.updateTemplateButton();
