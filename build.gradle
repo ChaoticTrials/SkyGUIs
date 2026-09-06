@@ -6,7 +6,9 @@ repositories {
     maven {
         url = "https://modmaven.dev/"
     }
-    mavenLocal()
+    maven {
+        url = "https://maven.melanx.de/"
+    }
 }
 
 var dev = System.getenv('IS_DEV')?.toBoolean() ?: false
